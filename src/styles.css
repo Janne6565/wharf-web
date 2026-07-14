@@ -1,0 +1,59 @@
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+@import "@fontsource/jetbrains-mono/700.css";
+@import "tailwindcss";
+
+/* Wharf's bespoke dark-terminal palette, exposed as Tailwind theme tokens so
+   every colour is a named utility (bg-bg, text-accent, border-border, …) and no
+   raw hex leaks into component classes. Values come straight from the design. */
+@theme {
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  --color-bg: #0a0e13;
+  --color-card: #10161d;
+  --color-input: #0c1219;
+  --color-border: #233140;
+  --color-text: #e8edf2;
+  --color-muted: #8b99a5;
+  --color-dim: #54646f;
+  --color-subtle: #bcc8d2;
+
+  --color-accent: #57d7c2;
+  --color-accent-strong: #8ae8d8;
+  --color-accent-ink: #07110e;
+
+  --color-success: #69d26e;
+
+  --color-warn: #e3c078;
+  --color-warn-bg: #171310;
+  --color-warn-border: #4a3a1a;
+
+  --color-danger: #e0685e;
+  --color-danger-bg: #1a1112;
+  --color-danger-border: #5a2a28;
+
+  --color-disabled-bg: #1b2530;
+
+  --radius-card: 16px;
+  --radius-input: 10px;
+}
+
+html,
+body,
+#app {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(87, 215, 194, 0.24);
+}
