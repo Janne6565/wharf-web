@@ -7,6 +7,7 @@ ciphertext vault blobs and bcrypt hashes of client-derived credential
 keys. It never sees passwords or plaintext vault contents.
  * OpenAPI spec version: v1
  */
+import type { RecoveryResetRequestTokenMode } from './recoveryResetRequestTokenMode';
 
 /**
  * Re-encrypt the vault under a new password and rotate the recovery code
@@ -19,6 +20,12 @@ export interface RecoveryResetRequest {
   newAuthKey: string;
   /** New base64 recovery authentication key for the freshly issued recovery code */
   newRecoveryAuthKey: string;
-  /** Base64-encoded vault blob re-encrypted with the new key material */
+  /**
+   * Base64-encoded vault blob re-encrypted with the new key material
+   * @minLength 0
+   * @maxLength 1400000
+   */
   vault: string;
+  /** Token delivery mode; defaults to COOKIE for browsers */
+  tokenMode?: RecoveryResetRequestTokenMode;
 }

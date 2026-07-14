@@ -4,6 +4,7 @@ import { issueDeviceCode } from "@/api/wharf";
 import { useAuthInformation } from "@/auth/useAuthInformation";
 
 const TICK_MS = 500;
+const RETRY_MS = 3000;
 
 function formatCode(code: string): string {
   const upper = code.toUpperCase();
@@ -30,7 +31,12 @@ export function useDeviceLogic() {
     mutationFn: issueDeviceCode,
     onSuccess: (data) => {
       setCode(data.code ?? null);
-      setExpiresAt(data.expiresAt ? Date.parse(data.expiresAt) : null);
+      const expiry = data.expiresAt ? Date.parse(data.expiresAt) : null;
+      setExpiresAt(expiry);
+      // Seed the remaining time from the fresh expiry immediately, so the UI never
+      // flashes the "expired/reissuing" state during the first tick (up to TICK_MS)
+      // before the interval has run once.
+      setRemainingMs(expiry ? Math.max(0, expiry - Date.now()) : 0);
     },
   });
   // Keep a stable handle so timer effects can re-issue without re-subscribing.
@@ -55,6 +61,15 @@ export function useDeviceLogic() {
     }, TICK_MS);
     return () => globalThis.clearInterval(id);
   }, [expiresAt]);
+
+  // A failed issue (initial fetch or an expiry-triggered reissue) leaves no live
+  // countdown, so the code would stay stuck. Retry on a short backoff so the page
+  // self-heals; a successful retry sets a new expiresAt which restarts the timer.
+  useEffect(() => {
+    if (!issue.isError) return;
+    const id = globalThis.setTimeout(() => issueRef.current(), RETRY_MS);
+    return () => globalThis.clearTimeout(id);
+  }, [issue.isError]);
 
   return {
     email,

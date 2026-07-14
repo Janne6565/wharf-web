@@ -9,15 +9,13 @@ keys. It never sees passwords or plaintext vault contents.
  */
 
 /**
- * Replace the vault blob with optimistic concurrency
+ * Token delivery mode; defaults to COOKIE for browsers
  */
-export interface UpdateVaultRequest {
-  /**
-   * Base64-encoded ciphertext vault blob
-   * @minLength 0
-   * @maxLength 1400000
-   */
-  vault: string;
-  /** The version the client last saw; the write is rejected (409) if it has moved on */
-  expectedVersion?: number;
-}
+export type RegisterRequestTokenMode = typeof RegisterRequestTokenMode[keyof typeof RegisterRequestTokenMode];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const RegisterRequestTokenMode = {
+  COOKIE: 'COOKIE',
+  DIRECT: 'DIRECT',
+} as const;

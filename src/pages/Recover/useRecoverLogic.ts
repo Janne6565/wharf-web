@@ -47,7 +47,11 @@ export function useRecoverLogic() {
   // Ephemeral, in-memory results of a successful verify — never persisted.
   const unlockedRef = useRef<UnlockedVault | null>(null);
   const recoveryAuthKeyRef = useRef<string | null>(null);
-  const verifiedCodeRef = useRef<string | null>(null);
+  // The exact email+code pair the current "valid" phase was verified against. A
+  // verify binds the vault and recoveryAuthKey to one specific account, so the
+  // guard must include the email — otherwise editing the email leaves a stale
+  // "valid" phase bound to the wrong account (submit then 401s confusingly).
+  const verifiedKeyRef = useRef<string | null>(null);
 
   const schema = useMemo(
     () =>
@@ -111,13 +115,15 @@ export function useRecoverLogic() {
   verifyRef.current = verifyMutation.mutate;
 
   // Auto-verify once the code looks complete and the email is valid. Guarded by
-  // the last-verified code so a complete code fires the (rate-limited) verify
-  // exactly once, and editing the code resets back to the entry phase.
+  // the last-verified email+code pair so a complete input fires the (rate-limited)
+  // verify exactly once, and editing either field re-verifies (or, if the input is
+  // no longer complete, resets back to the entry phase) — never leaving a stale
+  // "valid" phase bound to a since-changed email.
   useEffect(() => {
-    const normalized = normalizeRecovery(recoveryCode);
+    const verifyKey = `${normalizeEmail(email)}:${normalizeRecovery(recoveryCode)}`;
     if (looksLikeRecoveryCode(recoveryCode) && isValidEmail(email)) {
-      if (verifiedCodeRef.current !== normalized && !verifyMutation.isPending) {
-        verifiedCodeRef.current = normalized;
+      if (verifiedKeyRef.current !== verifyKey && !verifyMutation.isPending) {
+        verifiedKeyRef.current = verifyKey;
         setVerifyError(null);
         setPhase("verifying");
         verifyRef.current({ email, code: recoveryCode });
@@ -125,7 +131,7 @@ export function useRecoverLogic() {
     } else if (phase !== "idle") {
       setPhase("idle");
       unlockedRef.current = null;
-      verifiedCodeRef.current = null;
+      verifiedKeyRef.current = null;
     }
   }, [recoveryCode, email, phase, verifyMutation.isPending]);
 

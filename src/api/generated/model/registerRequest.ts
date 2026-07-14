@@ -7,6 +7,7 @@ ciphertext vault blobs and bcrypt hashes of client-derived credential
 keys. It never sees passwords or plaintext vault contents.
  * OpenAPI spec version: v1
  */
+import type { RegisterRequestTokenMode } from './registerRequestTokenMode';
 
 /**
  * Create a new zero-knowledge account
@@ -17,6 +18,12 @@ export interface RegisterRequest {
   authKey: string;
   /** base64 HKDF-derived recovery authentication key */
   recoveryAuthKey: string;
-  /** Base64-encoded ciphertext vault blob (WHARFV format) */
+  /**
+   * Base64-encoded ciphertext vault blob (WHARFV format)
+   * @minLength 0
+   * @maxLength 1400000
+   */
   vault: string;
+  /** Token delivery mode; defaults to COOKIE for browsers */
+  tokenMode?: RegisterRequestTokenMode;
 }

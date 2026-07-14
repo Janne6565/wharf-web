@@ -14,6 +14,9 @@ keys. It never sees passwords or plaintext vault contents.
 export interface TokenPair {
   /** Short-lived identity (access) token; send as Bearer */
   accessToken?: string;
-  /** Long-lived refresh token */
-  refreshToken?: string;
+  /**
+   * Long-lived refresh token; present only in DIRECT mode (in COOKIE mode it is set as an httpOnly cookie and omitted here)
+   * @nullable
+   */
+  refreshToken?: string | null;
 }

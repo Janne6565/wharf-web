@@ -28,6 +28,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
   export const getAuthentication = () => {
 /**
+ * In COOKIE mode the refresh token is set as an httpOnly cookie; in DIRECT mode it is returned in the body.
  * @summary Create a new zero-knowledge account
  */
 const register = (
@@ -68,7 +69,7 @@ const recoverVerify = (
       options);
     }
   /**
- * Atomically replaces the credential hashes and vault, invalidates the old recovery code and revokes all existing sessions.
+ * Atomically replaces the credential hashes and vault, invalidates the old recovery code and revokes all existing sessions. In COOKIE mode the refresh token is set as an httpOnly cookie; in DIRECT mode it is returned in the body.
  * @summary Re-encrypt the vault under a new password and rotate the recovery code
  */
 const recoverReset = (

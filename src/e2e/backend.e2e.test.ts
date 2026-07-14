@@ -21,6 +21,7 @@ import {
 } from "@/crypto";
 
 const BASE = process.env.E2E_BASE_URL ?? "http://localhost:8080/api/v1";
+const REFRESH_COOKIE = "wharf_refresh";
 const decoder = new TextDecoder();
 
 async function post(path: string, body: unknown, token?: string) {
@@ -34,6 +35,32 @@ async function post(path: string, body: unknown, token?: string) {
   });
   const text = await res.text();
   return { status: res.status, json: text ? JSON.parse(text) : null };
+}
+
+// A POST that also exposes Set-Cookie response headers and can echo a Cookie back,
+// so the COOKIE-mode refresh flow can be exercised the way a browser would.
+async function postWithCookies(path: string, body: unknown, opts: { cookie?: string } = {}) {
+  const res = await fetch(BASE + path, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(opts.cookie ? { Cookie: opts.cookie } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+  const text = await res.text();
+  const setCookies =
+    typeof res.headers.getSetCookie === "function"
+      ? res.headers.getSetCookie()
+      : ([res.headers.get("set-cookie")].filter(Boolean) as string[]);
+  return { status: res.status, json: text ? JSON.parse(text) : null, setCookies };
+}
+
+// Extracts the "name=value" pair for the refresh cookie from Set-Cookie headers,
+// dropping the attributes (Path/HttpOnly/SameSite) so it can be sent back as Cookie.
+function refreshCookiePair(setCookies: string[]): string | null {
+  const entry = setCookies.find((c) => c.startsWith(`${REFRESH_COOKIE}=`));
+  return entry ? (entry.split(";")[0] ?? null) : null;
 }
 
 async function get(path: string, token?: string) {
@@ -122,5 +149,40 @@ describe.skipIf(!process.env.E2E)("backend E2E (live server)", () => {
     const newVaultRes = await get("/vault", newLogin.json.accessToken);
     const newVault = await unlockWithPassword(fromBase64(newVaultRes.json.vault), newPassword);
     expect(decoder.decode(newVault.payload)).toBe(expectedPayload);
+  }, 60_000);
+
+  it("register in COOKIE mode sets a refresh cookie usable to refresh without login", async () => {
+    const email = `e2e-cookie+${Date.now()}@wharf.test`;
+    const password = "correct horse battery staple";
+
+    const masterKey = await deriveMasterKey(password, email);
+    const authKey = await deriveAuthKey(masterKey);
+    const { blob, recoveryCode } = await createVault(password, initialVaultPayload());
+    const recoveryAuthKey = await deriveRecoveryAuthKey(recoverySecretFromCode(recoveryCode));
+
+    // register defaults to COOKIE mode (no tokenMode): the refresh token must come
+    // back as an httpOnly Set-Cookie and be absent from the body.
+    const reg = await postWithCookies("/auth/register", {
+      email,
+      authKey,
+      recoveryAuthKey,
+      vault: toBase64(blob),
+    });
+    expect(reg.status).toBe(201);
+    expect(reg.json.tokens.accessToken).toBeTruthy();
+    expect(reg.json.tokens.refreshToken ?? null).toBeNull();
+    const setCookieHeader = reg.setCookies.find((c) => c.startsWith(`${REFRESH_COOKIE}=`));
+    expect(setCookieHeader).toBeTruthy();
+    expect(setCookieHeader).toContain("HttpOnly");
+
+    // the cookie alone (no Authorization, no login) must mint a fresh access token
+    const cookie = refreshCookiePair(reg.setCookies);
+    expect(cookie).toBeTruthy();
+    const refreshed = await postWithCookies("/auth/refresh", {}, { cookie: cookie ?? undefined });
+    expect(refreshed.status).toBe(200);
+    expect(refreshed.json.accessToken).toBeTruthy();
+    // still COOKIE mode: rotated refresh stays in the cookie, never the body
+    expect(refreshed.json.refreshToken ?? null).toBeNull();
+    expect(refreshCookiePair(refreshed.setCookies)).toBeTruthy();
   }, 60_000);
 });

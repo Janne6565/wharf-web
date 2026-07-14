@@ -11,7 +11,7 @@ import type { User } from './user';
 import type { TokenPair } from './tokenPair';
 
 /**
- * The account plus a new token pair (register / recovery reset)
+ * The account plus a new token pair (register / recovery reset). In COOKIE mode the refresh token is set as an httpOnly cookie and omitted from the pair.
  */
 export interface AuthResponse {
   user?: User;
