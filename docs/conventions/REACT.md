@@ -1,4 +1,4 @@
-<!-- AUTO-SYNCED from agents KB: technologies/REACT.md @ 97c4e55.
+<!-- AUTO-SYNCED from agents KB: technologies/REACT.md @ ffded4f.
      Do NOT edit here — edit the source in ~/projects/agents and re-run scripts/sync-conventions.sh. -->
 
 # React Rules
@@ -142,6 +142,58 @@ the control disables and shows a spinner until the request settles.
 **DON'T:**
 - Leave a raw `<button>` firing an async handler with no disabled/spinner state.
 - Show an empty list while a fetch is in flight — render the loading branch.
+
+---
+
+## Disabled / Gated Buttons
+
+A submit or primary-action button must be **disabled until the action is actually
+possible**. An always-pressable button that only reveals, on click, that a required
+field is empty is a dead end — gate it up front instead.
+
+Gate on **completeness, not full validity**. Disable while a *required* input is
+still missing — an empty text field, an unticked mandatory acknowledgement checkbox,
+an unselected required option, or (for multi-step flows) a prerequisite step not yet
+cleared. Do **not** disable for *format* errors (bad email shape, password too short,
+password mismatch): let the user submit and surface those as validation messages, so
+the reason for rejection is explicit rather than a silently-dead button.
+
+Derive the gate in the logic hook and expose it as a boolean (`canSubmit`), keeping
+the JSX thin:
+
+```ts
+// use<Page>Logic.ts — with react-hook-form + zod in `mode: "onSubmit"`
+const email = form.watch("email");
+const password = form.watch("password");
+const understand = form.watch("understand");
+// completeness only — zod still validates email/password *format* on submit
+const canSubmit = email.trim().length > 0 && password.length > 0 && understand;
+return { form, onSubmit, canSubmit, isSubmitting: mutation.isPending };
+```
+
+```tsx
+// index.tsx
+<Button type="submit" loading={isSubmitting} disabled={!canSubmit}>
+  {t("signin.submit")}
+</Button>
+```
+
+`disabled` and `loading` compose: the shared `<Button>` treats either as disabled, so
+the button is unpressable while the form is incomplete *and* while the request is in
+flight.
+
+**DO:**
+- Disable action buttons until every required field is filled / required checkbox is
+  ticked / prerequisite step is done, via a `canSubmit`-style boolean from the hook.
+- Keep the enable/disable derivation in the logic hook — not inline in the JSX.
+- Still run format validation on submit and show the messages; don't fold format
+  rules into the disable gate.
+
+**DON'T:**
+- Ship an always-pressable submit button whose only feedback is a post-click error
+  that a field is empty.
+- Disable the button on *format* errors — that hides why submit is blocked.
+- Recompute the gate in the component body — derive it in the hook.
 
 ---
 

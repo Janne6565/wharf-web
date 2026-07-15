@@ -1,4 +1,4 @@
-<!-- AUTO-SYNCED from agents KB: AGENT.md @ 97c4e55.
+<!-- AUTO-SYNCED from agents KB: AGENT.md @ ffded4f.
      Do NOT edit here — edit the source in ~/projects/agents and re-run scripts/sync-conventions.sh. -->
 
 # Agent Rules
