@@ -1,4 +1,4 @@
-<!-- AUTO-SYNCED from agents KB: projects/wharf.md @ ffded4f.
+<!-- AUTO-SYNCED from agents KB: projects/wharf.md @ 9e2779f.
      Do NOT edit here — edit the source in ~/projects/agents and re-run scripts/sync-conventions.sh. -->
 
 # Wharf
@@ -123,7 +123,34 @@ invite by email, roles (owner/admin/member); private keys are never shared.
   `/oauth/complete` (refresh → route by `hasVault`), `/set-password` (OAuth-first
   onboarding via atomic `/auth/setup`, shares `buildOnboardingVault` with signup),
   `/unlock` (returning OAuth user). Design sources copied to
-  `~/projects/wharf/design/`.
+  `~/projects/wharf/design/`. **`/connections` is the post-auth hub**
+  (2026-07-15): the landing nav shows a `[ profile ]` link (→ `/unlock`) for a
+  signed-in visitor instead of "sign in" (gated on `useAuthInformation`; SSR
+  renders the anonymous branch until the silent refresh resolves, no hydration
+  mismatch); password sign-in, the returning-OAuth `/unlock`, and the
+  `requireAnonymous` redirect all land on `/connections` (was `/device`), which
+  lists hosts and links out to the terminal-pairing screen. `/unlock`
+  short-circuits to `/connections` when the vault is already primed in memory.
+  Fresh-signup onboarding still ends on `/device` (guided "pair your terminal"
+  step 3). Note: the root `beforeLoad` silent refresh is dehydrated from SSR and
+  does **not** re-run on initial client hydration, so `RootDocument` also kicks
+  the (memoized) `ensureSessionBootstrapped()` off in a mount effect — otherwise
+  signed-in state only resolved on the next navigation/link-preload (the nav
+  appeared as "sign in" until you hovered a link). For the same dehydration
+  reason the **route guards** (`requireAuth`/`requireAnonymous`/`requireVault`)
+  each `await ensureSessionBootstrapped()` themselves before reading the token —
+  otherwise a hard reload of an `ssr:false` guarded route (e.g. `/unlock`)
+  checked the token before the refresh ran and bounced an authenticated user to
+  `/signin`. Memoized, so no extra request. **Back-nav + onboarding
+  chrome** (2026-07-15): `AuthShell` already had `backTo`/`step` props; every
+  auth screen now wires a back link to its predecessor (recover→signin,
+  unlock→`/`, connections→`/`, hub-context device→`/connections`), while the
+  forward-only onboarding screens (recovery-code, set-password, oauth-complete)
+  intentionally have none. `/device` takes an `onboarding` **search param**
+  (`validateSearch`): the recovery-code→device step passes `onboarding:true` to
+  show the 3-step indicator; connections' "pair a terminal" links pass
+  `onboarding:false` so a returning user gets no onboarding steps and a back
+  link instead. The page reads it via `getRouteApi("/device").useSearch()`.
 
 ## Notable (stands out vs other projects)
 - **Only Go + Bubble Tea TUI** in the portfolio (alongside Cosy's Go/Rust as non-house

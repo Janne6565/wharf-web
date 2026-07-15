@@ -1,4 +1,4 @@
-<!-- AUTO-SYNCED from agents KB: technologies/REACT.md @ ffded4f.
+<!-- AUTO-SYNCED from agents KB: technologies/REACT.md @ 9e2779f.
      Do NOT edit here — edit the source in ~/projects/agents and re-run scripts/sync-conventions.sh. -->
 
 # React Rules
@@ -248,6 +248,36 @@ flight.
 **DON'T:**
 - Use `[var(--x)]` arbitrary CSS variable syntax — always use the named token class.
 - Write inline styles for values that Tailwind can express with a utility class.
+
+---
+
+## Icons
+
+Use **`lucide-react`** icon components for every UI icon — arrows, checks,
+crosses, chevrons, spinners, close/menu affordances, etc. Never render an
+ASCII/UTF glyph (`←`, `→`, `↑`, `↓`, `✓`, `✗`, `▸`, `×`, …) as an icon: they
+render inconsistently across platforms/fonts, don't scale with `size`, and
+can't be recoloured cleanly.
+
+**DO:**
+- Import the specific icon: `import { ArrowLeft, Check, X } from "lucide-react"`.
+- Size with the `size` prop (px) and control weight with `strokeWidth`; colour
+  via `text-*` tokens on the icon (or a wrapper), never a hardcoded hex.
+- Mark decorative icons `aria-hidden` and keep the adjacent text label as the
+  accessible name (e.g. a "back" link is `<ArrowLeft aria-hidden /> back`).
+- Keep the icon glyph out of i18n strings — the translation is the word only
+  (`back`, not `← back`); the icon is rendered by the component.
+
+**DON'T:**
+- Hand-roll an arrow/check with a text glyph, an SVG literal, or a CSS
+  triangle when a Lucide icon exists.
+- Bake an icon character into a translation resource or a shared constant.
+
+**Deliberate exceptions (not icons):** brand marks (e.g. a logo glyph),
+faithful **terminal/TUI simulations** where ASCII is the point (a mock prompt,
+a `▸` selection caret in a rendered "terminal"), placeholder masks
+(`····-····`), and ordinary prose punctuation (a `·` separator, an in-sentence
+`→`). These stay as text.
 
 ---
 
