@@ -60,10 +60,7 @@ export function DevicePage() {
 
             <div className="mt-6 border border-border bg-input px-[18px] py-3.5 text-left text-[13px] leading-[1.7]">
               <div className="text-dim">{t("device.promptCommand")}</div>
-              <div className="text-muted">
-                {t("device.promptPaste")}
-                <span className="ml-0.5 inline-block h-[1.1em] w-[0.55em] animate-blink bg-accent align-text-bottom" />
-              </div>
+              <div className="text-muted">{t("device.promptPaste")}</div>
             </div>
 
             <div className="mt-5 text-[12.5px] text-dim">

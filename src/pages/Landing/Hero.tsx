@@ -30,8 +30,8 @@ function InstallBox({ copied, onCopy }: InstallBoxProps) {
   );
 }
 
-// Left column of the hero: mono headline with a blinking block cursor, body
-// copy, the install box, and a platform footnote.
+// Left column of the hero: mono headline, body copy, the install box, and a
+// platform footnote.
 function HeroCopy() {
   const { t } = useTranslation();
   const { copied, handleCopy } = useLandingLogic();
@@ -41,7 +41,6 @@ function HeroCopy() {
         {t("landing.hero.titleLine1")}
         <br />
         {t("landing.hero.titleLine2")}
-        <span className="ml-2 inline-block h-[0.9em] w-[0.5em] animate-blink bg-accent" />
       </h1>
       <p className="mt-[22px] max-w-[44ch] text-base text-muted [text-wrap:pretty] sm:text-[18px]">
         {t("landing.hero.body")}
