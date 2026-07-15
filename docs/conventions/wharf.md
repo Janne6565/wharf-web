@@ -1,4 +1,4 @@
-<!-- AUTO-SYNCED from agents KB: projects/wharf.md @ 13c2fec.
+<!-- AUTO-SYNCED from agents KB: projects/wharf.md @ 97c4e55.
      Do NOT edit here — edit the source in ~/projects/agents and re-run scripts/sync-conventions.sh. -->
 
 # Wharf
@@ -84,17 +84,32 @@ invite by email, roles (owner/admin/member); private keys are never shared.
   argon2id + XChaCha20-Poly1305, password + one-time recovery-code slots) with a
   typed store (`internal/store`). Host CRUD forms, `~/.ssh/config` import
   (`internal/sshcfg`), async reachability probes (`internal/probe`), ed25519 keygen +
-  `~/.ssh` scan (`internal/keys`). `--demo` preserves the design prototype. Account
-  sign-in/projects remain **simulated** pending the TUI sync client. Roadmap next: port
-  forwarding, sync client against the now-real backend.
+  `~/.ssh` scan (`internal/keys`). `--demo` preserves the design prototype.
+  **Real cloud sync done** (2026-07-15): `internal/api` (hand-rolled client, DIRECT
+  tokens, refresh-retry-on-401, `WHARF_API_BASE` override) + `internal/sync`
+  (full-blob optimistic-version engine: fast-forward pull/push, 409 → re-pass,
+  both-changed → keep-local/take-remote modal, zero-hosts side auto-loses on first
+  sync). Device pairing via the web `/device` code. Session file `session.enc` next
+  to the vault, XChaCha20 under an HKDF subkey of the vault DEK — sync only while
+  unlocked; unreadable file → signed-out → re-pair. Master password retained in
+  memory while unlocked (needed to adopt remote blobs with foreign salts), zeroed on
+  lock. Opt-in live E2E via `WHARF_E2E_BASE`. Projects tab remains **simulated** (no
+  backend projects API yet). Roadmap next: port forwarding, projects/teams.
 - **wharf-backend:** **v1 auth/vault/pairing API done** (2026-07-14): register/login/
   refresh (COOKIE|DIRECT token modes), recovery verify/reset (rotates code, bumps
   `tokenVersion` to revoke all sessions), device-code issue/exchange (one-time,
   pessimistic-locked), vault GET/PUT with optimistic versioning. Hardened after
   review: pre-decode base64 size cap, bcrypt timing equalization against user
   enumeration, XFF only trusted behind proxy, Caffeine-backed rate buckets,
-  fail-closed prod secret guard. 25 tests green; `openapi.json` committed at repo
-  root (Orval source). Projects/team endpoints + deployment still open.
+  fail-closed prod secret guard. **Google/GitHub OAuth login done** (2026-07-15) per
+  AUTH.md: authorize/callback/providers endpoints, one-time DB state store,
+  `oauth_identities` auto-linked by verified email, nullable `auth_key_hash` (dummy
+  bcrypt keeps timing equal), atomic `POST /auth/setup` (recovery + initial vault +
+  optional password authKey) for OAuth-first accounts, `users/me` exposes
+  `hasPassword/hasRecovery/hasVault`. Providers enabled only when `OAUTH_*` env
+  creds are set (prod: sealed `wharf-oauth-secret`, optional — see
+  wharf-deployment/docs/secrets.md). 61 tests green; `openapi.json` committed at
+  repo root (Orval source). Projects/team endpoints still open.
 - **wharf-web:** **web auth flow + landing done** (2026-07-15): the 5 auth screens
   restyled to `Wharf Web Auth v2.dc.html` (all-mono, square, fieldset label chips,
   bracketed buttons, `❯_` logo; Google/GitHub OAuth buttons rendered but disabled —
@@ -103,8 +118,12 @@ invite by email, roles (owner/admin/member); private keys are never shared.
   `Wharf Landing.dc.html` (server-rendered — the reason for TanStack Start; auth
   routes stay `ssr:false`) + `favicon.svg` (design variant 1a). Client-side WHARFV
   vault create/unlock/re-encrypt with byte-compat proven against the Go vault via
-  committed fixture; E2E suite against the live backend (opt-in `E2E=1`). Design
-  sources copied to `~/projects/wharf/design/`.
+  committed fixture; E2E suite against the live backend (opt-in `E2E=1`). **OAuth
+  flows wired** (2026-07-15): buttons enable from `GET /auth/oauth/providers`,
+  `/oauth/complete` (refresh → route by `hasVault`), `/set-password` (OAuth-first
+  onboarding via atomic `/auth/setup`, shares `buildOnboardingVault` with signup),
+  `/unlock` (returning OAuth user). Design sources copied to
+  `~/projects/wharf/design/`.
 
 ## Notable (stands out vs other projects)
 - **Only Go + Bubble Tea TUI** in the portfolio (alongside Cosy's Go/Rust as non-house
