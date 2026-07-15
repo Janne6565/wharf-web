@@ -10,20 +10,17 @@ interface AlertProps {
 }
 
 const TONES: Record<Tone, string> = {
-  warning: "bg-warn-bg border-warn-border text-warn",
-  danger: "bg-danger-bg border-danger-border text-danger",
+  warning: "border-warn-border border-l-[3px] border-l-warn bg-warn-bg text-warn",
+  danger: "border-danger-border border-l-[3px] border-l-danger bg-danger-bg text-danger",
 };
 
-// The amber (warning) / red (danger) callout boxes from the design.
+// The amber (warning) / red (danger) callout boxes from the design: square, with
+// a 3px accent-coloured left border.
 export function Alert({ tone, children, className }: AlertProps) {
   return (
     <div
       role={tone === "danger" ? "alert" : "note"}
-      className={cn(
-        "rounded-input border px-4 py-3 text-[13.5px] leading-relaxed",
-        TONES[tone],
-        className,
-      )}
+      className={cn("border px-4 py-3 text-[12.5px] leading-relaxed", TONES[tone], className)}
     >
       {children}
     </div>

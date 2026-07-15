@@ -4,35 +4,45 @@ import { cn } from "@/lib/utils";
 interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   readonly label: string;
   readonly error?: string;
-  // Optional slot rendered directly below the input (e.g. a strength meter).
+  // Optional slot rendered inside the field box, fused to the input's bottom
+  // edge (e.g. a password-strength meter).
   readonly below?: ReactNode;
 }
 
-// Shared form input wrapper — the only way inputs are rendered (REACT.md). Owns
-// the label, the 44px terminal-styled field, focus/error states, and the error
-// message; validation itself comes from src/lib/validators.ts via the caller.
+// Shared form input wrapper — the only way inputs are rendered (REACT.md). The
+// v2 field is a square fieldset: a 1px box on the page background with the label
+// as a chip notched into its top border, turning accent on focus. Validation
+// itself comes from src/lib/validators.ts via the caller.
 export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
   ({ label, error, below, className, id, ...rest }, ref) => {
     const generatedId = useId();
     const fieldId = id ?? generatedId;
     return (
       <div>
-        <label htmlFor={fieldId} className="mb-1.5 block text-[13px] text-muted">
-          {label}
-        </label>
-        <input
-          ref={ref}
-          id={fieldId}
-          aria-invalid={error ? true : undefined}
+        <div
           className={cn(
-            "h-11 w-full rounded-input border bg-input px-3.5 text-[15px] text-text outline-none transition-colors",
-            "placeholder:text-dim focus:border-accent",
+            "relative border bg-input transition-colors focus-within:border-accent",
             error ? "border-danger" : "border-border",
-            className,
           )}
-          {...rest}
-        />
-        {below}
+        >
+          <input
+            ref={ref}
+            id={fieldId}
+            aria-invalid={error ? true : undefined}
+            className={cn(
+              "peer h-[46px] w-full bg-transparent px-3.5 text-[14px] text-text outline-none placeholder:text-dim",
+              className,
+            )}
+            {...rest}
+          />
+          <label
+            htmlFor={fieldId}
+            className="pointer-events-none absolute -top-[9px] left-2.5 bg-card px-1.5 text-[12px] text-dim peer-focus:text-accent"
+          >
+            {label}
+          </label>
+          {below}
+        </div>
         {error ? <p className="mt-1.5 text-[13px] text-danger">{error}</p> : null}
       </div>
     );

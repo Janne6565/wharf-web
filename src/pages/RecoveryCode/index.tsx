@@ -25,15 +25,15 @@ export function RecoveryCodePage() {
 
   return (
     <AuthShell step={2}>
-      <Card maxWidth={520}>
-        <h2 className="mb-1 text-[22px] text-text">{t("recovery.title")}</h2>
-        <p className="mb-5.5 text-[14.5px] leading-relaxed text-muted">
+      <Card label={t("cards.recoveryCode")} maxWidth={540}>
+        <h2 className="mb-1.5 text-[20px] font-bold text-text">{t("recovery.title")}</h2>
+        <p className="mb-6 text-[13px] leading-relaxed text-muted">
           <Trans i18nKey="recovery.intro" components={emphasis} />
         </p>
 
         <div
           data-testid="recovery-code"
-          className="grid grid-cols-4 gap-x-3.5 gap-y-2.5 rounded-xl border border-dashed border-warn-border bg-input p-5 text-center font-mono text-[15.5px] tracking-wider text-accent"
+          className="grid grid-cols-4 gap-x-4 gap-y-3 border border-dashed border-warn-border bg-input p-[22px] text-center text-[15.5px] tracking-[0.08em] text-accent"
         >
           {groups.map((group, index) => (
             // Fixed-length, never-reordered sequence; groups can repeat, so the

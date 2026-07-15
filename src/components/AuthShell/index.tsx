@@ -11,16 +11,17 @@ interface AuthShellProps {
 }
 
 const TOP_GAP: Record<NonNullable<AuthShellProps["topGap"]>, string> = {
-  onboarding: "mt-7",
-  signin: "mt-20",
-  recover: "mt-14",
+  onboarding: "mt-8",
+  signin: "mt-[90px]",
+  recover: "mt-[60px]",
 };
 
-// The page frame shared by every auth screen: full-height dark background,
-// centered column, an optional step indicator, and the card slot.
+// The page frame shared by every auth screen: full-height dark background, all
+// monospace (v2), a centered column, an optional step indicator, and the card
+// slot.
 export function AuthShell({ children, step, topGap = "onboarding" }: AuthShellProps) {
   return (
-    <main className="flex min-h-screen flex-col items-center overflow-hidden bg-bg px-4 pb-10">
+    <main className="flex min-h-screen flex-col items-center overflow-hidden bg-bg px-4 pb-10 font-mono">
       {step ? <StepIndicator current={step} /> : null}
       <div className={cn("w-full", TOP_GAP[topGap])}>{children}</div>
     </main>

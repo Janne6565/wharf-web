@@ -10,8 +10,8 @@ interface StepIndicatorProps {
 
 const SEPARATOR = "──";
 
-// The onboarding progress row: "1 account ── 2 recovery code ── 3 connect
-// device", with completed steps shown as a green check, the current step in
+// The onboarding progress row: "[1] account ── [2] recovery code ── [3] connect
+// device", with completed steps shown as a green "[✓]", the current step in
 // accent, and upcoming steps dimmed.
 export function StepIndicator({ current }: StepIndicatorProps) {
   const { t } = useTranslation();
@@ -32,7 +32,7 @@ export function StepIndicator({ current }: StepIndicatorProps) {
                 !done && !active && "text-dim",
               )}
             >
-              {done ? "✓" : stepNumber} {label}
+              {done ? "[✓]" : `[${stepNumber}]`} {label}
             </span>
             {index < steps.length - 1 ? <span className="text-border">{SEPARATOR}</span> : null}
           </Fragment>

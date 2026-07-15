@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 
-// The "⋋ wharf" brand chip: mono, accent background, dark ink. The glyph is
-// U+22CB (&#8907; in the design source).
-const LOGO_GLYPH = "⋋";
+// The "❯_ wharf" brand chip: mono, accent background, dark ink. The glyph is
+// U+276F followed by an underscore (&#10095;_ in the v2 design source).
+const LOGO_GLYPH = "❯_";
 
 export function LogoChip() {
   const { t } = useTranslation();

@@ -15,9 +15,19 @@ const enCommon = {
     connectDevice: "connect device",
   },
   common: {
-    or: "or",
-    continueWithProviders: "continue with Google / GitHub",
     comingSoon: "coming soon",
+  },
+  cards: {
+    signup: "sign up",
+    recoveryCode: "recovery code",
+    device: "pair terminal",
+    signin: "sign in",
+    recover: "recover vault",
+  },
+  oauth: {
+    google: "google",
+    github: "github",
+    orWithEmail: "or with email",
   },
   fields: {
     email: "email",
@@ -36,27 +46,27 @@ const enCommon = {
   signup: {
     title: "Create your account",
     warning:
-      "This password encrypts your vault on your device. We never see it and <1>cannot reset it</1> — only your recovery code can.",
+      "this password encrypts your vault on your device. we never see it and <1>cannot reset it</1> — only your recovery code can.",
     understand: "I understand that wharf cannot recover my password",
-    submit: "Create account",
+    submit: "create account",
   },
   recovery: {
     title: "Save your recovery code",
     intro:
-      "These 40 characters are the <1>only</1> way to reset your password. They are shown <3>once, right now</3> — we keep no readable copy.",
-    copy: "Copy",
-    copied: "Copied",
-    download: "Download .txt",
-    print: "Print",
+      "these 40 characters are the <1>only</1> way to reset your password. shown <3>once, right now</3> — we keep no readable copy.",
+    copy: "copy",
+    copied: "copied",
+    download: "download .txt",
+    print: "print",
     stored: "I stored this code somewhere safe, outside this device",
-    continue: "Continue",
+    continue: "continue",
     footnote: "button unlocks once confirmed · there is no “remind me later”",
     fileHeading:
       "wharf recovery code — keep this safe, offline. It is the only way to reset your password.",
   },
   device: {
     title: "Pair your terminal",
-    subtitle: "You're signed in as <1>{{email}}</1>. Type this code into wharf in your terminal:",
+    subtitle: "signed in as <1>{{email}}</1> · type this code into wharf in your terminal:",
     issuing: "issuing code…",
     expiresIn: "expires in {{time}}",
     reissuing: "code expired — issuing a fresh one…",
@@ -68,19 +78,21 @@ const enCommon = {
   },
   signin: {
     title: "Welcome back",
-    submit: "Unlock vault",
-    footerLead: "your password decrypts the vault locally ·",
+    submit: "unlock vault",
+    footerLead: "your password decrypts the vault locally",
     forgot: "forgot it? use your recovery code",
+    newHere: "new here?",
+    createAccount: "create an account",
   },
   recover: {
     title: "Reset your password",
     intro:
-      "Enter the 40-character recovery code from your onboarding. It decrypts your vault so it can be re-encrypted with a new password.",
+      "enter the 40-character recovery code from your onboarding. it decrypts your vault so it can be re-encrypted with a new password.",
     valid: "code valid · vault unlocked for re-encryption",
     verifying: "checking recovery code…",
     danger:
-      "Resetting issues a <1>new recovery code</1> and invalidates this one. Signed-in devices will re-authenticate.",
-    submit: "Re-encrypt & reset",
+      "resetting issues a <1>new recovery code</1> and invalidates this one. signed-in devices will re-authenticate.",
+    submit: "re-encrypt & reset",
   },
   validation: {
     emailRequired: "enter your email",

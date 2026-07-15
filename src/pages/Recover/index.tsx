@@ -18,11 +18,13 @@ export function RecoverPage() {
 
   return (
     <AuthShell topGap="recover">
-      <Card maxWidth={480}>
-        <h2 className="mb-1.5 text-[22px] text-text">{t("recover.title")}</h2>
-        <p className="mb-5.5 text-[14.5px] leading-relaxed text-muted">{t("recover.intro")}</p>
+      <Card label={t("cards.recover")} maxWidth={500}>
+        <h2 className="mb-1.5 text-[20px] font-bold text-text">{t("recover.title")}</h2>
+        <p className="mb-6 text-[13px] leading-relaxed text-muted">{t("recover.intro")}</p>
 
-        <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
+        <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
+          {/* The design omits the email field, but the recovery flow verifies the
+              code against a specific account, so it stays a functional necessity. */}
           <FormField
             label={t("fields.email")}
             type="email"
@@ -33,21 +35,28 @@ export function RecoverPage() {
           />
 
           <div>
-            <label htmlFor="recover-code" className="mb-1.5 block text-[13px] text-muted">
-              {t("fields.recoveryCode")}
-            </label>
-            <textarea
-              id="recover-code"
-              rows={2}
-              spellCheck={false}
-              autoCapitalize="characters"
-              data-testid="recover-code"
+            <div
               className={cn(
-                "w-full resize-none rounded-input border bg-input px-3.5 py-3 font-mono text-[14.5px] leading-[1.7] tracking-wide text-text outline-none transition-colors focus:border-accent",
+                "relative border bg-input transition-colors focus-within:border-accent",
                 errors.recoveryCode ? "border-danger" : "border-border",
               )}
-              {...register("recoveryCode")}
-            />
+            >
+              <textarea
+                id="recover-code"
+                rows={2}
+                spellCheck={false}
+                autoCapitalize="characters"
+                data-testid="recover-code"
+                className="peer w-full resize-none bg-transparent px-3.5 py-3 text-[14px] leading-[1.7] tracking-wide text-text outline-none"
+                {...register("recoveryCode")}
+              />
+              <label
+                htmlFor="recover-code"
+                className="pointer-events-none absolute -top-[9px] left-2.5 bg-card px-1.5 text-[12px] text-dim peer-focus:text-accent"
+              >
+                {t("fields.recoveryCode")}
+              </label>
+            </div>
             {errors.recoveryCode?.message ? (
               <p className="mt-1.5 text-[13px] text-danger">{errors.recoveryCode.message}</p>
             ) : null}

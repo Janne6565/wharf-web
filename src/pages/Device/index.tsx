@@ -3,7 +3,9 @@ import { AuthShell } from "@/components/AuthShell";
 import { Card } from "@/components/Card";
 import { useDeviceLogic } from "./useDeviceLogic";
 
-const INSTALL_HREF = "https://github.com/Janne6565/wharf-tui";
+// The landing page (with an #install section) is owned by a follow-up task; for
+// now the "install wharf" link just points at that anchor.
+const INSTALL_HREF = "/#install";
 
 export function DevicePage() {
   const { t } = useTranslation();
@@ -12,10 +14,10 @@ export function DevicePage() {
 
   return (
     <AuthShell step={3}>
-      <Card maxWidth={460}>
+      <Card label={t("cards.device")} maxWidth={480}>
         <div className="text-center">
-          <h2 className="mb-1.5 text-[22px] text-text">{t("device.title")}</h2>
-          <p className="text-[14.5px] leading-relaxed text-muted">
+          <h2 className="mb-2 text-[20px] font-bold text-text">{t("device.title")}</h2>
+          <p className="text-[13px] leading-relaxed text-muted">
             <Trans
               i18nKey="device.subtitle"
               values={{ email: email ?? "" }}
@@ -25,12 +27,12 @@ export function DevicePage() {
 
           <div
             data-testid="device-code"
-            className="mx-auto mt-6 rounded-xl border border-accent bg-input p-[18px] font-mono text-[34px] font-bold tracking-[0.25em] text-accent"
+            className="mx-auto mt-6 border border-accent bg-input p-5 text-[34px] font-bold tracking-[0.25em] text-accent"
           >
             {formattedCode ?? "····-····"}
           </div>
 
-          <div className="mt-3 font-mono text-[13px] text-dim" data-testid="device-status">
+          <div className="mt-3 text-[12.5px] text-dim" data-testid="device-status">
             {isError
               ? t("device.error")
               : !hasCode || isIssuing
@@ -40,19 +42,17 @@ export function DevicePage() {
                   : t("device.expiresIn", { time: timeLabel })}
           </div>
 
-          <div className="mt-6 rounded-input border border-border bg-input px-[18px] py-3.5 text-left font-mono text-[13px] leading-[1.7]">
+          <div className="mt-6 border border-border bg-input px-[18px] py-3.5 text-left text-[13px] leading-[1.7]">
             <div className="text-dim">{t("device.promptCommand")}</div>
-            <div className="text-muted">{t("device.promptPaste")}</div>
+            <div className="text-muted">
+              {t("device.promptPaste")}
+              <span className="ml-0.5 inline-block h-[1.1em] w-[0.55em] animate-blink bg-accent align-text-bottom" />
+            </div>
           </div>
 
-          <div className="mt-[18px] text-[13px] text-dim">
+          <div className="mt-5 text-[12.5px] text-dim">
             {t("device.noTerminal")}{" "}
-            <a
-              className="text-accent hover:text-accent-strong"
-              href={INSTALL_HREF}
-              target="_blank"
-              rel="noreferrer"
-            >
+            <a className="text-accent hover:text-accent-strong" href={INSTALL_HREF}>
               {t("device.installWharf")}
             </a>
           </div>

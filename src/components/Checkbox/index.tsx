@@ -34,13 +34,13 @@ export function Checkbox({
       <span
         aria-hidden
         className={cn(
-          "mt-px flex size-[18px] flex-none items-center justify-center rounded-[5px] text-[12px] font-bold transition-colors",
-          checked ? "bg-accent text-accent-ink" : "border-[1.5px] border-dim text-transparent",
+          "mt-0.5 flex size-4 flex-none items-center justify-center text-[11px] font-bold transition-colors",
+          checked ? "bg-accent text-accent-ink" : "border border-dim text-transparent",
         )}
       >
         ✓
       </span>
-      <span className="text-[13.5px] leading-snug text-muted">{label}</span>
+      <span className="text-[12.5px] leading-snug text-muted">{label}</span>
     </label>
   );
 }

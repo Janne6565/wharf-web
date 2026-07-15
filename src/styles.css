@@ -10,9 +10,11 @@
   --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
 
+  /* v2: cards sit on the page background as #0C1219 panels, and inputs/code
+     boxes drop to the darker page colour #0A0E13. */
   --color-bg: #0a0e13;
-  --color-card: #10161d;
-  --color-input: #0c1219;
+  --color-card: #0c1219;
+  --color-input: #0a0e13;
   --color-border: #233140;
   --color-text: #e8edf2;
   --color-muted: #8b99a5;
@@ -26,17 +28,29 @@
   --color-success: #69d26e;
 
   --color-warn: #e3c078;
-  --color-warn-bg: #171310;
+  --color-warn-bg: #12100a;
   --color-warn-border: #4a3a1a;
 
   --color-danger: #e0685e;
-  --color-danger-bg: #1a1112;
+  --color-danger-bg: #120a0a;
   --color-danger-border: #5a2a28;
 
-  --color-disabled-bg: #1b2530;
+  /* Empty password-strength segment, and the disabled primary-button block. */
+  --color-meter-empty: #141b23;
+  --color-disabled-bg: #10161d;
 
-  --radius-card: 16px;
-  --radius-input: 10px;
+  /* Blinking block cursor for the terminal hint box (device screen). */
+  --animate-blink: blink 1.1s steps(1) infinite;
+  @keyframes blink {
+    0%,
+    55% {
+      opacity: 1;
+    }
+    56%,
+    100% {
+      opacity: 0;
+    }
+  }
 }
 
 html,
