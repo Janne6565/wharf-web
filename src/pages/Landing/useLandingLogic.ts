@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { copyToClipboard } from "@/lib/browser";
-import { INSTALL_COMMAND } from "./lib";
+import { INSTALL_COMMAND } from "@/lib/install";
 
 const COPIED_RESET_MS = 1600;
 

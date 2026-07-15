@@ -1,10 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { issueDeviceCode } from "@/api/wharf";
 import { useAuthInformation } from "@/auth/useAuthInformation";
+import { copyToClipboard } from "@/lib/browser";
+import { INSTALL_COMMAND } from "@/lib/install";
 
 const deviceRoute = getRouteApi("/device");
+const COPIED_RESET_MS = 1600;
 
 const TICK_MS = 500;
 const RETRY_MS = 3000;
@@ -26,6 +29,8 @@ function formatRemaining(ms: number): string {
 export function useDeviceLogic() {
   const { email } = useAuthInformation();
   const { onboarding } = deviceRoute.useSearch();
+  const [installOpen, setInstallOpen] = useState(false);
+  const [installCopied, setInstallCopied] = useState(false);
   const [code, setCode] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
   const [remainingMs, setRemainingMs] = useState<number>(0);
@@ -75,9 +80,23 @@ export function useDeviceLogic() {
     return () => globalThis.clearTimeout(id);
   }, [issue.isError]);
 
+  const openInstall = useCallback(() => setInstallOpen(true), []);
+  const closeInstall = useCallback(() => setInstallOpen(false), []);
+  const copyInstall = useCallback(async () => {
+    await copyToClipboard(INSTALL_COMMAND);
+    setInstallCopied(true);
+    globalThis.setTimeout(() => setInstallCopied(false), COPIED_RESET_MS);
+  }, []);
+
   return {
     email,
     onboarding,
+    installOpen,
+    installCopied,
+    installCommand: INSTALL_COMMAND,
+    openInstall,
+    closeInstall,
+    copyInstall,
     formattedCode: code ? formatCode(code) : null,
     timeLabel: formatRemaining(remainingMs),
     hasCode: code !== null,

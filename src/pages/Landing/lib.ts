@@ -1,9 +1,5 @@
 // Framework-agnostic constants and decorative demo data for the landing page.
 
-// The install one-liner. A literal shell command (not localizable copy) shown in
-// the hero and footer and copied to the clipboard by the hero's copy button.
-export const INSTALL_COMMAND = "curl -fsSL wharf.sh/install | sh";
-
 // Static illustration of the wharf TUI shown beside the hero. This mirrors a
 // screenshot — literal demo output rather than localizable product copy — so it
 // lives here as data instead of in the i18n resources.

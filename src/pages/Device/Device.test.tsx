@@ -1,9 +1,13 @@
 // @vitest-environment jsdom
 import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/utils";
 
-const mocks = vi.hoisted(() => ({ search: { onboarding: false } as { onboarding: boolean } }));
+const mocks = vi.hoisted(() => ({
+  search: { onboarding: false } as { onboarding: boolean },
+  copyToClipboard: vi.fn().mockResolvedValue(undefined),
+}));
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, ...props }: { children: React.ReactNode }) => <a {...props}>{children}</a>,
@@ -17,6 +21,7 @@ vi.mock("@/api/wharf", () => ({
     expiresAt: new Date(Date.now() + 600_000).toISOString(),
   }),
 }));
+vi.mock("@/lib/browser", () => ({ copyToClipboard: mocks.copyToClipboard }));
 
 import { DevicePage } from "./index";
 
@@ -53,5 +58,22 @@ describe("DevicePage", () => {
 
     expect(screen.getByText(/connect device/i)).toBeInTheDocument();
     expect(screen.queryByTestId("auth-back")).not.toBeInTheDocument();
+  });
+
+  it("opens an install modal with the install command and copies it", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<DevicePage />, { user: { id: "u1", email: "deniz@acme.io" } });
+
+    expect(screen.queryByTestId("device-install-modal")).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId("device-install-open"));
+    const modal = screen.getByTestId("device-install-modal");
+    expect(modal).toHaveTextContent("curl -fsSL wharf.sh/install | sh");
+
+    await user.click(screen.getByTestId("device-install-copy"));
+    expect(mocks.copyToClipboard).toHaveBeenCalledWith("curl -fsSL wharf.sh/install | sh");
+
+    await user.click(screen.getByTestId("modal-close"));
+    expect(screen.queryByTestId("device-install-modal")).not.toBeInTheDocument();
   });
 });

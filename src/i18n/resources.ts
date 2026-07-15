@@ -17,8 +17,12 @@ const enCommon = {
   common: {
     comingSoon: "coming soon",
     back: "back",
+    close: "close",
+    copy: "copy",
+    copied: "copied",
   },
   cards: {
+    install: "install",
     signup: "sign up",
     recoveryCode: "recovery code",
     device: "pair terminal",
@@ -111,6 +115,8 @@ const enCommon = {
     noTerminal: "no terminal yet?",
     installWharf: "install wharf first",
     viewConnections: "view your connections",
+    installTitle: "install wharf",
+    installBody: "run this in your terminal, then come back and paste the code:",
   },
   connections: {
     title: "Your connections",

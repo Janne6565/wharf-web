@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { INSTALL_COMMAND } from "./lib";
+import { INSTALL_COMMAND } from "@/lib/install";
 import { TerminalMockup } from "./TerminalMockup";
 import { useLandingLogic } from "./useLandingLogic";
 
