@@ -16,7 +16,10 @@ export const Route = createRootRoute({
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "wharf — sign in" },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+      { rel: "stylesheet", href: appCss },
+    ],
   }),
   // Run the one-time silent refresh before any child guard evaluates, so route
   // guards see a resolved session. No-op on the server (client-only concern).

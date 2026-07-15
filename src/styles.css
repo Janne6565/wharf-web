@@ -21,6 +21,13 @@
   --color-dim: #54646f;
   --color-subtle: #bcc8d2;
 
+  /* Landing-page extras: a fainter section/row divider, the hero command box,
+     the highlighted terminal row/active tab, and the host-tag blue. */
+  --color-border-subtle: #1a232d;
+  --color-code: #10161d;
+  --color-row-active: #12202a;
+  --color-blue: #6fb3e8;
+
   --color-accent: #57d7c2;
   --color-accent-strong: #8ae8d8;
   --color-accent-ink: #07110e;

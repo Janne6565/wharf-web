@@ -112,6 +112,59 @@ const enCommon = {
     vaultDecrypt: "couldn't decrypt the vault with that recovery code",
     generic: "something went wrong — please try again",
   },
+  landing: {
+    nav: {
+      features: "features",
+      security: "security",
+      install: "install",
+      signIn: "sign in",
+      getWharf: "get wharf",
+    },
+    hero: {
+      titleLine1: "Your fleet,",
+      titleLine2: "one terminal",
+      body: "An SSH manager that lives in your terminal. Hosts, keys and projects — synced across devices, shared with your team, and readable by no one but you.",
+      copy: "copy",
+      copied: "copied",
+      footnote: "macOS · Linux · single binary, no root",
+    },
+    features: {
+      vault: {
+        kicker: "vault",
+        title: "Hosts & keys, everywhere",
+        body: "Store connections, tags and identities once. Every device you sign in on gets the same vault — laptop, desktop, phone.",
+      },
+      projects: {
+        kicker: "projects",
+        title: "Share hosts, not secrets",
+        body: "Invite teammates into a project to share its hosts. Roles decide who connects where. Private keys always stay yours.",
+      },
+      signin: {
+        kicker: "sign-in",
+        title: "Browser once, terminal forever",
+        body: "Authenticate in the browser, pair your terminal with a short device code. No passwords typed into the TUI, ever.",
+      },
+    },
+    security: {
+      kicker: "security model",
+      headingLine1: "We store your vault.",
+      headingLine2: "We can't read it.",
+      para1:
+        "Everything on our servers is encrypted with a key derived from your password — on your device, before it leaves. Your password is never sent to us, so there is nothing for us (or anyone who breaches us) to decrypt.",
+      para2:
+        "Forgot your password? The only way back in is the <1>40-character recovery code</1> shown once when you created your account. No code, no vault — that's the point.",
+      check1: "password → key derivation (argon2id) happens client-side",
+      check2: "vault blobs encrypted with XChaCha20-Poly1305 before upload",
+      check3: "recovery code shown exactly once, never stored by us in plaintext",
+      check4: "no password reset by email · no support-desk backdoor",
+    },
+    footer: {
+      security: "security",
+      docs: "docs",
+      github: "github",
+      copyright: "© 2026 wharf",
+    },
+  },
 } as const;
 
 type DeepStringSchema<T> = {
