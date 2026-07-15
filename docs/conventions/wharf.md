@@ -1,4 +1,4 @@
-<!-- AUTO-SYNCED from agents KB: projects/wharf.md @ 586576f.
+<!-- AUTO-SYNCED from agents KB: projects/wharf.md @ 2752efb.
      Do NOT edit here — edit the source in ~/projects/agents and re-run scripts/sync-conventions.sh. -->
 
 # Wharf
@@ -156,6 +156,11 @@ invite by email, roles (owner/admin/member); private keys are never shared.
   "install wharf first" opens a reusable `<Modal>` (backdrop/Escape/close,
   Card-style panel) with the `curl … | sh` one-liner + copy button;
   `INSTALL_COMMAND` lives in shared `@/lib/install` (landing + device).
+  Blinking cursors are only rendered where the user can actually type: web
+  dropped the decorative hero-headline and device terminal-hint cursors (and the
+  `blink` keyframe); the TUI dropped the cursor next to the `⚓ wharf` logo but
+  keeps the focus-gated cursor in every real input (forms, unlock, `/` search,
+  session prompt, device-code entry, invite email).
 
 ## Notable (stands out vs other projects)
 - **Only Go + Bubble Tea TUI** in the portfolio (alongside Cosy's Go/Rust as non-house
