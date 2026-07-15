@@ -52,11 +52,26 @@ describe("SigninPage", () => {
     expect(screen.getByTestId("auth-back")).toHaveAttribute("to", "/");
   });
 
-  it("shows validation errors on empty submit and does not call the API", async () => {
+  it("keeps the submit button disabled until both fields are filled", async () => {
     const user = userEvent.setup();
     renderWithProviders(<SigninPage />);
+
+    expect(screen.getByTestId("signin-submit")).toBeDisabled();
+    await user.type(screen.getByTestId("signin-email"), "deniz@acme.io");
+    expect(screen.getByTestId("signin-submit")).toBeDisabled();
+    await user.type(screen.getByTestId("signin-password"), "super-secret-pass");
+    expect(screen.getByTestId("signin-submit")).toBeEnabled();
+  });
+
+  it("surfaces zod validation errors on a filled-but-invalid submit and does not call the API", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SigninPage />);
+    // Non-empty (so the button is enabled) but not a valid email — the format
+    // rule must still surface as a submit-time validation error.
+    await user.type(screen.getByTestId("signin-email"), "not-an-email");
+    await user.type(screen.getByTestId("signin-password"), "super-secret-pass");
     await user.click(screen.getByTestId("signin-submit"));
-    expect(await screen.findByText(/enter your email/i)).toBeInTheDocument();
+    expect(await screen.findByText(/enter a valid email address/i)).toBeInTheDocument();
     expect(mocks.login).not.toHaveBeenCalled();
   });
 

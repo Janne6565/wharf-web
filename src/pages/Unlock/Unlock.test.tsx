@@ -42,6 +42,15 @@ describe("UnlockPage", () => {
     expect(screen.getByText("deniz@acme.io")).toBeInTheDocument();
   });
 
+  it("keeps the submit button disabled until a password is entered", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<UnlockPage />, { user: USER });
+
+    expect(screen.getByTestId("unlock-submit")).toBeDisabled();
+    await user.type(screen.getByTestId("unlock-password"), "master-password");
+    expect(screen.getByTestId("unlock-submit")).toBeEnabled();
+  });
+
   it("unlocks the vault and navigates to /device", async () => {
     mocks.unlockVaultWithPassword.mockResolvedValue(true);
     const user = userEvent.setup();

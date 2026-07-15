@@ -13,14 +13,22 @@ import { useSignupLogic } from "./useSignupLogic";
 
 export function SignupPage() {
   const { t } = useTranslation();
-  const { form, onSubmit, submitError, isSubmitting, password, understand, setUnderstand } =
-    useSignupLogic();
+  const {
+    form,
+    onSubmit,
+    submitError,
+    isSubmitting,
+    password,
+    understand,
+    setUnderstand,
+    canSubmit,
+  } = useSignupLogic();
   const { register, formState } = form;
   const { errors } = formState;
 
   return (
-    <AuthShell step={1}>
-      <Card label={t("cards.signup")} maxWidth={460} backTo="/">
+    <AuthShell step={1} backTo="/">
+      <Card label={t("cards.signup")} maxWidth={460}>
         <LogoChip />
         <h2 className="mt-4.5 mb-4 text-[20px] font-bold text-text">{t("signup.title")}</h2>
         <OAuthButtons />
@@ -78,6 +86,7 @@ export function SignupPage() {
           <Button
             type="submit"
             loading={isSubmitting}
+            disabled={!canSubmit}
             data-testid="signup-submit"
             className="mt-6.5"
           >

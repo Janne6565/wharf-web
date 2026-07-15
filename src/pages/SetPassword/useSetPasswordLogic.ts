@@ -117,15 +117,20 @@ export function useSetPasswordLogic() {
     mutation.mutate(values);
   });
 
+  const password = form.watch("password");
+  const confirm = form.watch("confirm");
+  const understand = form.watch("understand");
+
   return {
     form,
     onSubmit,
     submitError,
     isSubmitting: mutation.isPending,
     ready: Boolean(profile.data?.email),
-    password: form.watch("password"),
-    understand: form.watch("understand"),
+    password,
+    understand,
     setUnderstand: (checked: boolean) =>
       form.setValue("understand", checked, { shouldValidate: form.formState.isSubmitted }),
+    canSubmit: password.length > 0 && confirm.length > 0 && understand,
   };
 }

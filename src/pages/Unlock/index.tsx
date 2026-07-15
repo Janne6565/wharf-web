@@ -8,12 +8,12 @@ import { useUnlockLogic } from "./useUnlockLogic";
 
 export function UnlockPage() {
   const { t } = useTranslation();
-  const { form, onSubmit, submitError, isSubmitting, email } = useUnlockLogic();
+  const { form, onSubmit, submitError, isSubmitting, email, canSubmit } = useUnlockLogic();
   const { register, formState } = form;
   const { errors } = formState;
 
   return (
-    <AuthShell topGap="signin">
+    <AuthShell>
       <Card label={t("cards.unlock")} maxWidth={440}>
         <LogoChip />
         <h2 className="mt-4.5 mb-1.5 text-[20px] font-bold text-text">{t("unlock.title")}</h2>
@@ -40,6 +40,7 @@ export function UnlockPage() {
           <Button
             type="submit"
             loading={isSubmitting}
+            disabled={!canSubmit}
             data-testid="unlock-submit"
             className="mt-6.5"
           >

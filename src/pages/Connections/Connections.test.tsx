@@ -70,6 +70,15 @@ describe("ConnectionsPage", () => {
     expect(screen.queryByText("prod-web")).toBeNull();
   });
 
+  it("keeps the locked-panel unlock button disabled until a password is entered", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<ConnectionsPage />);
+
+    expect(screen.getByTestId("connections-unlock")).toBeDisabled();
+    await user.type(screen.getByTestId("connections-password"), "super-secret");
+    expect(screen.getByTestId("connections-unlock")).toBeEnabled();
+  });
+
   it("unlocks the vault from the locked panel and shows the hosts", async () => {
     mocks.getVault.mockResolvedValue({ vault: "AA==" });
     mocks.unlockWithPassword.mockResolvedValue({

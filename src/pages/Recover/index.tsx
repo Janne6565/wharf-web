@@ -17,7 +17,7 @@ export function RecoverPage() {
   const { errors } = formState;
 
   return (
-    <AuthShell topGap="recover">
+    <AuthShell>
       <Card label={t("cards.recover")} maxWidth={500}>
         <h2 className="mb-1.5 text-[20px] font-bold text-text">{t("recover.title")}</h2>
         <p className="mb-6 text-[13px] leading-relaxed text-muted">{t("recover.intro")}</p>

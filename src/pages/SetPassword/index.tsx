@@ -12,8 +12,17 @@ import { useSetPasswordLogic } from "./useSetPasswordLogic";
 
 export function SetPasswordPage() {
   const { t } = useTranslation();
-  const { form, onSubmit, submitError, isSubmitting, ready, password, understand, setUnderstand } =
-    useSetPasswordLogic();
+  const {
+    form,
+    onSubmit,
+    submitError,
+    isSubmitting,
+    ready,
+    password,
+    understand,
+    setUnderstand,
+    canSubmit,
+  } = useSetPasswordLogic();
   const { register, formState } = form;
   const { errors } = formState;
 
@@ -69,7 +78,7 @@ export function SetPasswordPage() {
           <Button
             type="submit"
             loading={isSubmitting}
-            disabled={!ready}
+            disabled={!ready || !canSubmit}
             data-testid="setpassword-submit"
             className="mt-6.5"
           >

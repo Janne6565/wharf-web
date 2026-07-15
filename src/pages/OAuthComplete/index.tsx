@@ -47,7 +47,7 @@ export function OAuthCompletePage({ error }: OAuthCompletePageProps) {
   const { errorCode } = useOAuthCompleteLogic(error);
 
   return (
-    <AuthShell topGap="signin">
+    <AuthShell>
       <Card label={t("cards.oauth")} maxWidth={440}>
         {errorCode ? <OAuthError code={errorCode} /> : <OAuthLoading />}
       </Card>

@@ -14,6 +14,7 @@ export function ConnectionsPage() {
     onSubmit,
     unlockError,
     isUnlocking,
+    canSubmit,
     vaultUnlocked,
     noVault,
     hosts,
@@ -24,13 +25,19 @@ export function ConnectionsPage() {
   } = useConnectionsLogic();
 
   return (
-    <AuthShell topGap="recover">
+    <AuthShell>
       <Card label={t("cards.connections")} maxWidth={640}>
         <Header count={totalHosts} unlocked={vaultUnlocked} onLock={handleLock} />
         {vaultUnlocked || noVault ? (
           <VaultBody hosts={hosts} totalHosts={totalHosts} query={query} setQuery={setQuery} />
         ) : (
-          <LockedPanel form={form} onSubmit={onSubmit} error={unlockError} loading={isUnlocking} />
+          <LockedPanel
+            form={form}
+            onSubmit={onSubmit}
+            error={unlockError}
+            loading={isUnlocking}
+            canSubmit={canSubmit}
+          />
         )}
         <Footer />
       </Card>
@@ -152,9 +159,10 @@ interface LockedPanelProps {
   readonly onSubmit: ReturnType<typeof useConnectionsLogic>["onSubmit"];
   readonly error: string | null;
   readonly loading: boolean;
+  readonly canSubmit: boolean;
 }
 
-function LockedPanel({ form, onSubmit, error, loading }: LockedPanelProps) {
+function LockedPanel({ form, onSubmit, error, loading, canSubmit }: LockedPanelProps) {
   const { t } = useTranslation();
   const { register, formState } = form;
   return (
@@ -170,7 +178,13 @@ function LockedPanel({ form, onSubmit, error, loading }: LockedPanelProps) {
           {...register("password")}
         />
         {error ? <p className="mt-4 text-[13px] text-danger">{error}</p> : null}
-        <Button type="submit" loading={loading} data-testid="connections-unlock" className="mt-6">
+        <Button
+          type="submit"
+          loading={loading}
+          disabled={!canSubmit}
+          data-testid="connections-unlock"
+          className="mt-6"
+        >
           {t("connections.unlock")}
         </Button>
       </form>

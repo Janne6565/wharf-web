@@ -57,5 +57,14 @@ export function useUnlockLogic() {
     mutation.mutate(values);
   });
 
-  return { form, onSubmit, submitError, isSubmitting: mutation.isPending, email };
+  const password = form.watch("password");
+
+  return {
+    form,
+    onSubmit,
+    submitError,
+    isSubmitting: mutation.isPending,
+    email,
+    canSubmit: password.length > 0,
+  };
 }

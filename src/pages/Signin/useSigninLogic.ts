@@ -83,5 +83,14 @@ export function useSigninLogic() {
     mutation.mutate(values);
   });
 
-  return { form, onSubmit, submitError, isSubmitting: mutation.isPending };
+  const email = form.watch("email");
+  const password = form.watch("password");
+
+  return {
+    form,
+    onSubmit,
+    submitError,
+    isSubmitting: mutation.isPending,
+    canSubmit: email.trim().length > 0 && password.length > 0,
+  };
 }

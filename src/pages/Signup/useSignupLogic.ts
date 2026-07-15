@@ -100,14 +100,20 @@ export function useSignupLogic() {
     mutation.mutate(values);
   });
 
+  const email = form.watch("email");
+  const password = form.watch("password");
+  const confirm = form.watch("confirm");
+  const understand = form.watch("understand");
+
   return {
     form,
     onSubmit,
     submitError,
     isSubmitting: mutation.isPending,
-    password: form.watch("password"),
-    understand: form.watch("understand"),
+    password,
+    understand,
     setUnderstand: (checked: boolean) =>
       form.setValue("understand", checked, { shouldValidate: form.formState.isSubmitted }),
+    canSubmit: email.trim().length > 0 && password.length > 0 && confirm.length > 0 && understand,
   };
 }

@@ -86,11 +86,14 @@ export function useConnectionsLogic() {
     form.reset({ password: "" });
   }, [form]);
 
+  const password = form.watch("password");
+
   return {
     form,
     onSubmit,
     unlockError,
     isUnlocking: mutation.isPending,
+    canSubmit: password.length > 0,
     vaultUnlocked: vault !== null,
     noVault,
     hosts,

@@ -1,31 +1,35 @@
+import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { type OnboardingStep, StepIndicator } from "@/components/StepIndicator";
-import { cn } from "@/lib/utils";
 
 interface AuthShellProps {
   readonly children: ReactNode;
   // When set, renders the onboarding step indicator above the card.
   readonly step?: OnboardingStep;
-  // Vertical offset of the card from the top, matching each screen's design.
-  readonly topGap?: "onboarding" | "signin" | "recover";
+  // When set, renders a "← back" link pinned to the top-left of the screen.
+  readonly backTo?: string;
 }
 
-// Desktop offsets come from the design; on phones the card hugs the top so the
-// form stays reachable above the keyboard.
-const TOP_GAP: Record<NonNullable<AuthShellProps["topGap"]>, string> = {
-  onboarding: "mt-6 sm:mt-8",
-  signin: "mt-10 sm:mt-[90px]",
-  recover: "mt-8 sm:mt-[60px]",
-};
-
 // The page frame shared by every auth screen: full-height dark background, all
-// monospace (v2), a centered column, an optional step indicator, and the card
-// slot.
-export function AuthShell({ children, step, topGap = "onboarding" }: AuthShellProps) {
+// monospace (v2), and a centered column holding an optional step indicator and
+// the card slot. The card is vertically centered so it reads the same on every
+// screen regardless of its height.
+export function AuthShell({ children, step, backTo }: AuthShellProps) {
+  const { t } = useTranslation();
   return (
-    <main className="flex min-h-screen flex-col items-center overflow-hidden bg-bg px-4 pb-10 font-mono">
+    <main className="relative flex min-h-screen flex-col items-center justify-center gap-6 overflow-hidden bg-bg px-4 py-10 font-mono sm:gap-8">
+      {backTo ? (
+        <Link
+          to={backTo}
+          data-testid="auth-back"
+          className="absolute top-4 left-4 text-[13px] text-dim hover:text-accent sm:top-6 sm:left-7"
+        >
+          {t("common.back")}
+        </Link>
+      ) : null}
       {step ? <StepIndicator current={step} /> : null}
-      <div className={cn("w-full", TOP_GAP[topGap])}>{children}</div>
+      <div className="w-full">{children}</div>
     </main>
   );
 }

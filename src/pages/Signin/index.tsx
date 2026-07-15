@@ -10,13 +10,13 @@ import { useSigninLogic } from "./useSigninLogic";
 
 export function SigninPage() {
   const { t } = useTranslation();
-  const { form, onSubmit, submitError, isSubmitting } = useSigninLogic();
+  const { form, onSubmit, submitError, isSubmitting, canSubmit } = useSigninLogic();
   const { register, formState } = form;
   const { errors } = formState;
 
   return (
-    <AuthShell topGap="signin">
-      <Card label={t("cards.signin")} maxWidth={440} backTo="/">
+    <AuthShell backTo="/">
+      <Card label={t("cards.signin")} maxWidth={440}>
         <LogoChip />
         <h2 className="mt-4.5 mb-4 text-[20px] font-bold text-text">{t("signin.title")}</h2>
         <OAuthButtons />
@@ -46,6 +46,7 @@ export function SigninPage() {
           <Button
             type="submit"
             loading={isSubmitting}
+            disabled={!canSubmit}
             data-testid="signin-submit"
             className="mt-6.5"
           >

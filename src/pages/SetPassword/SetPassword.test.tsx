@@ -49,10 +49,11 @@ function seedHappyPath() {
 }
 
 async function fillAndSubmit(user: ReturnType<typeof userEvent.setup>) {
-  await waitFor(() => expect(screen.getByTestId("setpassword-submit")).toBeEnabled());
   await user.type(screen.getByTestId("setpassword-password"), PASSWORD);
   await user.type(screen.getByTestId("setpassword-confirm"), PASSWORD);
   await user.click(screen.getByTestId("setpassword-understand"));
+  // Enabled only once the profile has loaded (ready) and the form is complete.
+  await waitFor(() => expect(screen.getByTestId("setpassword-submit")).toBeEnabled());
   await user.click(screen.getByTestId("setpassword-submit"));
 }
 
@@ -89,17 +90,31 @@ describe("SetPasswordPage", () => {
     const user = userEvent.setup();
     renderWithProviders(<SetPasswordPage />);
 
-    // Wait for the profile to load first, then make the 409 re-check of
-    // /users/me report the vault as existing.
-    await waitFor(() => expect(screen.getByTestId("setpassword-submit")).toBeEnabled());
-    mocks.getCurrentUser.mockResolvedValue({ id: "u1", email: "dev@acme.io", hasVault: true });
+    // Fill the form; the button enabling confirms the profile has loaded. Then
+    // make the 409 re-check of /users/me report the vault as existing.
     await user.type(screen.getByTestId("setpassword-password"), PASSWORD);
     await user.type(screen.getByTestId("setpassword-confirm"), PASSWORD);
     await user.click(screen.getByTestId("setpassword-understand"));
+    await waitFor(() => expect(screen.getByTestId("setpassword-submit")).toBeEnabled());
+    mocks.getCurrentUser.mockResolvedValue({ id: "u1", email: "dev@acme.io", hasVault: true });
     await user.click(screen.getByTestId("setpassword-submit"));
 
     await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith({ to: "/unlock" }));
     expect(mocks.setPendingRecoveryCode).not.toHaveBeenCalled();
+  });
+
+  it("enables the submit button only once password, confirm, and acknowledgement are set", async () => {
+    seedHappyPath();
+    const user = userEvent.setup();
+    renderWithProviders(<SetPasswordPage />);
+
+    // Disabled until the profile loads and every required field is filled.
+    expect(screen.getByTestId("setpassword-submit")).toBeDisabled();
+    await user.type(screen.getByTestId("setpassword-password"), PASSWORD);
+    await user.type(screen.getByTestId("setpassword-confirm"), PASSWORD);
+    expect(screen.getByTestId("setpassword-submit")).toBeDisabled();
+    await user.click(screen.getByTestId("setpassword-understand"));
+    await waitFor(() => expect(screen.getByTestId("setpassword-submit")).toBeEnabled());
   });
 
   it("redirects to unlock when the profile already has a vault", async () => {
