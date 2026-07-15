@@ -1,4 +1,4 @@
-<!-- AUTO-SYNCED from agents KB: projects/wharf.md @ 9e2779f.
+<!-- AUTO-SYNCED from agents KB: projects/wharf.md @ 586576f.
      Do NOT edit here — edit the source in ~/projects/agents and re-run scripts/sync-conventions.sh. -->
 
 # Wharf
@@ -151,6 +151,11 @@ invite by email, roles (owner/admin/member); private keys are never shared.
   show the 3-step indicator; connections' "pair a terminal" links pass
   `onboarding:false` so a returning user gets no onboarding steps and a back
   link instead. The page reads it via `getRouteApi("/device").useSearch()`.
+  UI uses **lucide-react** icons (never ASCII/UTF glyphs) per REACT.md — brand
+  marks, the terminal mockup and prose punctuation excepted. The device screen's
+  "install wharf first" opens a reusable `<Modal>` (backdrop/Escape/close,
+  Card-style panel) with the `curl … | sh` one-liner + copy button;
+  `INSTALL_COMMAND` lives in shared `@/lib/install` (landing + device).
 
 ## Notable (stands out vs other projects)
 - **Only Go + Bubble Tea TUI** in the portfolio (alongside Cosy's Go/Rust as non-house
