@@ -1,3 +1,4 @@
+import { Check, X } from "lucide-react";
 import { Trans, useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
@@ -6,8 +7,10 @@ interface CheckItem {
   readonly danger: boolean;
 }
 
-// One square checklist card: a 3px accent (or danger) left border and a ✓ / ✗.
+// One square checklist card: a 3px accent (or danger) left border and a check
+// or cross icon.
 function ChecklistCard({ item }: { readonly item: CheckItem }) {
+  const Icon = item.danger ? X : Check;
   return (
     <div
       className={cn(
@@ -15,7 +18,12 @@ function ChecklistCard({ item }: { readonly item: CheckItem }) {
         item.danger ? "border-l-danger" : "border-l-accent",
       )}
     >
-      <span className={item.danger ? "text-danger" : "text-accent"}>{item.danger ? "✗" : "✓"}</span>
+      <Icon
+        size={16}
+        strokeWidth={3}
+        aria-hidden
+        className={cn("mt-0.5 flex-none", item.danger ? "text-danger" : "text-accent")}
+      />
       <span className="text-muted">{item.text}</span>
     </div>
   );

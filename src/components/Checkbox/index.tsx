@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { useId } from "react";
 import { cn } from "@/lib/utils";
 
@@ -34,11 +35,11 @@ export function Checkbox({
       <span
         aria-hidden
         className={cn(
-          "mt-0.5 flex size-4 flex-none items-center justify-center text-[11px] font-bold transition-colors",
+          "mt-0.5 flex size-4 flex-none items-center justify-center transition-colors",
           checked ? "bg-accent text-accent-ink" : "border border-dim text-transparent",
         )}
       >
-        ✓
+        <Check size={12} strokeWidth={3} />
       </span>
       <span className="text-[12.5px] leading-snug text-muted">{label}</span>
     </label>

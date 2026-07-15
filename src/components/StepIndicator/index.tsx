@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -11,8 +12,8 @@ interface StepIndicatorProps {
 const SEPARATOR = "──";
 
 // The onboarding progress row: "[1] account ── [2] recovery code ── [3] connect
-// device", with completed steps shown as a green "[✓]", the current step in
-// accent, and upcoming steps dimmed.
+// device", with completed steps shown as a green bracketed Check icon, the
+// current step in accent, and upcoming steps dimmed.
 export function StepIndicator({ current }: StepIndicatorProps) {
   const { t } = useTranslation();
   const steps = [t("steps.account"), t("steps.recoveryCode"), t("steps.connectDevice")];
@@ -27,12 +28,20 @@ export function StepIndicator({ current }: StepIndicatorProps) {
           <Fragment key={label}>
             <span
               className={cn(
+                "inline-flex items-center gap-1",
                 done && "text-success",
                 active && "text-accent",
                 !done && !active && "text-dim",
               )}
             >
-              {done ? "[✓]" : `[${stepNumber}]`} {label}
+              {done ? (
+                <span className="inline-flex items-center">
+                  [<Check size={11} strokeWidth={3} aria-hidden />]
+                </span>
+              ) : (
+                `[${stepNumber}]`
+              )}{" "}
+              {label}
             </span>
             {index < steps.length - 1 ? <span className="text-border">{SEPARATOR}</span> : null}
           </Fragment>

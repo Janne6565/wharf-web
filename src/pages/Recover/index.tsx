@@ -1,3 +1,4 @@
+import { Check } from "lucide-react";
 import { Trans, useTranslation } from "react-i18next";
 import { Alert } from "@/components/Alert";
 import { AuthShell } from "@/components/AuthShell";
@@ -112,7 +113,7 @@ function RecoveryStatus({ phase, isVerifying, verifyError }: RecoveryStatusProps
         className="mt-2 flex items-center gap-2 text-[13px] text-success"
         data-testid="recover-valid"
       >
-        <span>✓</span>
+        <Check size={14} strokeWidth={3} aria-hidden />
         {t("recover.valid")}
       </p>
     );

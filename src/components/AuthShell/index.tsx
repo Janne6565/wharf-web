@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { type OnboardingStep, StepIndicator } from "@/components/StepIndicator";
@@ -7,7 +8,8 @@ interface AuthShellProps {
   readonly children: ReactNode;
   // When set, renders the onboarding step indicator above the card.
   readonly step?: OnboardingStep;
-  // When set, renders a "← back" link pinned to the top-left of the screen.
+  // When set, renders a bordered back link (ArrowLeft icon + "back") pinned to
+  // the top-left of the screen.
   readonly backTo?: string;
 }
 
@@ -23,8 +25,9 @@ export function AuthShell({ children, step, backTo }: AuthShellProps) {
         <Link
           to={backTo}
           data-testid="auth-back"
-          className="absolute top-4 left-4 border border-border px-3 py-1.5 font-mono text-[13px] text-muted hover:border-accent hover:text-accent sm:top-6 sm:left-7"
+          className="absolute top-4 left-4 flex items-center gap-1.5 border border-border px-3 py-1.5 font-mono text-[13px] text-muted hover:border-accent hover:text-accent sm:top-6 sm:left-7"
         >
+          <ArrowLeft size={14} aria-hidden />
           {t("common.back")}
         </Link>
       ) : null}

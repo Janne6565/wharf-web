@@ -16,7 +16,7 @@ const enCommon = {
   },
   common: {
     comingSoon: "coming soon",
-    back: "← back",
+    back: "back",
   },
   cards: {
     signup: "sign up",
