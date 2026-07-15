@@ -25,7 +25,7 @@ export function ConnectionsPage() {
   } = useConnectionsLogic();
 
   return (
-    <AuthShell>
+    <AuthShell backTo="/">
       <Card label={t("cards.connections")} maxWidth={640}>
         <Header count={totalHosts} unlocked={vaultUnlocked} onLock={handleLock} />
         {vaultUnlocked || noVault ? (
@@ -146,6 +146,7 @@ function EmptyState() {
       <p className="text-[13px] text-muted">{t("connections.empty")}</p>
       <Link
         to="/device"
+        search={{ onboarding: false }}
         className="mt-3 inline-block text-[13px] text-accent hover:text-accent-strong"
       >
         {t("connections.pairTerminal")}
@@ -196,7 +197,11 @@ function Footer() {
   const { t } = useTranslation();
   return (
     <p className="mt-5 border-t border-border pt-3.5 text-center text-[12.5px] text-dim">
-      <Link to="/device" className="text-accent hover:text-accent-strong">
+      <Link
+        to="/device"
+        search={{ onboarding: false }}
+        className="text-accent hover:text-accent-strong"
+      >
         {t("connections.pairTerminal")}
       </Link>
     </p>

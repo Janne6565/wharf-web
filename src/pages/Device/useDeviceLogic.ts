@@ -1,7 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { issueDeviceCode } from "@/api/wharf";
 import { useAuthInformation } from "@/auth/useAuthInformation";
+
+const deviceRoute = getRouteApi("/device");
 
 const TICK_MS = 500;
 const RETRY_MS = 3000;
@@ -22,6 +25,7 @@ function formatRemaining(ms: number): string {
 // automatically re-issues a fresh code the moment the current one lapses.
 export function useDeviceLogic() {
   const { email } = useAuthInformation();
+  const { onboarding } = deviceRoute.useSearch();
   const [code, setCode] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
   const [remainingMs, setRemainingMs] = useState<number>(0);
@@ -73,6 +77,7 @@ export function useDeviceLogic() {
 
   return {
     email,
+    onboarding,
     formattedCode: code ? formatCode(code) : null,
     timeLabel: formatRemaining(remainingMs),
     hasCode: code !== null,

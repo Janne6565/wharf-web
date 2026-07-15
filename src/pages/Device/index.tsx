@@ -10,11 +10,13 @@ const INSTALL_HREF = "/#install";
 
 export function DevicePage() {
   const { t } = useTranslation();
-  const { email, formattedCode, timeLabel, hasCode, isIssuing, isError, isExpired } =
+  const { email, onboarding, formattedCode, timeLabel, hasCode, isIssuing, isError, isExpired } =
     useDeviceLogic();
 
   return (
-    <AuthShell step={3}>
+    // During onboarding this is the final "[3] connect device" step; a returning
+    // user pairing a device instead gets a plain back link to their connections.
+    <AuthShell step={onboarding ? 3 : undefined} backTo={onboarding ? undefined : "/connections"}>
       <Card label={t("cards.device")} maxWidth={480}>
         <div className="text-center">
           <h2 className="mb-2 text-[20px] font-bold text-text">{t("device.title")}</h2>
@@ -58,11 +60,15 @@ export function DevicePage() {
             </a>
           </div>
 
-          <div className="mt-5 text-[12.5px] text-dim">
-            <Link to="/connections" className="text-accent hover:text-accent-strong">
-              {t("device.viewConnections")}
-            </Link>
-          </div>
+          {/* In onboarding there is no back link, so offer a way on to the
+              (freshly created) connections; the hub context uses the back link. */}
+          {onboarding ? (
+            <div className="mt-5 text-[12.5px] text-dim">
+              <Link to="/connections" className="text-accent hover:text-accent-strong">
+                {t("device.viewConnections")}
+              </Link>
+            </div>
+          ) : null}
         </div>
       </Card>
     </AuthShell>

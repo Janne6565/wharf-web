@@ -23,6 +23,7 @@ const mocks = vi.hoisted(() => {
 
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => mocks.navigate,
+  Link: ({ children, ...props }: { children: React.ReactNode }) => <a {...props}>{children}</a>,
 }));
 vi.mock("@/auth/vaultUnlock", () => ({
   unlockVaultWithPassword: mocks.unlockVaultWithPassword,

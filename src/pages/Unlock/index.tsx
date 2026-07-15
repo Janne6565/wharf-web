@@ -13,7 +13,7 @@ export function UnlockPage() {
   const { errors } = formState;
 
   return (
-    <AuthShell>
+    <AuthShell backTo="/">
       <Card label={t("cards.unlock")} maxWidth={440}>
         <LogoChip />
         <h2 className="mt-4.5 mb-1.5 text-[20px] font-bold text-text">{t("unlock.title")}</h2>

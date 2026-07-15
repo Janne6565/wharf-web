@@ -37,7 +37,8 @@ export function useRecoveryCodeLogic() {
 
   const handleContinue = useCallback(() => {
     clearPendingRecoveryCode();
-    void navigate({ to: "/device" });
+    // Final onboarding step — flag it so /device shows the step indicator.
+    void navigate({ to: "/device", search: { onboarding: true } });
   }, [navigate]);
 
   return {
