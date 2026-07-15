@@ -1,12 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getHttpStatus } from "@/api/httpError";
 import { useAuthInformation } from "@/auth/useAuthInformation";
+import { getVaultSession } from "@/auth/vaultSession";
 import { unlockVaultWithPassword } from "@/auth/vaultUnlock";
 import { CryptoError } from "@/crypto";
 
@@ -35,11 +36,20 @@ export function useUnlockLogic() {
     mode: "onSubmit",
   });
 
+  // If the vault is already primed in memory (e.g. the user unlocked earlier
+  // this session and came back via the landing "profile" link), don't ask for
+  // the master password again — go straight to their connections.
+  useEffect(() => {
+    if (getVaultSession()) {
+      void navigate({ to: "/connections" });
+    }
+  }, [navigate]);
+
   const mutation = useMutation({
     mutationFn: (values: UnlockValues) => unlockVaultWithPassword(values.password),
     onSuccess: (primed) => {
       // No vault blob means onboarding was never finished — route there instead.
-      void navigate({ to: primed ? "/device" : "/set-password" });
+      void navigate({ to: primed ? "/connections" : "/set-password" });
     },
     onError: (error: unknown) => {
       if (error instanceof CryptoError && error.code === "wrong-secret") {

@@ -51,7 +51,7 @@ describe("UnlockPage", () => {
     expect(screen.getByTestId("unlock-submit")).toBeEnabled();
   });
 
-  it("unlocks the vault and navigates to /device", async () => {
+  it("unlocks the vault and navigates to /connections", async () => {
     mocks.unlockVaultWithPassword.mockResolvedValue(true);
     const user = userEvent.setup();
     renderWithProviders(<UnlockPage />, { user: USER });
@@ -62,7 +62,7 @@ describe("UnlockPage", () => {
     await waitFor(() =>
       expect(mocks.unlockVaultWithPassword).toHaveBeenCalledWith("master-password"),
     );
-    await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith({ to: "/device" }));
+    await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith({ to: "/connections" }));
   });
 
   it("surfaces an inline error for a wrong master password", async () => {

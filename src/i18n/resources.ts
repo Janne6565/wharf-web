@@ -170,6 +170,7 @@ const enCommon = {
       security: "security",
       install: "install",
       signIn: "sign in",
+      profile: "profile",
       getWharf: "get wharf",
     },
     hero: {

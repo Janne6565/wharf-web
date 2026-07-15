@@ -24,7 +24,7 @@ export function requireAuth(): void {
 export function requireAnonymous(): void {
   if (!isClient) return;
   if (getAccessToken()) {
-    throw redirect({ to: "/device" });
+    throw redirect({ to: "/connections" });
   }
 }
 

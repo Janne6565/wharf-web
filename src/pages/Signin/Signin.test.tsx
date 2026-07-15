@@ -75,7 +75,7 @@ describe("SigninPage", () => {
     expect(mocks.login).not.toHaveBeenCalled();
   });
 
-  it("derives the auth key, logs in, and navigates to /device on success", async () => {
+  it("derives the auth key, logs in, and navigates to /connections on success", async () => {
     mocks.login.mockResolvedValue({
       accessToken: "access",
       user: { id: "u1", email: "deniz@acme.io" },
@@ -95,7 +95,7 @@ describe("SigninPage", () => {
         tokenMode: "COOKIE",
       }),
     );
-    await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith({ to: "/device" }));
+    await waitFor(() => expect(mocks.navigate).toHaveBeenCalledWith({ to: "/connections" }));
     expect(mocks.establishSession).toHaveBeenCalledWith("access", {
       id: "u1",
       email: "deniz@acme.io",

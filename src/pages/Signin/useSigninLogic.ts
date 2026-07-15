@@ -64,7 +64,7 @@ export function useSigninLogic() {
       }
     },
     onSuccess: () => {
-      void navigate({ to: "/device" });
+      void navigate({ to: "/connections" });
     },
     onError: (error: unknown) => {
       const status = getHttpStatus(error);

@@ -19,4 +19,18 @@ describe("LandingPage", () => {
     expect(screen.getByRole("heading", { name: /your fleet/i })).toBeInTheDocument();
     expect(screen.getByTestId("landing-copy")).toHaveTextContent(/copy/i);
   });
+
+  it("shows a sign-in link (not a profile link) for anonymous visitors", () => {
+    renderWithProviders(<LandingPage />);
+    expect(screen.getByTestId("landing-signin")).toHaveAttribute("to", "/signin");
+    expect(screen.queryByTestId("landing-profile")).not.toBeInTheDocument();
+  });
+
+  it("shows a profile link into the unlock flow for a signed-in visitor", () => {
+    renderWithProviders(<LandingPage />, { user: { id: "u1", email: "deniz@acme.io" } });
+    const profile = screen.getByTestId("landing-profile");
+    expect(profile).toHaveTextContent(/profile/i);
+    expect(profile).toHaveAttribute("to", "/unlock");
+    expect(screen.queryByTestId("landing-signin")).not.toBeInTheDocument();
+  });
 });
