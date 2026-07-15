@@ -24,7 +24,7 @@ function TitleBar() {
 function TabRow() {
   return (
     <div className="flex items-baseline gap-2.5 px-4 pb-2">
-      <span className="bg-accent px-[7px] font-bold text-accent-ink">❯ wharf</span>
+      <span className="bg-accent px-[7px] font-bold text-accent-ink">❯_ wharf</span>
       <span className="bg-row-active px-2 text-accent">1:hosts</span>
       <span className="text-dim">2:projects</span>
       <span className="text-dim">3:keys</span>

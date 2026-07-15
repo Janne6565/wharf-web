@@ -1,9 +1,10 @@
 import { useTranslation } from "react-i18next";
 
-// The "❯ wharf" brand chip: mono, accent background, dark ink. The glyph is a
-// single U+276F chevron — the trailing underscore of the v2 design source is
-// dropped so nothing reads as a blinking cursor beside the logo.
-const LOGO_GLYPH = "❯";
+// The "❯_ wharf" brand chip: mono, accent background, dark ink. The glyph is
+// U+276F followed by a static underscore (the v2 design's "prompt" mark). The
+// underscore is plain text — it never blinks, so it reads as part of the logo
+// rather than a live cursor.
+const LOGO_GLYPH = "❯_";
 
 export function LogoChip() {
   const { t } = useTranslation();
