@@ -1,4 +1,4 @@
-<!-- AUTO-SYNCED from agents KB: projects/wharf.md @ 4acc86c.
+<!-- AUTO-SYNCED from agents KB: projects/wharf.md @ 043bdf9.
      Do NOT edit here — edit the source in ~/projects/agents and re-run scripts/sync-conventions.sh. -->
 
 # Wharf
@@ -160,10 +160,9 @@ invite by email, roles (owner/admin/member); private keys are never shared.
   dropped the decorative hero-headline and device terminal-hint cursors (and the
   `blink` keyframe); the TUI dropped the cursor next to the `⚓ wharf` logo but
   keeps the focus-gated cursor in every real input (forms, unlock, `/` search,
-  session prompt, device-code entry, invite email). The web brand chip also
-  dropped the trailing underscore of its `❯_` mark (design variant 1a "prompt")
-  to a bare `❯` in `LogoChip` + the landing terminal mockup, since the `_` read
-  as a cursor beside the logo (favicon left as-is).
+  session prompt, device-code entry, invite email). The web brand chip keeps its
+  `❯_` "prompt" mark (design variant 1a) — the underscore is static plain text,
+  never animated, so it reads as part of the logo, not a live cursor.
 
 ## Notable (stands out vs other projects)
 - **Only Go + Bubble Tea TUI** in the portfolio (alongside Cosy's Go/Rust as non-house
