@@ -8,11 +8,11 @@ export function LandingFooter() {
   const { t } = useTranslation();
   return (
     <footer className="border-t border-border-subtle">
-      <div className="mx-auto flex max-w-[1080px] flex-wrap items-center gap-6 px-8 py-14">
-        <div className="font-mono text-sm text-dim">
+      <div className="mx-auto flex max-w-[1080px] flex-wrap items-center gap-6 px-5 py-10 sm:px-8 sm:py-14">
+        <div className="font-mono text-[13px] text-dim sm:text-sm">
           <span className="text-accent">$</span> {INSTALL_COMMAND}
         </div>
-        <div className="ml-auto flex gap-5 text-[13px] text-dim">
+        <div className="ml-auto flex flex-wrap gap-5 text-[13px] text-dim">
           <a href="#security" className="text-dim hover:text-accent-strong">
             {t("landing.footer.security")}
           </a>

@@ -32,10 +32,10 @@ export function Security() {
   ];
   return (
     <section id="security" className="border-t border-border-subtle bg-card">
-      <div className="mx-auto flex max-w-[1080px] flex-wrap items-start gap-14 px-8 py-[72px]">
-        <div className="min-w-[360px] flex-1">
+      <div className="mx-auto flex max-w-[1080px] flex-wrap items-start gap-10 px-5 py-14 sm:gap-14 sm:px-8 sm:py-[72px]">
+        <div className="min-w-[min(100%,360px)] flex-1">
           <div className="font-mono text-sm text-accent">{t("landing.security.kicker")}</div>
-          <h2 className="mt-3 font-mono text-[30px] leading-[1.25] text-text [text-wrap:pretty]">
+          <h2 className="mt-3 font-mono text-2xl leading-[1.25] text-text [text-wrap:pretty] sm:text-[30px]">
             {t("landing.security.headingLine1")}
             <br />
             {t("landing.security.headingLine2")}
@@ -50,7 +50,7 @@ export function Security() {
             />
           </p>
         </div>
-        <div className="flex min-w-[360px] flex-1 flex-col gap-3 font-mono text-[13.5px]">
+        <div className="flex min-w-[min(100%,360px)] flex-1 flex-col gap-3 font-mono text-[13.5px]">
           {items.map((item) => (
             <ChecklistCard key={item.text} item={item} />
           ))}

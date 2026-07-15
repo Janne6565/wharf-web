@@ -10,10 +10,12 @@ interface AuthShellProps {
   readonly topGap?: "onboarding" | "signin" | "recover";
 }
 
+// Desktop offsets come from the design; on phones the card hugs the top so the
+// form stays reachable above the keyboard.
 const TOP_GAP: Record<NonNullable<AuthShellProps["topGap"]>, string> = {
-  onboarding: "mt-8",
-  signin: "mt-[90px]",
-  recover: "mt-[60px]",
+  onboarding: "mt-6 sm:mt-8",
+  signin: "mt-10 sm:mt-[90px]",
+  recover: "mt-8 sm:mt-[60px]",
 };
 
 // The page frame shared by every auth screen: full-height dark background, all

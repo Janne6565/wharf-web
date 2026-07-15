@@ -40,8 +40,9 @@ function HostRow({ host }: { readonly host: TerminalHost }) {
       <span className={cn("min-w-[14ch]", host.selected ? "text-accent" : "text-subtle")}>
         {host.name}
       </span>
-      <span className="flex-1 text-dim">{host.target}</span>
-      <span className="text-blue">{host.tags}</span>
+      <span className="flex-1 truncate text-dim">{host.target}</span>
+      {/* The tags column is the first thing to give way on narrow phones. */}
+      <span className="hidden text-blue sm:inline">{host.tags}</span>
       <span className={host.online ? "text-success" : "text-dim"}>● {host.status}</span>
     </div>
   );
@@ -49,7 +50,7 @@ function HostRow({ host }: { readonly host: TerminalHost }) {
 
 function KeyHints() {
   return (
-    <div className="mt-2 flex gap-3.5 border-t border-border-subtle px-4 pt-1.5 text-dim">
+    <div className="mt-2 flex flex-wrap gap-x-3.5 gap-y-0.5 border-t border-border-subtle px-4 pt-1.5 text-dim">
       {TERMINAL_KEYS.map((hint) => (
         <span key={hint.key}>
           <span className="text-accent">{hint.key}</span> {hint.label}
@@ -66,7 +67,7 @@ export function TerminalMockup() {
   return (
     <div className="overflow-hidden border border-border bg-card shadow-[0_24px_60px_rgba(0,0,0,0.5)]">
       <TitleBar />
-      <div className="pt-3.5 pb-2.5 font-mono text-[12.5px] leading-[1.7]">
+      <div className="pt-3.5 pb-2.5 font-mono text-[11px] leading-[1.7] sm:text-[12.5px]">
         <TabRow />
         <div className="border-t border-border-subtle pt-2 pb-0.5">
           {TERMINAL_HOSTS.map((host) => (

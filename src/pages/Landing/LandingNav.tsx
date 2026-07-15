@@ -7,9 +7,11 @@ import { LogoChip } from "@/components/LogoChip";
 export function LandingNav() {
   const { t } = useTranslation();
   return (
-    <nav className="mx-auto flex max-w-[1080px] items-center gap-8 px-8 py-[22px]">
+    <nav className="mx-auto flex max-w-[1080px] items-center gap-5 px-5 py-[22px] sm:gap-8 sm:px-8">
       <LogoChip />
-      <div className="flex gap-6 text-sm text-muted">
+      {/* In-page anchors are redundant on a phone-length page — hide them and
+          keep the brand + actions row compact. */}
+      <div className="hidden gap-6 text-sm text-muted sm:flex">
         <a href="#features" className="text-muted hover:text-accent-strong">
           {t("landing.nav.features")}
         </a>

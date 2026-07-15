@@ -21,7 +21,7 @@ export function Features() {
   const { t } = useTranslation();
   return (
     <section id="features" className="border-t border-border-subtle">
-      <div className="mx-auto grid max-w-[1080px] gap-10 px-8 py-16 [grid-template-columns:repeat(auto-fit,minmax(280px,1fr))]">
+      <div className="mx-auto grid max-w-[1080px] gap-10 px-5 py-12 [grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))] sm:px-8 sm:py-16">
         <Feature
           kicker={t("landing.features.vault.kicker")}
           title={t("landing.features.vault.title")}

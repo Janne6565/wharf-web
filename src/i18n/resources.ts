@@ -16,6 +16,7 @@ const enCommon = {
   },
   common: {
     comingSoon: "coming soon",
+    back: "← back",
   },
   cards: {
     signup: "sign up",
@@ -23,6 +24,7 @@ const enCommon = {
     device: "pair terminal",
     signin: "sign in",
     recover: "recover vault",
+    connections: "connections",
     setPassword: "set master password",
     unlock: "sign in",
     oauth: "connecting",
@@ -108,6 +110,22 @@ const enCommon = {
     promptPaste: "› paste the 8-character code…",
     noTerminal: "no terminal yet?",
     installWharf: "install wharf first",
+    viewConnections: "view your connections",
+  },
+  connections: {
+    title: "Your connections",
+    count_one: "{{count}} host",
+    count_other: "{{count}} hosts",
+    filter: "filter",
+    lock: "lock vault",
+    unlock: "unlock vault",
+    lockedHint:
+      "your vault is locked on this device. enter your master password to decrypt it locally — it never leaves the browser.",
+    empty: "no connections stored yet — add hosts from the wharf terminal app.",
+    noMatches: "no hosts match your filter",
+    pairTerminal: "pair a terminal",
+    authKey: "key",
+    authPassword: "password",
   },
   signin: {
     title: "Welcome back",
@@ -143,6 +161,7 @@ const enCommon = {
     recoveryInvalid: "that recovery code doesn't match this account",
     recoveryMalformed: "check the recovery code — it looks incomplete",
     vaultDecrypt: "couldn't decrypt the vault with that recovery code",
+    vaultUnlock: "couldn't unlock the vault with that password",
     generic: "something went wrong — please try again",
   },
   landing: {

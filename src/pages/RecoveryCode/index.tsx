@@ -33,7 +33,7 @@ export function RecoveryCodePage() {
 
         <div
           data-testid="recovery-code"
-          className="grid grid-cols-4 gap-x-4 gap-y-3 border border-dashed border-warn-border bg-input p-[22px] text-center text-[15.5px] tracking-[0.08em] text-accent"
+          className="grid grid-cols-2 gap-x-4 gap-y-3 border border-dashed border-warn-border bg-input p-[22px] text-center text-[15.5px] tracking-[0.08em] text-accent sm:grid-cols-4"
         >
           {groups.map((group, index) => (
             // Fixed-length, never-reordered sequence; groups can repeat, so the
@@ -43,7 +43,7 @@ export function RecoveryCodePage() {
           ))}
         </div>
 
-        <div className="mt-4 flex gap-3">
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
           <Button
             variant="secondary"
             className="flex-1"

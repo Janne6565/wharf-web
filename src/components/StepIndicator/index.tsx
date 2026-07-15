@@ -18,7 +18,7 @@ export function StepIndicator({ current }: StepIndicatorProps) {
   const steps = [t("steps.account"), t("steps.recoveryCode"), t("steps.connectDevice")];
 
   return (
-    <div className="mt-11 flex items-center gap-3.5 font-mono text-[12.5px]">
+    <div className="mt-8 flex flex-wrap items-center justify-center gap-x-3.5 gap-y-1 px-4 font-mono text-[12.5px] sm:mt-11">
       {steps.map((label, index) => {
         const stepNumber = index + 1;
         const done = stepNumber < current;

@@ -47,6 +47,11 @@ describe("SigninPage", () => {
     expect(screen.getByRole("button", { name: /unlock vault/i })).toBeInTheDocument();
   });
 
+  it("renders a back link to the landing page", () => {
+    renderWithProviders(<SigninPage />);
+    expect(screen.getByTestId("auth-back")).toHaveAttribute("to", "/");
+  });
+
   it("shows validation errors on empty submit and does not call the API", async () => {
     const user = userEvent.setup();
     renderWithProviders(<SigninPage />);

@@ -16,7 +16,7 @@ export function SigninPage() {
 
   return (
     <AuthShell topGap="signin">
-      <Card label={t("cards.signin")} maxWidth={440}>
+      <Card label={t("cards.signin")} maxWidth={440} backTo="/">
         <LogoChip />
         <h2 className="mt-4.5 mb-4 text-[20px] font-bold text-text">{t("signin.title")}</h2>
         <OAuthButtons />

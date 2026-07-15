@@ -20,7 +20,7 @@ export function SignupPage() {
 
   return (
     <AuthShell step={1}>
-      <Card label={t("cards.signup")} maxWidth={460}>
+      <Card label={t("cards.signup")} maxWidth={460} backTo="/">
         <LogoChip />
         <h2 className="mt-4.5 mb-4 text-[20px] font-bold text-text">{t("signup.title")}</h2>
         <OAuthButtons />
