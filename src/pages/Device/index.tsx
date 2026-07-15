@@ -117,18 +117,19 @@ function InstallModal({ open, onClose, command, copied, onCopy }: InstallModalPr
       open={open}
       onClose={onClose}
       label={t("cards.install")}
+      maxWidth={560}
       data-testid="device-install-modal"
     >
       <h2 className="mb-1.5 text-[18px] font-bold text-text">{t("device.installTitle")}</h2>
       <p className="mb-5 text-[13px] leading-relaxed text-muted">{t("device.installBody")}</p>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border border-border bg-code px-[18px] py-3 font-mono text-[13px]">
+      <div className="flex items-center gap-x-3 border border-border bg-code px-[18px] py-3 font-mono text-[13px]">
         <span className="text-dim">$</span>
-        <span className="flex-1 break-all text-text">{command}</span>
+        <span className="flex-1 overflow-x-auto whitespace-nowrap text-text">{command}</span>
         <button
           type="button"
           onClick={onCopy}
           data-testid="device-install-copy"
-          className="border border-border px-2 py-0.5 text-xs text-accent hover:text-accent-strong"
+          className="min-w-[72px] flex-none border border-border px-2 py-0.5 text-center text-xs text-accent hover:text-accent-strong"
         >
           [ {copied ? t("common.copied") : t("common.copy")} ]
         </button>
