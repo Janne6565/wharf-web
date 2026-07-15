@@ -3,6 +3,9 @@ import { screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/utils";
 
+vi.mock("@tanstack/react-router", () => ({
+  Link: ({ children, ...props }: { children: React.ReactNode }) => <a {...props}>{children}</a>,
+}));
 // Issue a device code from a stubbed backend; the page must render it as
 // XXXX-XXXX and show the signed-in email.
 vi.mock("@/api/wharf", () => ({

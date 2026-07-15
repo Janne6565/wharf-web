@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Trans, useTranslation } from "react-i18next";
 import { AuthShell } from "@/components/AuthShell";
 import { Card } from "@/components/Card";
@@ -27,7 +28,7 @@ export function DevicePage() {
 
           <div
             data-testid="device-code"
-            className="mx-auto mt-6 border border-accent bg-input p-5 text-[34px] font-bold tracking-[0.25em] text-accent"
+            className="mx-auto mt-6 border border-accent bg-input p-4 text-[26px] font-bold tracking-[0.2em] text-accent sm:p-5 sm:text-[34px] sm:tracking-[0.25em]"
           >
             {formattedCode ?? "····-····"}
           </div>
@@ -55,6 +56,12 @@ export function DevicePage() {
             <a className="text-accent hover:text-accent-strong" href={INSTALL_HREF}>
               {t("device.installWharf")}
             </a>
+          </div>
+
+          <div className="mt-5 text-[12.5px] text-dim">
+            <Link to="/connections" className="text-accent hover:text-accent-strong">
+              {t("device.viewConnections")}
+            </Link>
           </div>
         </div>
       </Card>
