@@ -9,17 +9,9 @@ import { getHttpStatus } from "@/api/httpError";
 import { registerAccount } from "@/api/wharf";
 import { setPendingRecoveryCode } from "@/auth/recoveryHandoff";
 import { establishSession } from "@/auth/session";
+import { buildOnboardingVault } from "@/auth/vaultOnboarding";
 import { setVaultSession } from "@/auth/vaultSession";
-import {
-  createVault,
-  deriveAuthKey,
-  deriveMasterKey,
-  deriveRecoveryAuthKey,
-  initialVaultPayload,
-  normalizeEmail,
-  recoverySecretFromCode,
-  toBase64,
-} from "@/crypto";
+import { normalizeEmail, toBase64 } from "@/crypto";
 import { isValidEmail, PASSWORD_MIN_LENGTH } from "@/lib/validators";
 
 interface SignupValues {
@@ -69,15 +61,10 @@ export function useSignupLogic() {
   const mutation = useMutation({
     mutationFn: async (values: SignupValues) => {
       const email = normalizeEmail(values.email);
-      const masterKey = await deriveMasterKey(values.password, email);
-      const authKey = await deriveAuthKey(masterKey);
-
-      const { blob, recoveryCode, vault } = await createVault(
+      const { authKey, recoveryAuthKey, blob, recoveryCode, vault } = await buildOnboardingVault(
+        email,
         values.password,
-        initialVaultPayload(),
       );
-      const recoverySecret = recoverySecretFromCode(recoveryCode);
-      const recoveryAuthKey = await deriveRecoveryAuthKey(recoverySecret);
 
       const response = await registerAccount({
         email,

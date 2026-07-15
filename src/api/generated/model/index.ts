@@ -9,11 +9,14 @@ keys. It never sees passwords or plaintext vault contents.
  */
 
 export * from './accessTokenResponse';
+export * from './accountSetupRequest';
 export * from './authResponse';
 export * from './deviceCodeExchangeRequest';
 export * from './deviceCodeResponse';
 export * from './loginRequest';
 export * from './loginRequestTokenMode';
+export * from './oAuthProvidersResponse';
+export * from './oauthCallbackParams';
 export * from './recoveryResetRequest';
 export * from './recoveryResetRequestTokenMode';
 export * from './recoveryVerifyRequest';
@@ -26,5 +29,6 @@ export * from './sessionResponse';
 export * from './tokenPair';
 export * from './updateVaultRequest';
 export * from './user';
+export * from './userProfile';
 export * from './vaultResponse';
 export * from './vaultUpdateResponse';

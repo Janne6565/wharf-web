@@ -23,11 +23,44 @@ const enCommon = {
     device: "pair terminal",
     signin: "sign in",
     recover: "recover vault",
+    setPassword: "set master password",
+    unlock: "sign in",
+    oauth: "connecting",
   },
   oauth: {
     google: "google",
     github: "github",
     orWithEmail: "or with email",
+    continueWith: "continue with {{provider}}",
+  },
+  oauthComplete: {
+    loading: "signing you in…",
+    errorTitle: "Sign-in failed",
+    error: {
+      provider_disabled: "that sign-in provider isn't available right now.",
+      invalid_state: "the sign-in link expired or was already used — please try again.",
+      email_not_verified:
+        "your provider account's email isn't verified. verify it with the provider, then try again.",
+      provider_error: "the provider rejected the sign-in — please try again.",
+      server_error: "something went wrong completing sign-in — please try again.",
+      generic: "we couldn't complete sign-in — please try again.",
+    },
+    backToSignin: "back to sign in",
+    backToSignup: "create an account",
+  },
+  setPassword: {
+    title: "Set your master password",
+    subtitle: "this encrypts your vault on this device. choose it now to finish setting up.",
+    warning:
+      "this password encrypts your vault on your device. we never see it and <1>cannot reset it</1> — only your recovery code can.",
+    understand: "I understand that wharf cannot recover my password",
+    submit: "continue",
+  },
+  unlock: {
+    title: "Unlock your vault",
+    signedInAs: "signed in as <1>{{email}}</1>",
+    submit: "unlock vault",
+    wrongPassword: "that master password can't decrypt your vault",
   },
   fields: {
     email: "email",

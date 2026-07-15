@@ -9,13 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnlockRouteImport } from './routes/unlock'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SigninRouteImport } from './routes/signin'
+import { Route as SetPasswordRouteImport } from './routes/set-password'
 import { Route as RecoverRouteImport } from './routes/recover'
 import { Route as DeviceRouteImport } from './routes/device'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WelcomeRecoveryCodeRouteImport } from './routes/welcome.recovery-code'
+import { Route as OauthCompleteRouteImport } from './routes/oauth.complete'
 
+const UnlockRoute = UnlockRouteImport.update({
+  id: '/unlock',
+  path: '/unlock',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -24,6 +32,11 @@ const SignupRoute = SignupRouteImport.update({
 const SigninRoute = SigninRouteImport.update({
   id: '/signin',
   path: '/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SetPasswordRoute = SetPasswordRouteImport.update({
+  id: '/set-password',
+  path: '/set-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RecoverRoute = RecoverRouteImport.update({
@@ -46,21 +59,32 @@ const WelcomeRecoveryCodeRoute = WelcomeRecoveryCodeRouteImport.update({
   path: '/welcome/recovery-code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OauthCompleteRoute = OauthCompleteRouteImport.update({
+  id: '/oauth/complete',
+  path: '/oauth/complete',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/device': typeof DeviceRoute
   '/recover': typeof RecoverRoute
+  '/set-password': typeof SetPasswordRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/unlock': typeof UnlockRoute
+  '/oauth/complete': typeof OauthCompleteRoute
   '/welcome/recovery-code': typeof WelcomeRecoveryCodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/device': typeof DeviceRoute
   '/recover': typeof RecoverRoute
+  '/set-password': typeof SetPasswordRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/unlock': typeof UnlockRoute
+  '/oauth/complete': typeof OauthCompleteRoute
   '/welcome/recovery-code': typeof WelcomeRecoveryCodeRoute
 }
 export interface FileRoutesById {
@@ -68,8 +92,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/device': typeof DeviceRoute
   '/recover': typeof RecoverRoute
+  '/set-password': typeof SetPasswordRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/unlock': typeof UnlockRoute
+  '/oauth/complete': typeof OauthCompleteRoute
   '/welcome/recovery-code': typeof WelcomeRecoveryCodeRoute
 }
 export interface FileRouteTypes {
@@ -78,24 +105,33 @@ export interface FileRouteTypes {
     | '/'
     | '/device'
     | '/recover'
+    | '/set-password'
     | '/signin'
     | '/signup'
+    | '/unlock'
+    | '/oauth/complete'
     | '/welcome/recovery-code'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/device'
     | '/recover'
+    | '/set-password'
     | '/signin'
     | '/signup'
+    | '/unlock'
+    | '/oauth/complete'
     | '/welcome/recovery-code'
   id:
     | '__root__'
     | '/'
     | '/device'
     | '/recover'
+    | '/set-password'
     | '/signin'
     | '/signup'
+    | '/unlock'
+    | '/oauth/complete'
     | '/welcome/recovery-code'
   fileRoutesById: FileRoutesById
 }
@@ -103,13 +139,23 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DeviceRoute: typeof DeviceRoute
   RecoverRoute: typeof RecoverRoute
+  SetPasswordRoute: typeof SetPasswordRoute
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
+  UnlockRoute: typeof UnlockRoute
+  OauthCompleteRoute: typeof OauthCompleteRoute
   WelcomeRecoveryCodeRoute: typeof WelcomeRecoveryCodeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/unlock': {
+      id: '/unlock'
+      path: '/unlock'
+      fullPath: '/unlock'
+      preLoaderRoute: typeof UnlockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -122,6 +168,13 @@ declare module '@tanstack/react-router' {
       path: '/signin'
       fullPath: '/signin'
       preLoaderRoute: typeof SigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/set-password': {
+      id: '/set-password'
+      path: '/set-password'
+      fullPath: '/set-password'
+      preLoaderRoute: typeof SetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/recover': {
@@ -152,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WelcomeRecoveryCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/oauth/complete': {
+      id: '/oauth/complete'
+      path: '/oauth/complete'
+      fullPath: '/oauth/complete'
+      preLoaderRoute: typeof OauthCompleteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -159,19 +219,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DeviceRoute: DeviceRoute,
   RecoverRoute: RecoverRoute,
+  SetPasswordRoute: SetPasswordRoute,
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
+  UnlockRoute: UnlockRoute,
+  OauthCompleteRoute: OauthCompleteRoute,
   WelcomeRecoveryCodeRoute: WelcomeRecoveryCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

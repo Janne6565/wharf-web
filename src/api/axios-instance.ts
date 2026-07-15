@@ -7,7 +7,10 @@
 import Axios, { type AxiosError, type AxiosRequestConfig } from "axios";
 import { clearAccessToken, getAccessToken, setAccessToken } from "@/auth/tokenStore";
 
-const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+// Base origin of the backend API. Empty in dev (the Vite proxy forwards /api to
+// :8080) or when same-origin in prod; set via VITE_API_URL for a cross-origin
+// API. Exported so full-page OAuth redirects can build an absolute authorize URL.
+export const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const REFRESH_PATH = "/api/v1/auth/refresh";
 // Auth endpoints must never trigger the refresh-and-retry loop: a 401 from them
 // is a genuine credential failure, not an expired access token.

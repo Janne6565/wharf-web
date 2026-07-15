@@ -6,16 +6,10 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getHttpStatus } from "@/api/httpError";
-import { getVault, login } from "@/api/wharf";
+import { login } from "@/api/wharf";
 import { establishSession } from "@/auth/session";
-import { setVaultSession } from "@/auth/vaultSession";
-import {
-  deriveAuthKey,
-  deriveMasterKey,
-  fromBase64,
-  normalizeEmail,
-  unlockWithPassword,
-} from "@/crypto";
+import { unlockVaultWithPassword } from "@/auth/vaultUnlock";
+import { deriveAuthKey, deriveMasterKey, normalizeEmail } from "@/crypto";
 import { isValidEmail } from "@/lib/validators";
 
 interface SigninValues {
@@ -64,14 +58,7 @@ export function useSigninLogic() {
       // vault locally to prime it in memory. A failure here doesn't invalidate
       // the (already established) session.
       try {
-        const vaultResponse = await getVault();
-        if (vaultResponse.vault) {
-          const unlocked = await unlockWithPassword(
-            fromBase64(vaultResponse.vault),
-            values.password,
-          );
-          setVaultSession(unlocked);
-        }
+        await unlockVaultWithPassword(values.password);
       } catch {
         // Ignore — session is valid regardless of vault priming.
       }

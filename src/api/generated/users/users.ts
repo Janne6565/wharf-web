@@ -8,7 +8,7 @@ keys. It never sees passwords or plaintext vault contents.
  * OpenAPI spec version: v1
  */
 import type {
-  User
+  UserProfile
 } from '.././model';
 
 import { customInstance } from '../../axios-instance';
@@ -19,12 +19,13 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
   export const getUsers = () => {
 /**
+ * Includes hasPassword / hasRecovery / hasVault flags the frontend uses to route the account.
  * @summary Get the authenticated account's profile
  */
 const getCurrentUser = (
     
- options?: SecondParameter<typeof customInstance<User>>,) => {
-      return customInstance<User>(
+ options?: SecondParameter<typeof customInstance<UserProfile>>,) => {
+      return customInstance<UserProfile>(
       {url: `/api/v1/users/me`, method: 'GET'
     },
       options);

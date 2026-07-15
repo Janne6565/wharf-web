@@ -9,6 +9,7 @@ keys. It never sees passwords or plaintext vault contents.
  */
 import type {
   AccessTokenResponse,
+  AccountSetupRequest,
   AuthResponse,
   LoginRequest,
   RecoveryResetRequest,
@@ -28,6 +29,20 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
   export const getAuthentication = () => {
 /**
+ * Atomically sets the recovery key, the initial encrypted vault and (optionally) a password auth key — all-or-nothing, so an account can never end up with a recovery key but no vault. Strictly first-time: rejected with 409 if a recovery key or vault already exists, or if authKey is supplied while a password is already set. Rotation stays exclusive to recover/reset.
+ * @summary One-time onboarding for an account created via OAuth
+ */
+const setupAccount = (
+    accountSetupRequest: BodyType<AccountSetupRequest>,
+ options?: SecondParameter<typeof customInstance<void>>,) => {
+      return customInstance<void>(
+      {url: `/api/v1/auth/setup`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: accountSetupRequest
+    },
+      options);
+    }
+  /**
  * In COOKIE mode the refresh token is set as an httpOnly cookie; in DIRECT mode it is returned in the body.
  * @summary Create a new zero-knowledge account
  */
@@ -96,7 +111,8 @@ const login = (
     },
       options);
     }
-  return {register,refresh,recoverVerify,recoverReset,login}};
+  return {setupAccount,register,refresh,recoverVerify,recoverReset,login}};
+export type SetupAccountResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getAuthentication>['setupAccount']>>>
 export type RegisterResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getAuthentication>['register']>>>
 export type RefreshResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getAuthentication>['refresh']>>>
 export type RecoverVerifyResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getAuthentication>['recoverVerify']>>>

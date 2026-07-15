@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   login: vi.fn(),
   getVault: vi.fn(),
+  listOAuthProviders: vi.fn().mockResolvedValue({ providers: [] }),
   establishSession: vi.fn(),
   setVaultSession: vi.fn(),
 }));
@@ -16,7 +17,11 @@ vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => mocks.navigate,
   Link: ({ children, ...props }: { children: React.ReactNode }) => <a {...props}>{children}</a>,
 }));
-vi.mock("@/api/wharf", () => ({ login: mocks.login, getVault: mocks.getVault }));
+vi.mock("@/api/wharf", () => ({
+  login: mocks.login,
+  getVault: mocks.getVault,
+  listOAuthProviders: mocks.listOAuthProviders,
+}));
 vi.mock("@/auth/session", () => ({ establishSession: mocks.establishSession }));
 vi.mock("@/auth/vaultSession", () => ({ setVaultSession: mocks.setVaultSession }));
 // Stub the heavy crypto so the UI-wiring test stays fast and deterministic; the

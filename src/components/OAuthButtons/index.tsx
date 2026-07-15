@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
+import { type OAuthProvider, useOAuthButtonsLogic } from "./useOAuthButtonsLogic";
 
 // Google "G" mark, sized to the design's 17px accent glyph.
 function GoogleIcon() {
@@ -31,19 +33,27 @@ interface OAuthButtonProps {
   readonly icon: ReactNode;
   readonly label: string;
   readonly title: string;
+  readonly enabled: boolean;
+  readonly onConnect: () => void;
+  readonly testId: string;
 }
 
-// A single provider button. Social login has no backend yet, so it renders
-// disabled with an honest "coming soon" title/aria-label rather than faking a
-// login.
-function OAuthButton({ icon, label, title }: OAuthButtonProps) {
+// A single provider button. Enabled when the backend has the provider
+// configured (click starts the full-page OAuth redirect); otherwise it renders
+// disabled with an honest "coming soon" title rather than faking a login.
+function OAuthButton({ icon, label, title, enabled, onConnect, testId }: OAuthButtonProps) {
   return (
     <button
       type="button"
-      disabled
+      disabled={!enabled}
       title={title}
       aria-label={`${label} — ${title}`}
-      className="flex h-11 flex-1 cursor-not-allowed items-center justify-center gap-2.5 border border-border bg-bg text-[13px] text-subtle"
+      data-testid={testId}
+      onClick={enabled ? onConnect : undefined}
+      className={cn(
+        "flex h-11 flex-1 items-center justify-center gap-2.5 border border-border bg-bg text-[13px] transition-colors",
+        enabled ? "cursor-pointer text-text hover:border-accent" : "cursor-not-allowed text-subtle",
+      )}
     >
       {icon}
       {label}
@@ -51,16 +61,36 @@ function OAuthButton({ icon, label, title }: OAuthButtonProps) {
   );
 }
 
+const PROVIDER_ICON: Record<OAuthProvider, ReactNode> = {
+  google: <GoogleIcon />,
+  github: <GithubIcon />,
+};
+
 // The two provider buttons (google / github) followed by an "── or with email
 // ──" divider, shared by sign-up and sign-in.
 export function OAuthButtons() {
   const { t } = useTranslation();
+  const { isEnabled, connect } = useOAuthButtonsLogic();
   const comingSoon = t("common.comingSoon");
+
   return (
     <>
       <div className="mt-4 mb-2.5 flex gap-3">
-        <OAuthButton icon={<GoogleIcon />} label={t("oauth.google")} title={comingSoon} />
-        <OAuthButton icon={<GithubIcon />} label={t("oauth.github")} title={comingSoon} />
+        {(["google", "github"] as const).map((provider) => {
+          const enabled = isEnabled(provider);
+          const label = t(`oauth.${provider}`);
+          return (
+            <OAuthButton
+              key={provider}
+              icon={PROVIDER_ICON[provider]}
+              label={label}
+              enabled={enabled}
+              title={enabled ? t("oauth.continueWith", { provider: label }) : comingSoon}
+              onConnect={() => connect(provider)}
+              testId={`oauth-${provider}`}
+            />
+          );
+        })}
       </div>
       <div className="mb-5 flex items-center gap-3">
         <span className="h-px flex-1 bg-border" />
