@@ -1,28 +1,36 @@
 // Route access guards for TanStack Router `beforeLoad`. Per REACT.md/AUTH.md,
-// access control lives here — never inside page components. They run after the
-// root route's beforeLoad has awaited the silent-refresh bootstrap, so the
-// access token reflects the resolved session.
+// access control lives here — never inside page components.
 //
-// On the server the token is always absent (it is client-only), so guards defer
-// entirely to the client pass rather than issuing a misleading redirect.
+// Each guard awaits the silent-refresh bootstrap itself before reading the
+// token. The root beforeLoad also runs it, but its result is dehydrated from
+// SSR and does NOT re-run on initial client hydration — so on a hard reload of
+// an ssr:false guarded route (e.g. /unlock) the token would still be absent at
+// guard time and bounce an authenticated user to /signin. Awaiting the
+// (memoized) bootstrap here makes the guard see the resolved session.
+//
+// On the server the token is always absent (it is client-only) and the refresh
+// is a no-op, so guards defer entirely to the client pass.
 
 import { redirect } from "@tanstack/react-router";
 import { getCurrentUser } from "@/api/wharf";
 import { queryClient } from "@/queryClient";
 import { ME_QUERY_KEY } from "./profile";
+import { ensureSessionBootstrapped } from "./session";
 import { getAccessToken } from "./tokenStore";
 
 const isClient = typeof window !== "undefined";
 
-export function requireAuth(): void {
+export async function requireAuth(): Promise<void> {
   if (!isClient) return;
+  await ensureSessionBootstrapped();
   if (!getAccessToken()) {
     throw redirect({ to: "/signin" });
   }
 }
 
-export function requireAnonymous(): void {
+export async function requireAnonymous(): Promise<void> {
   if (!isClient) return;
+  await ensureSessionBootstrapped();
   if (getAccessToken()) {
     throw redirect({ to: "/connections" });
   }
@@ -36,7 +44,7 @@ export function requireAnonymous(): void {
 // themselves don't hard-depend on the flags).
 export async function requireVault(): Promise<void> {
   if (!isClient) return;
-  requireAuth();
+  await requireAuth();
   let hasVault: boolean | undefined;
   try {
     const me = await queryClient.ensureQueryData({

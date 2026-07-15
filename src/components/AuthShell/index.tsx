@@ -23,7 +23,7 @@ export function AuthShell({ children, step, backTo }: AuthShellProps) {
         <Link
           to={backTo}
           data-testid="auth-back"
-          className="absolute top-4 left-4 text-[13px] text-dim hover:text-accent sm:top-6 sm:left-7"
+          className="absolute top-4 left-4 border border-border px-3 py-1.5 font-mono text-[13px] text-muted hover:border-accent hover:text-accent sm:top-6 sm:left-7"
         >
           {t("common.back")}
         </Link>
