@@ -1,4 +1,4 @@
-<!-- AUTO-SYNCED from agents KB: projects/wharf.md @ a789eda.
+<!-- AUTO-SYNCED from agents KB: projects/wharf.md @ 13c2fec.
      Do NOT edit here — edit the source in ~/projects/agents and re-run scripts/sync-conventions.sh. -->
 
 # Wharf
@@ -30,9 +30,10 @@ only ever holds ciphertext.
   secret on both product repos; see concepts/CICD.md), bump retries on concurrent
   pushes. Loop verified end-to-end 2026-07-15.
 - **Design source:** Claude Design project `33a77f79-40ef-4774-8324-6ece35835b06`
-  (files: Wharf TUI v2, Wharf Web Auth, Wharf Landing, Wharf Mobile). Import via the
-  `claude_design` MCP (`DesignSync` tool). Removed by decision: shared/multiplayer SSH
-  sessions, session chat, member presence.
+  (files: Wharf TUI v2, Wharf Web Auth **v2** (authoritative; v1 superseded),
+  Wharf Landing, Wharf Favicon (variant 1a "prompt" selected), Wharf Mobile). Import
+  via the `claude_design` MCP (`DesignSync` tool). Removed by decision:
+  shared/multiplayer SSH sessions, session chat, member presence.
 
 ## Idea
 Manage your SSH fleet — hosts (searchable/filterable by tags, projects, status), keys/
@@ -94,12 +95,16 @@ invite by email, roles (owner/admin/member); private keys are never shared.
   enumeration, XFF only trusted behind proxy, Caffeine-backed rate buckets,
   fail-closed prod secret guard. 25 tests green; `openapi.json` committed at repo
   root (Orval source). Projects/team endpoints + deployment still open.
-- **wharf-web:** **web auth flow done** (2026-07-14): the 5 design screens (signup →
-  recovery code → device pairing / signin → recover) pixel-faithful to
-  `Wharf Web Auth.dc.html`. Client-side WHARFV vault create/unlock/re-encrypt with
-  byte-compat proven against the Go vault via committed fixture; 17-check E2E suite
-  against the live backend (opt-in `E2E=1`). Landing page still open (the reason
-  for TanStack Start). Design sources copied to `~/projects/wharf/design/`.
+- **wharf-web:** **web auth flow + landing done** (2026-07-15): the 5 auth screens
+  restyled to `Wharf Web Auth v2.dc.html` (all-mono, square, fieldset label chips,
+  bracketed buttons, `❯_` logo; Google/GitHub OAuth buttons rendered but disabled —
+  no backend OAuth yet; recover screen keeps an email field the design omits since
+  recovery verify is keyed email+code). **SSR landing page** at `/` per
+  `Wharf Landing.dc.html` (server-rendered — the reason for TanStack Start; auth
+  routes stay `ssr:false`) + `favicon.svg` (design variant 1a). Client-side WHARFV
+  vault create/unlock/re-encrypt with byte-compat proven against the Go vault via
+  committed fixture; E2E suite against the live backend (opt-in `E2E=1`). Design
+  sources copied to `~/projects/wharf/design/`.
 
 ## Notable (stands out vs other projects)
 - **Only Go + Bubble Tea TUI** in the portfolio (alongside Cosy's Go/Rust as non-house
