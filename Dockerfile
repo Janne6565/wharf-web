@@ -4,6 +4,9 @@ WORKDIR /app
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 COPY . .
+# Force the Nitro node-server preset: building under Bun would otherwise emit a
+# Bun-targeted server (Bun.serve) that crashes under the Node runtime below.
+ENV SERVER_PRESET=node-server
 # vite build runs the TanStack Start + Nitro plugin, emitting a self-contained
 # Node server bundle at .output/server/index.mjs (Nitro bundles node_modules in).
 RUN bun run build
