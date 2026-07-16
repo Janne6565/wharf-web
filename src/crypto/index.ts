@@ -24,6 +24,7 @@ export {
 } from "./keys";
 export { INITIAL_VAULT_DOCUMENT, initialVaultPayload } from "./payload";
 export type { Argon2Params } from "./primitives";
+export { randomBytes } from "./primitives";
 export {
   HEADER_LEN as PROJECT_HEADER_LEN,
   openProject,

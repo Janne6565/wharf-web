@@ -11,13 +11,15 @@ import type {
   AccessTokenResponse,
   AccountSetupRequest,
   AuthResponse,
+  ChangePasswordRequest,
   LoginRequest,
   RecoveryResetRequest,
   RecoveryVerifyRequest,
   RecoveryVerifyResponse,
   RefreshRequest,
   RegisterRequest,
-  SessionResponse
+  SessionResponse,
+  VaultUpdateResponse
 } from '.././model';
 
 import { customInstance } from '../../axios-instance';
@@ -98,6 +100,20 @@ const recoverReset = (
       options);
     }
   /**
+ * Authenticated master-password change: verifies the current auth key, replaces the stored auth-key hash with one derived from the new password and stores the vault blob re-encrypted under it (bumping the vault version). The recovery code is left untouched, and existing sessions stay valid (device pairings are independent of the password). Requires a password to already be set — OAuth-first accounts set one via /auth/setup.
+ * @summary Rotate the master-password auth key and re-encrypt the vault
+ */
+const changePassword = (
+    changePasswordRequest: BodyType<ChangePasswordRequest>,
+ options?: SecondParameter<typeof customInstance<VaultUpdateResponse>>,) => {
+      return customInstance<VaultUpdateResponse>(
+      {url: `/api/v1/auth/password`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: changePasswordRequest
+    },
+      options);
+    }
+  /**
  * In COOKIE mode the refresh token is set as an httpOnly cookie; in DIRECT mode it is returned in the body.
  * @summary Authenticate with the derived auth key
  */
@@ -111,10 +127,11 @@ const login = (
     },
       options);
     }
-  return {setupAccount,register,refresh,recoverVerify,recoverReset,login}};
+  return {setupAccount,register,refresh,recoverVerify,recoverReset,changePassword,login}};
 export type SetupAccountResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getAuthentication>['setupAccount']>>>
 export type RegisterResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getAuthentication>['register']>>>
 export type RefreshResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getAuthentication>['refresh']>>>
 export type RecoverVerifyResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getAuthentication>['recoverVerify']>>>
 export type RecoverResetResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getAuthentication>['recoverReset']>>>
+export type ChangePasswordResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getAuthentication>['changePassword']>>>
 export type LoginResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getAuthentication>['login']>>>

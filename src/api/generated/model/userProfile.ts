@@ -21,4 +21,6 @@ export interface UserProfile {
   hasRecovery?: boolean;
   /** Whether an encrypted vault exists for this account */
   hasVault?: boolean;
+  /** The account's base64 X25519 public key, or null if none is published yet */
+  publicKey?: string;
 }

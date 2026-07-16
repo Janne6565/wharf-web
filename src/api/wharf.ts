@@ -6,13 +6,21 @@ import { getAuthentication } from "./generated/authentication/authentication";
 import { getDeviceCodes } from "./generated/device-codes/device-codes";
 import type {
   AccountSetupRequest,
+  CreateInviteRequest,
+  CreateProjectRequest,
   LoginRequest,
   RecoveryResetRequest,
   RecoveryVerifyRequest,
   RegisterRequest,
+  RotateProjectRequest,
+  SubmitWrappedKeyRequest,
+  UpdateMemberRoleRequest,
+  UpdateProjectRequest,
+  UpdatePublicKeyRequest,
   UpdateVaultRequest,
 } from "./generated/model";
 import { getOauth } from "./generated/oauth/oauth";
+import { getProjects } from "./generated/projects/projects";
 import { getUsers } from "./generated/users/users";
 import { getVault as getVaultClient } from "./generated/vault/vault";
 
@@ -21,6 +29,7 @@ const users = getUsers();
 const vault = getVaultClient();
 const deviceCodes = getDeviceCodes();
 const oauth = getOauth();
+const projects = getProjects();
 
 export const registerAccount = (body: RegisterRequest) => auth.register(body);
 export const login = (body: LoginRequest) => auth.login(body);
@@ -41,3 +50,40 @@ export const getVault = () => vault.getVault();
 export const updateVault = (body: UpdateVaultRequest) => vault.updateVault(body);
 
 export const issueDeviceCode = () => deviceCodes.issueDeviceCode();
+
+// --- Wharf Projects (team workspaces) ------------------------------------
+// The account's X25519 identity: publish or rotate the public key others seal
+// project DEKs against. The private half never leaves the encrypted vault.
+export const updatePublicKey = (body: UpdatePublicKeyRequest) => users.updatePublicKey(body);
+
+// Incoming project invites addressed to the signed-in account.
+export const getMyInvites = () => users.getMyInvites();
+export const acceptInvite = (id: string) => users.acceptInvite(id);
+export const declineInvite = (id: string) => users.declineInvite(id);
+
+// Projects the caller belongs to, plus full detail for one project.
+export const listProjects = () => projects.listProjects();
+export const getProject = (id: string) => projects.getProject(id);
+export const createProject = (body: CreateProjectRequest) => projects.createProject(body);
+export const updateProject = (id: string, body: UpdateProjectRequest) =>
+  projects.updateProject(id, body);
+export const deleteProject = (id: string) => projects.deleteProject(id);
+
+// A project's ciphertext blob + the caller's wrapped DEK (statelessly delivered
+// every fetch), and the versioned write path.
+export const getProjectVault = (id: string) => projects.getProjectVault(id);
+export const rotateProject = (id: string, body: RotateProjectRequest) =>
+  projects.rotateProject(id, body);
+
+// Invite management + the accept-then-finalize key distribution.
+export const createInvite = (id: string, body: CreateInviteRequest) =>
+  projects.createInvite(id, body);
+export const deleteInvite = (id: string, inviteId: string) => projects.deleteInvite(id, inviteId);
+export const getPendingKeys = (id: string) => projects.getPendingKeys(id);
+export const submitMemberKey = (id: string, userId: string, body: SubmitWrappedKeyRequest) =>
+  projects.submitMemberKey(id, userId, body);
+
+// Role changes / transfer (owner) and voluntary leave.
+export const updateMemberRole = (id: string, userId: string, body: UpdateMemberRoleRequest) =>
+  projects.updateMemberRole(id, userId, body);
+export const leaveProject = (id: string) => projects.leaveProject(id);

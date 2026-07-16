@@ -14,10 +14,12 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SetPasswordRouteImport } from './routes/set-password'
 import { Route as RecoverRouteImport } from './routes/recover'
+import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as DeviceRouteImport } from './routes/device'
 import { Route as ConnectionsRouteImport } from './routes/connections'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WelcomeRecoveryCodeRouteImport } from './routes/welcome.recovery-code'
+import { Route as ProjectsProjectIdRouteImport } from './routes/projects.$projectId'
 import { Route as OauthCompleteRouteImport } from './routes/oauth.complete'
 
 const UnlockRoute = UnlockRouteImport.update({
@@ -45,6 +47,11 @@ const RecoverRoute = RecoverRouteImport.update({
   path: '/recover',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DeviceRoute = DeviceRouteImport.update({
   id: '/device',
   path: '/device',
@@ -65,6 +72,11 @@ const WelcomeRecoveryCodeRoute = WelcomeRecoveryCodeRouteImport.update({
   path: '/welcome/recovery-code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsProjectIdRoute = ProjectsProjectIdRouteImport.update({
+  id: '/$projectId',
+  path: '/$projectId',
+  getParentRoute: () => ProjectsRoute,
+} as any)
 const OauthCompleteRoute = OauthCompleteRouteImport.update({
   id: '/oauth/complete',
   path: '/oauth/complete',
@@ -75,24 +87,28 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/connections': typeof ConnectionsRoute
   '/device': typeof DeviceRoute
+  '/projects': typeof ProjectsRouteWithChildren
   '/recover': typeof RecoverRoute
   '/set-password': typeof SetPasswordRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/unlock': typeof UnlockRoute
   '/oauth/complete': typeof OauthCompleteRoute
+  '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/welcome/recovery-code': typeof WelcomeRecoveryCodeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/connections': typeof ConnectionsRoute
   '/device': typeof DeviceRoute
+  '/projects': typeof ProjectsRouteWithChildren
   '/recover': typeof RecoverRoute
   '/set-password': typeof SetPasswordRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/unlock': typeof UnlockRoute
   '/oauth/complete': typeof OauthCompleteRoute
+  '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/welcome/recovery-code': typeof WelcomeRecoveryCodeRoute
 }
 export interface FileRoutesById {
@@ -100,12 +116,14 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/connections': typeof ConnectionsRoute
   '/device': typeof DeviceRoute
+  '/projects': typeof ProjectsRouteWithChildren
   '/recover': typeof RecoverRoute
   '/set-password': typeof SetPasswordRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/unlock': typeof UnlockRoute
   '/oauth/complete': typeof OauthCompleteRoute
+  '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/welcome/recovery-code': typeof WelcomeRecoveryCodeRoute
 }
 export interface FileRouteTypes {
@@ -114,36 +132,42 @@ export interface FileRouteTypes {
     | '/'
     | '/connections'
     | '/device'
+    | '/projects'
     | '/recover'
     | '/set-password'
     | '/signin'
     | '/signup'
     | '/unlock'
     | '/oauth/complete'
+    | '/projects/$projectId'
     | '/welcome/recovery-code'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/connections'
     | '/device'
+    | '/projects'
     | '/recover'
     | '/set-password'
     | '/signin'
     | '/signup'
     | '/unlock'
     | '/oauth/complete'
+    | '/projects/$projectId'
     | '/welcome/recovery-code'
   id:
     | '__root__'
     | '/'
     | '/connections'
     | '/device'
+    | '/projects'
     | '/recover'
     | '/set-password'
     | '/signin'
     | '/signup'
     | '/unlock'
     | '/oauth/complete'
+    | '/projects/$projectId'
     | '/welcome/recovery-code'
   fileRoutesById: FileRoutesById
 }
@@ -151,6 +175,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ConnectionsRoute: typeof ConnectionsRoute
   DeviceRoute: typeof DeviceRoute
+  ProjectsRoute: typeof ProjectsRouteWithChildren
   RecoverRoute: typeof RecoverRoute
   SetPasswordRoute: typeof SetPasswordRoute
   SigninRoute: typeof SigninRoute
@@ -197,6 +222,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecoverRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/device': {
       id: '/device'
       path: '/device'
@@ -225,6 +257,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WelcomeRecoveryCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/projects/$projectId': {
+      id: '/projects/$projectId'
+      path: '/$projectId'
+      fullPath: '/projects/$projectId'
+      preLoaderRoute: typeof ProjectsProjectIdRouteImport
+      parentRoute: typeof ProjectsRoute
+    }
     '/oauth/complete': {
       id: '/oauth/complete'
       path: '/oauth/complete'
@@ -235,10 +274,23 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ProjectsRouteChildren {
+  ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
+}
+
+const ProjectsRouteChildren: ProjectsRouteChildren = {
+  ProjectsProjectIdRoute: ProjectsProjectIdRoute,
+}
+
+const ProjectsRouteWithChildren = ProjectsRoute._addFileChildren(
+  ProjectsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ConnectionsRoute: ConnectionsRoute,
   DeviceRoute: DeviceRoute,
+  ProjectsRoute: ProjectsRouteWithChildren,
   RecoverRoute: RecoverRoute,
   SetPasswordRoute: SetPasswordRoute,
   SigninRoute: SigninRoute,
@@ -250,12 +302,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

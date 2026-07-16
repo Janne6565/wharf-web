@@ -8,10 +8,14 @@ keys. It never sees passwords or plaintext vault contents.
  * OpenAPI spec version: v1
  */
 import type {
+  MyInvite,
+  ProjectSummary,
+  UpdatePublicKeyRequest,
   UserProfile
 } from '.././model';
 
 import { customInstance } from '../../axios-instance';
+import type { BodyType } from '../../axios-instance';
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -19,7 +23,43 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
   export const getUsers = () => {
 /**
- * Includes hasPassword / hasRecovery / hasVault flags the frontend uses to route the account.
+ * Rotating (rotate=true) replaces the key and resets every wrapped key the account holds — each affected project membership re-enters the awaiting-key state.
+ * @summary Publish or rotate the account's X25519 public key
+ */
+const updatePublicKey = (
+    updatePublicKeyRequest: BodyType<UpdatePublicKeyRequest>,
+ options?: SecondParameter<typeof customInstance<void>>,) => {
+      return customInstance<void>(
+      {url: `/api/v1/users/me/public-key`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: updatePublicKeyRequest
+    },
+      options);
+    }
+  /**
+ * @summary Decline a project invite
+ */
+const declineInvite = (
+    id: string,
+ options?: SecondParameter<typeof customInstance<void>>,) => {
+      return customInstance<void>(
+      {url: `/api/v1/users/me/invites/${id}/decline`, method: 'POST'
+    },
+      options);
+    }
+  /**
+ * @summary Accept a project invite, joining as an awaiting-key member
+ */
+const acceptInvite = (
+    id: string,
+ options?: SecondParameter<typeof customInstance<ProjectSummary>>,) => {
+      return customInstance<ProjectSummary>(
+      {url: `/api/v1/users/me/invites/${id}/accept`, method: 'POST'
+    },
+      options);
+    }
+  /**
+ * Includes hasPassword / hasRecovery / hasVault flags and the account's public key.
  * @summary Get the authenticated account's profile
  */
 const getCurrentUser = (
@@ -30,5 +70,20 @@ const getCurrentUser = (
     },
       options);
     }
-  return {getCurrentUser}};
+  /**
+ * @summary List unexpired project invites addressed to the caller
+ */
+const getMyInvites = (
+    
+ options?: SecondParameter<typeof customInstance<MyInvite[]>>,) => {
+      return customInstance<MyInvite[]>(
+      {url: `/api/v1/users/me/invites`, method: 'GET'
+    },
+      options);
+    }
+  return {updatePublicKey,declineInvite,acceptInvite,getCurrentUser,getMyInvites}};
+export type UpdatePublicKeyResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['updatePublicKey']>>>
+export type DeclineInviteResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['declineInvite']>>>
+export type AcceptInviteResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['acceptInvite']>>>
 export type GetCurrentUserResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['getCurrentUser']>>>
+export type GetMyInvitesResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['getMyInvites']>>>
