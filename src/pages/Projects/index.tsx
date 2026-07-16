@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Alert } from "@/components/Alert";
 import { AuthShell } from "@/components/AuthShell";
 import { Card } from "@/components/Card";
+import { IdentityNotice } from "@/components/IdentityNotice";
 import { LockedVaultPanel } from "@/components/LockedVaultPanel";
 import { CreateProjectForm } from "./CreateProjectForm";
 import { InvitesBanner } from "./InvitesBanner";
@@ -61,10 +62,8 @@ function UnlockedBody({ logic }: { readonly logic: ReturnType<typeof useProjects
   const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-4">
-      {logic.identityState === "needs-sync" ? (
-        <Alert tone="warning" className="mt-1">
-          {t("projects.identity.needsSync")}
-        </Alert>
+      {logic.identityState === "needs-sync" && logic.gate.vault ? (
+        <IdentityNotice vault={logic.gate.vault} />
       ) : null}
       {logic.identityState === "error" ? (
         <Alert tone="danger" className="mt-1">

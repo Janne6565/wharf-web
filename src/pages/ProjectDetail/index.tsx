@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Alert } from "@/components/Alert";
 import { AuthShell } from "@/components/AuthShell";
 import { Card } from "@/components/Card";
+import { IdentityNotice } from "@/components/IdentityNotice";
 import { LockedVaultPanel } from "@/components/LockedVaultPanel";
 import { DangerZone } from "./DangerZone";
 import { HostsCard } from "./HostsCard";
@@ -45,6 +46,17 @@ function Body({ logic, inviteOpen, setInviteOpen }: BodyProps) {
   const { t } = useTranslation();
   if (logic.notFound) {
     return <Alert tone="danger">{t("projectDetail.notFound")}</Alert>;
+  }
+  // No identity locally but the server has a key: the hosts blob can't be
+  // decrypted here, so surface the same needs-sync notice as the hub (with its
+  // reset action) instead of leaving the hosts list spinning indefinitely.
+  if (logic.identityState === "needs-sync" && logic.gate.vault) {
+    return (
+      <div className="flex flex-col gap-5">
+        <BackLink />
+        <IdentityNotice vault={logic.gate.vault} />
+      </div>
+    );
   }
   if (logic.loading || !logic.project) {
     return <p className="py-6 text-center text-[13px] text-dim">{t("projectDetail.loading")}</p>;

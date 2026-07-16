@@ -31,7 +31,10 @@ vi.mock("@/api/wharf", () => ({
   deleteProject: vi.fn(),
   rotateProject: vi.fn(),
 }));
-vi.mock("@/vault/identity", () => ({ ensureIdentity: mocks.ensureIdentity }));
+vi.mock("@/vault/identity", () => ({
+  ensureIdentity: mocks.ensureIdentity,
+  resetIdentity: vi.fn(),
+}));
 vi.mock("@/vault/projectVaultAccess", () => ({ loadProjectVault: mocks.loadProjectVault }));
 
 import { ProjectDetailPage } from "./index";
@@ -119,6 +122,20 @@ describe("ProjectDetailPage", () => {
 
     renderWithProviders(<ProjectDetailPage projectId="p1" />);
     expect(await screen.findByText(/no longer exists/i)).toBeInTheDocument();
+  });
+
+  it("surfaces the needs-sync notice instead of spinning when this vault has no identity", async () => {
+    primeVault();
+    mocks.ensureIdentity.mockResolvedValue({ kind: "needs-sync" });
+    mocks.getCurrentUser.mockResolvedValue({ id: "u1" });
+    mocks.getProject.mockResolvedValue({ id: "p1", name: "Atlas", role: "MEMBER", members: [] });
+
+    renderWithProviders(<ProjectDetailPage projectId="p1" />);
+
+    expect(await screen.findByTestId("identity-notice")).toBeInTheDocument();
+    expect(screen.getByTestId("identity-reset-open")).toBeInTheDocument();
+    // The hosts blob is never loaded in this state.
+    expect(mocks.loadProjectVault).not.toHaveBeenCalled();
   });
 
   it("shows the locked panel until the vault is unlocked", () => {

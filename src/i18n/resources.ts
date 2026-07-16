@@ -256,6 +256,14 @@ const enCommon = {
       needsSync:
         "this vault has no project identity yet. sync it from the device where you first opened projects, then reload — we won't create a second key here.",
       error: "couldn't set up your project identity — please try again.",
+      reset: {
+        action: "I lost my old vault — reset project identity",
+        title: "Reset project identity",
+        body: "This mints a brand-new key on this device and replaces your published one. Every project you belong to re-enters awaiting-access until an admin re-grants you the key. Any project where you were the only member holding a key becomes permanently unrecoverable. Only do this if you have truly lost the device that created your identity.",
+        confirm: "reset identity",
+        cancel: "cancel",
+        failed: "couldn't reset your identity — please try again.",
+      },
     },
     errors: {
       loadFailed: "couldn't load your projects — please try again.",

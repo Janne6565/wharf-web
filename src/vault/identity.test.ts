@@ -17,7 +17,7 @@ vi.mock("@/api/wharf", () => ({
 vi.mock("@/auth/vaultSession", () => ({ setVaultSession: mocks.setVaultSession }));
 
 import type { UnlockedVault } from "@/crypto";
-import { ensureIdentity, withIdentity } from "./identity";
+import { ensureIdentity, resetIdentity, withIdentity } from "./identity";
 
 const encode = (value: unknown) => new TextEncoder().encode(JSON.stringify(value));
 const decode = (bytes: Uint8Array) => JSON.parse(new TextDecoder().decode(bytes));
@@ -90,6 +90,42 @@ describe("ensureIdentity", () => {
     expect(mocks.updateVault).toHaveBeenCalledTimes(1);
     expect(mocks.updateVault.mock.calls[0][0].expectedVersion).toBe(7);
     expect(mocks.setVaultSession).toHaveBeenCalledTimes(1);
+    expect(mocks.updatePublicKey).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("resetIdentity", () => {
+  it("mints a fresh keypair, writes the vault at the current version, and rotates the public key", async () => {
+    mocks.getVault.mockResolvedValue({ version: 4 });
+    mocks.updateVault.mockResolvedValue({ version: 5 });
+    mocks.updatePublicKey.mockResolvedValue(undefined);
+
+    const identity = await resetIdentity(vaultOf({ schema: 1, hosts: [] }));
+
+    // A brand-new keypair — never the old server key or an existing vault identity.
+    expect(identity.x25519Pub).toBeTruthy();
+    expect(identity.x25519Priv).toBeTruthy();
+    expect(mocks.updateVault).toHaveBeenCalledTimes(1);
+    expect(mocks.updateVault.mock.calls[0][0].expectedVersion).toBe(4);
+    expect(mocks.setVaultSession).toHaveBeenCalledTimes(1);
+    // The publish is a deliberate rotate (nulls all wrapped DEKs server-side).
+    expect(mocks.updatePublicKey).toHaveBeenCalledTimes(1);
+    expect(mocks.updatePublicKey).toHaveBeenCalledWith({
+      publicKey: identity.x25519Pub,
+      rotate: true,
+    });
+  });
+
+  it("retries the vault write once on a concurrent-write conflict", async () => {
+    mocks.getVault.mockResolvedValue({ version: 9 });
+    mocks.updateVault
+      .mockRejectedValueOnce({ isAxiosError: true, response: { status: 409 } })
+      .mockResolvedValueOnce({ version: 10 });
+    mocks.updatePublicKey.mockResolvedValue(undefined);
+
+    await resetIdentity(vaultOf({ schema: 2, hosts: [], identity: IDENTITY }));
+
+    expect(mocks.updateVault).toHaveBeenCalledTimes(2);
     expect(mocks.updatePublicKey).toHaveBeenCalledTimes(1);
   });
 });

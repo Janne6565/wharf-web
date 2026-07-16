@@ -53,16 +53,22 @@ async function publishKey(publicKey: string): Promise<void> {
   }
 }
 
-// generateAndStore mints a keypair, writes it into the personal vault (optimistic
-// version, single retry on a concurrent write), primes the in-memory session
-// with the new payload, then publishes the public key.
-async function generateAndStore(vault: UnlockedVault): Promise<VaultIdentity> {
+// makeIdentity mints a fresh X25519 identity keypair, base64-encoded for storage
+// in the vault payload.
+async function makeIdentity(): Promise<VaultIdentity> {
   const kp = await generateKeypair();
-  const identity: VaultIdentity = {
+  return {
     x25519Priv: toBase64(kp.privateKey),
     x25519Pub: toBase64(kp.publicKey),
     createdAt: new Date().toISOString(),
   };
+}
+
+// storeIdentity writes an identity into the personal vault (optimistic version,
+// single retry on a concurrent write) and primes the in-memory session with the
+// new payload. It does NOT publish the public key — the caller decides whether to
+// publish idempotently (generate) or rotate (reset).
+async function storeIdentity(vault: UnlockedVault, identity: VaultIdentity): Promise<void> {
   const newPayload = withIdentity(vault.payload, identity);
   const blob = await sealPayload(vault, newPayload);
   const base64 = toBase64(blob);
@@ -79,6 +85,13 @@ async function generateAndStore(vault: UnlockedVault): Promise<VaultIdentity> {
   }
 
   setVaultSession({ ...vault, payload: newPayload, header: blob.slice(0, HEADER_LEN) });
+}
+
+// generateAndStore mints a keypair, writes it into the personal vault, then
+// publishes the public key idempotently.
+async function generateAndStore(vault: UnlockedVault): Promise<VaultIdentity> {
+  const identity = await makeIdentity();
+  await storeIdentity(vault, identity);
   await publishKey(identity.x25519Pub);
   return identity;
 }
@@ -102,6 +115,21 @@ export async function ensureIdentity(vault: UnlockedVault): Promise<IdentityStat
   }
   const identity = await generateAndStore(vault);
   return { kind: "ready", identity };
+}
+
+// resetIdentity is the "I lost my old vault" recovery for the needs-sync outcome:
+// this device can't sync the identity from the device that created it, so mint a
+// brand-new keypair, write it into the personal vault, then ROTATE the published
+// public key. The rotate replaces the account's key AND nulls every wrapped
+// project DEK server-side, so all the caller's projects re-enter awaiting-access
+// until an admin re-grants (projects where the caller was the only keyed member
+// become unrecoverable). Unlike the generate path, the publish is a deliberate
+// replace — no 409 swallowing.
+export async function resetIdentity(vault: UnlockedVault): Promise<VaultIdentity> {
+  const identity = await makeIdentity();
+  await storeIdentity(vault, identity);
+  await updatePublicKey({ publicKey: identity.x25519Pub, rotate: true });
+  return identity;
 }
 
 // identityKeys decodes a ready identity's base64 keypair into raw bytes for the
