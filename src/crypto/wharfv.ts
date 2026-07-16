@@ -78,11 +78,15 @@ interface Header {
 }
 
 // An unlocked vault: the DEK and decrypted payload held in memory. Never
-// serialized or persisted.
+// serialized or persisted. `header` carries the (non-secret) fixed prefix —
+// KDF params, slot salts/nonces and wrapped DEKs — of the blob it was opened
+// from, so an updated payload can be re-sealed under the same slots without
+// re-deriving KEKs or re-wrapping the DEK (see sealPayload).
 export interface UnlockedVault {
   readonly dek: Uint8Array;
   readonly payload: Uint8Array;
   readonly params: Argon2Params;
+  readonly header: Uint8Array;
 }
 
 export interface SealedVault {
@@ -233,7 +237,7 @@ export async function createVault(
   const recoveryCode = encodeCrockford(recoverySecret);
   const passwordBytes = textEncoder.encode(password);
   const blob = await buildBlob(dek, payload, passwordBytes, recoverySecret, params);
-  return { blob, recoveryCode, vault: { dek, payload, params } };
+  return { blob, recoveryCode, vault: { dek, payload, params, header: blob.slice(0, HEADER_LEN) } };
 }
 
 async function unlock(
@@ -253,7 +257,7 @@ async function unlock(
   if (!payload) {
     throw corrupt();
   }
-  return { dek, payload, params: header.params };
+  return { dek, payload, params: header.params, header: aad };
 }
 
 export async function unlockWithPassword(
@@ -297,8 +301,32 @@ export async function reEncrypt(vault: UnlockedVault, newPassword: string): Prom
   return {
     blob,
     recoveryCode,
-    vault: { dek: vault.dek, payload: vault.payload, params: vault.params },
+    vault: {
+      dek: vault.dek,
+      payload: vault.payload,
+      params: vault.params,
+      header: blob.slice(0, HEADER_LEN),
+    },
   };
+}
+
+// sealPayload re-seals newPayload under the SAME DEK and the SAME key slots as
+// the unlocked vault it is given, changing only the body: the wrapped-DEK slots
+// (and thus the password + recovery code) are preserved untouched. It exists so
+// callers can write an updated document (e.g. adding an X25519 identity) without
+// re-slotting or prompting for the password. Because the body nonce lives inside
+// the AAD-covered header region, re-sealing rebuilds the header with a fresh
+// body nonce and re-encrypts the body against it. Returns the new blob; the
+// caller is responsible for persisting it and refreshing any in-memory session.
+export async function sealPayload(
+  unlocked: UnlockedVault,
+  newPayload: Uint8Array,
+): Promise<Uint8Array> {
+  const header = unlocked.header.slice();
+  const bodyNonce = randomBytes(BODY_NONCE_LEN);
+  header.set(bodyNonce, OFF_BODY_NONCE);
+  const body = await xchachaSeal(unlocked.dek, bodyNonce, newPayload, header);
+  return concat(header, body);
 }
 
 export { RECOVERY_SECRET_LEN };

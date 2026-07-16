@@ -25,12 +25,25 @@ export {
 export { INITIAL_VAULT_DOCUMENT, initialVaultPayload } from "./payload";
 export type { Argon2Params } from "./primitives";
 export {
+  HEADER_LEN as PROJECT_HEADER_LEN,
+  openProject,
+  sealProject,
+} from "./wharfp";
+export {
   createVault,
   DEFAULT_PARAMS,
   HEADER_LEN,
   reEncrypt,
   type SealedVault,
+  sealPayload,
   type UnlockedVault,
   unlockWithPassword,
   unlockWithRecovery,
 } from "./wharfv";
+export {
+  generateKeypair,
+  openDek,
+  sealDek,
+  WRAPPED_DEK_LEN,
+  X25519_KEY_LEN,
+} from "./x25519";

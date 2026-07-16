@@ -5,6 +5,7 @@ import {
   createVault,
   HEADER_LEN,
   reEncrypt,
+  sealPayload,
   unlockWithPassword,
   unlockWithRecovery,
 } from "./wharfv";
@@ -64,6 +65,36 @@ describe("WHARFV vault", () => {
     tampered[0] ^= 0xff;
     await expect(unlockWithPassword(tampered, "hunter2")).rejects.toMatchObject({
       code: "corrupt",
+    });
+  });
+
+  describe("sealPayload (re-seal same slots)", () => {
+    it("updates the payload while the same password and recovery code still unlock", async () => {
+      const original = makePayload('{"schema":1,"hosts":[]}');
+      const created = await createVault("hunter2", original, fastParams);
+      const unlocked = await unlockWithPassword(created.blob, "hunter2");
+
+      const updated = makePayload('{"schema":2,"hosts":[],"identity":{"x25519Pub":"AA=="}}');
+      const newBlob = await sealPayload(unlocked, updated);
+
+      // The unchanged password unlocks the re-sealed blob and yields the new payload.
+      const viaPassword = await unlockWithPassword(newBlob, "hunter2");
+      expect(viaPassword.payload).toEqual(updated);
+
+      // The original recovery code still unlocks it too (slots untouched).
+      const viaRecovery = await unlockWithRecovery(newBlob, created.recoveryCode);
+      expect(viaRecovery.payload).toEqual(updated);
+
+      // The wrapped-DEK slots are byte-identical; only the body changed.
+      expect(newBlob.slice(0, HEADER_LEN - 24)).toEqual(created.blob.slice(0, HEADER_LEN - 24));
+    });
+
+    it("draws a fresh body nonce so two re-seals differ", async () => {
+      const created = await createVault("pw", makePayload("{}"), fastParams);
+      const unlocked = await unlockWithPassword(created.blob, "pw");
+      const a = await sealPayload(unlocked, makePayload('{"a":1}'));
+      const b = await sealPayload(unlocked, makePayload('{"a":1}'));
+      expect(a).not.toEqual(b);
     });
   });
 

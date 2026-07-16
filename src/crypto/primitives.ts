@@ -104,3 +104,34 @@ export function randomBytes(length: number): Uint8Array {
   globalThis.crypto.getRandomValues(bytes);
   return bytes;
 }
+
+// boxKeypair generates an X25519 keypair (crypto_box_keypair). Byte-compatible
+// with Go's nacl/box.GenerateKey.
+export async function boxKeypair(): Promise<{ publicKey: Uint8Array; privateKey: Uint8Array }> {
+  const s = await sodium();
+  const kp = s.crypto_box_keypair();
+  return { publicKey: kp.publicKey, privateKey: kp.privateKey };
+}
+
+// boxSeal is libsodium's crypto_box_seal: an anonymous sealed box to
+// recipientPub. Output is 32 (ephemeral pk) + len(message) + 16 (tag) bytes.
+export async function boxSeal(message: Uint8Array, recipientPub: Uint8Array): Promise<Uint8Array> {
+  const s = await sodium();
+  return s.crypto_box_seal(message, recipientPub);
+}
+
+// boxSealOpen is crypto_box_seal_open. It returns null on failure (wrong
+// recipient or tampering) rather than throwing, so callers map it to a
+// CryptoError, mirroring xchachaOpen.
+export async function boxSealOpen(
+  sealed: Uint8Array,
+  publicKey: Uint8Array,
+  privateKey: Uint8Array,
+): Promise<Uint8Array | null> {
+  const s = await sodium();
+  try {
+    return s.crypto_box_seal_open(sealed, publicKey, privateKey);
+  } catch {
+    return null;
+  }
+}
