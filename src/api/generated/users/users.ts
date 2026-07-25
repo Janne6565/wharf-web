@@ -8,6 +8,8 @@ keys. It never sees passwords or plaintext vault contents.
  * OpenAPI spec version: v1
  */
 import type {
+  AccountDeletionPreview,
+  DeleteAccountRequest,
   MyInvite,
   ProjectSummary,
   UpdatePublicKeyRequest,
@@ -71,6 +73,20 @@ const getCurrentUser = (
       options);
     }
   /**
+ * Deletes the account, its personal vault, its OAuth links and device codes, its memberships, and — outright — every project it owns, including projects that still have other members (they lose access). All in one transaction: it either all happens or none of it does. There is no undo and no server-side copy to restore from: the server only ever held ciphertext. Because this destroys data for other people too, it is re-authenticated: an account with a master password must supply its current authKey. An OAuth-only account has no password to prove and may omit the body. Use /users/me/deletion-preview first to show the caller exactly what will be lost.
+ * @summary Irreversibly delete the authenticated account and everything it owns
+ */
+const deleteAccount = (
+    deleteAccountRequest: BodyType<DeleteAccountRequest>,
+ options?: SecondParameter<typeof customInstance<void>>,) => {
+      return customInstance<void>(
+      {url: `/api/v1/users/me`, method: 'DELETE',
+      headers: {'Content-Type': 'application/json', },
+      data: deleteAccountRequest
+    },
+      options);
+    }
+  /**
  * @summary List unexpired project invites addressed to the caller
  */
 const getMyInvites = (
@@ -81,9 +97,23 @@ const getMyInvites = (
     },
       options);
     }
-  return {updatePublicKey,declineInvite,acceptInvite,getCurrentUser,getMyInvites}};
+  /**
+ * Read-only. Lists the projects the caller owns (each deleted with the account, together with the number of other members who would lose access) and how many further projects the caller is only a member of (those survive; only the membership is removed).
+ * @summary Preview what deleting the account would destroy
+ */
+const getAccountDeletionPreview = (
+    
+ options?: SecondParameter<typeof customInstance<AccountDeletionPreview>>,) => {
+      return customInstance<AccountDeletionPreview>(
+      {url: `/api/v1/users/me/deletion-preview`, method: 'GET'
+    },
+      options);
+    }
+  return {updatePublicKey,declineInvite,acceptInvite,getCurrentUser,deleteAccount,getMyInvites,getAccountDeletionPreview}};
 export type UpdatePublicKeyResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['updatePublicKey']>>>
 export type DeclineInviteResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['declineInvite']>>>
 export type AcceptInviteResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['acceptInvite']>>>
 export type GetCurrentUserResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['getCurrentUser']>>>
+export type DeleteAccountResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['deleteAccount']>>>
 export type GetMyInvitesResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['getMyInvites']>>>
+export type GetAccountDeletionPreviewResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['getAccountDeletionPreview']>>>

@@ -5,6 +5,7 @@ import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { FormField } from "@/components/FormField";
 import { hostTarget, type VaultHost } from "@/lib/vaultDocument";
+import { DangerZone } from "./DangerZone";
 import { useConnectionsLogic } from "./useConnectionsLogic";
 
 export function ConnectionsPage() {
@@ -40,6 +41,7 @@ export function ConnectionsPage() {
           />
         )}
         <Footer />
+        <DangerZone />
       </Card>
     </AuthShell>
   );

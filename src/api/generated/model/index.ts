@@ -9,11 +9,13 @@ keys. It never sees passwords or plaintext vault contents.
  */
 
 export * from './accessTokenResponse';
+export * from './accountDeletionPreview';
 export * from './accountSetupRequest';
 export * from './authResponse';
 export * from './changePasswordRequest';
 export * from './createInviteRequest';
 export * from './createProjectRequest';
+export * from './deleteAccountRequest';
 export * from './deviceCodeExchangeRequest';
 export * from './deviceCodeResponse';
 export * from './loginRequest';
@@ -22,6 +24,7 @@ export * from './myInvite';
 export * from './oAuthProvidersResponse';
 export * from './oauthAuthorizeParams';
 export * from './oauthCallbackParams';
+export * from './ownedProjectImpact';
 export * from './pendingKey';
 export * from './project';
 export * from './projectInvite';

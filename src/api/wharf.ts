@@ -8,6 +8,7 @@ import type {
   AccountSetupRequest,
   CreateInviteRequest,
   CreateProjectRequest,
+  DeleteAccountRequest,
   LoginRequest,
   RecoveryResetRequest,
   RecoveryVerifyRequest,
@@ -92,6 +93,17 @@ export const deleteInvite = (id: string, inviteId: string) => projects.deleteInv
 export const getPendingKeys = (id: string) => projects.getPendingKeys(id);
 export const submitMemberKey = (id: string, userId: string, body: SubmitWrappedKeyRequest) =>
   projects.submitMemberKey(id, userId, body);
+
+// --- Account deletion -----------------------------------------------------
+// What deleting the account destroys, so the confirmation can spell it out.
+// springdoc types every field as optional; useDeleteAccountLogic resolves that
+// once and exports the tightened shape the UI works with.
+export const getAccountDeletionPreview = () => users.getAccountDeletionPreview();
+
+// Irreversibly deletes the account (204). Accounts with a master password must
+// re-prove it with a derived authKey; an OAuth-only account omits the field and
+// is authorized by the session alone.
+export const deleteAccount = (body: DeleteAccountRequest) => users.deleteAccount(body);
 
 // Role changes / transfer (owner) and voluntary leave.
 export const updateMemberRole = (id: string, userId: string, body: UpdateMemberRoleRequest) =>

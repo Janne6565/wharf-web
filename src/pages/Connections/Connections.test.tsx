@@ -17,10 +17,20 @@ vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => mocks.navigate,
   Link: ({ children, ...props }: { children: React.ReactNode }) => <a {...props}>{children}</a>,
 }));
-vi.mock("@/api/wharf", () => ({ getVault: mocks.getVault }));
+vi.mock("@/api/wharf", () => ({
+  getVault: mocks.getVault,
+  // Read by the danger zone's deletion modal (both only fire once it opens).
+  getCurrentUser: vi.fn(),
+  getAccountDeletionPreview: vi.fn(),
+  deleteAccount: vi.fn(),
+  refreshSession: vi.fn(),
+}));
 vi.mock("@/crypto", () => ({
   fromBase64: mocks.fromBase64,
   unlockWithPassword: mocks.unlockWithPassword,
+  deriveMasterKey: vi.fn(),
+  deriveAuthKey: vi.fn(),
+  normalizeEmail: (value: string) => value.trim().toLowerCase(),
 }));
 
 import { ConnectionsPage } from "./index";

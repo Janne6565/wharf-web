@@ -15,6 +15,7 @@ export function getHttpStatus(error: unknown): number | undefined {
 export const PROBLEM_CODES = {
   emailNotVerified: "email_not_verified",
   invalidVerificationCode: "invalid_verification_code",
+  authKeyRequired: "auth_key_required",
 } as const;
 
 // Extracts that `code` from an unknown Axios error, so logic hooks can branch on
