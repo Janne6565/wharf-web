@@ -3,7 +3,7 @@ import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
-export type OnboardingStep = 1 | 2 | 3;
+export type OnboardingStep = 1 | 2 | 3 | 4;
 
 interface StepIndicatorProps {
   readonly current: OnboardingStep;
@@ -11,12 +11,17 @@ interface StepIndicatorProps {
 
 const SEPARATOR = "──";
 
-// The onboarding progress row: "[1] account ── [2] recovery code ── [3] connect
-// device", with completed steps shown as a green bracketed Check icon, the
-// current step in accent, and upcoming steps dimmed.
+// The onboarding progress row: "[1] account ── [2] recovery code ── [3] verify
+// email ── [4] connect device", with completed steps shown as a green bracketed
+// Check icon, the current step in accent, and upcoming steps dimmed.
 export function StepIndicator({ current }: StepIndicatorProps) {
   const { t } = useTranslation();
-  const steps = [t("steps.account"), t("steps.recoveryCode"), t("steps.connectDevice")];
+  const steps = [
+    t("steps.account"),
+    t("steps.recoveryCode"),
+    t("steps.verifyEmail"),
+    t("steps.connectDevice"),
+  ];
 
   return (
     <div className="mt-8 flex flex-wrap items-center justify-center gap-x-3.5 gap-y-1 px-4 font-mono text-[12.5px] sm:mt-11">

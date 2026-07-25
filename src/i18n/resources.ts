@@ -12,6 +12,7 @@ const enCommon = {
   steps: {
     account: "account",
     recoveryCode: "recovery code",
+    verifyEmail: "verify email",
     connectDevice: "connect device",
   },
   common: {
@@ -25,6 +26,7 @@ const enCommon = {
     install: "install",
     signup: "sign up",
     recoveryCode: "recovery code",
+    verifyEmail: "verify email",
     device: "pair terminal",
     signin: "sign in",
     recover: "recover vault",
@@ -49,12 +51,17 @@ const enCommon = {
       invalid_state: "the sign-in link expired or was already used — please try again.",
       email_not_verified:
         "your provider account's email isn't verified. verify it with the provider, then try again.",
+      unverified_account_conflict:
+        "an account with this email already exists but was never verified. verify that address with the emailed code first, then connect this provider.",
+      account_not_verified:
+        "your account is not verified yet, please verify your email before continuing.",
       provider_error: "the provider rejected the sign-in — please try again.",
       server_error: "something went wrong completing sign-in — please try again.",
       generic: "we couldn't complete sign-in — please try again.",
     },
     backToSignin: "back to sign in",
     backToSignup: "create an account",
+    verifyEmail: "sign in to verify your email",
   },
   setPassword: {
     title: "Set your master password",
@@ -76,6 +83,7 @@ const enCommon = {
     confirmPassword: "confirm master password",
     newMasterPassword: "new master password",
     recoveryCode: "recovery code",
+    verificationCode: "6-digit code",
   },
   strength: {
     label: "password strength",
@@ -104,6 +112,15 @@ const enCommon = {
     footnote: "button unlocks once confirmed · there is no “remind me later”",
     fileHeading:
       "wharf recovery code — keep this safe, offline. It is the only way to reset your password.",
+  },
+  verifyEmail: {
+    title: "Verify your email",
+    intro: "we sent a 6-digit code to <1>{{email}}</1>. enter it to activate your account.",
+    submit: "verify email",
+    resend: "send a new code",
+    resendIn: "send a new code ({{seconds}}s)",
+    resent: "if that address has an unverified account, a new code is on its way.",
+    invalidCode: "that code is not valid or has expired — request a new one",
   },
   device: {
     title: "Pair your terminal",
@@ -142,6 +159,7 @@ const enCommon = {
     forgot: "forgot it? use your recovery code",
     newHere: "new here?",
     createAccount: "create an account",
+    verifyEmail: "verify your email now",
   },
   recover: {
     title: "Reset your password",
@@ -161,10 +179,14 @@ const enCommon = {
     confirmMismatch: "passwords don't match",
     mustAcknowledge: "please confirm you understand",
     recoveryRequired: "enter your recovery code",
+    codeRequired: "enter the 6-digit code",
+    codeInvalid: "the code is 6 digits",
   },
   errors: {
     invalidCredentials: "email or master password is incorrect",
     emailTaken: "an account with this email already exists",
+    emailNotVerified:
+      "your account is not verified yet, please verify your email before continuing",
     rateLimited: "too many attempts — please wait a moment and try again",
     recoveryInvalid: "that recovery code doesn't match this account",
     recoveryMalformed: "check the recovery code — it looks incomplete",

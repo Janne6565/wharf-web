@@ -35,6 +35,20 @@ describe("OAuthCompletePage", () => {
     expect(mocks.getCurrentUser).not.toHaveBeenCalled();
   });
 
+  it("offers a way to verify for an unverified wharf account", () => {
+    renderWithProviders(<OAuthCompletePage error="account_not_verified" />);
+
+    expect(screen.getByText(/your account is not verified yet/i)).toBeInTheDocument();
+    expect(screen.getByTestId("oauth-verify-email")).toHaveAttribute("to", "/signin");
+  });
+
+  it("explains an unverified local account blocking the provider link", () => {
+    renderWithProviders(<OAuthCompletePage error="unverified_account_conflict" />);
+
+    expect(screen.getByText(/already exists but was never verified/i)).toBeInTheDocument();
+    expect(screen.getByTestId("oauth-verify-email")).toBeInTheDocument();
+  });
+
   it("falls back to a generic message for an unknown error code", () => {
     renderWithProviders(<OAuthCompletePage error="something_new" />);
     expect(screen.getByText(/couldn't complete sign-in/i)).toBeInTheDocument();

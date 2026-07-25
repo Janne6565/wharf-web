@@ -8,9 +8,9 @@ import { z } from "zod";
 import { getHttpStatus } from "@/api/httpError";
 import { registerAccount } from "@/api/wharf";
 import { setPendingRecoveryCode } from "@/auth/recoveryHandoff";
-import { establishSession } from "@/auth/session";
 import { buildOnboardingVault } from "@/auth/vaultOnboarding";
 import { setVaultSession } from "@/auth/vaultSession";
+import { setPendingVerificationEmail } from "@/auth/verificationHandoff";
 import { normalizeEmail, toBase64 } from "@/crypto";
 import { isValidEmail, PASSWORD_MIN_LENGTH } from "@/lib/validators";
 
@@ -24,6 +24,10 @@ interface SignupValues {
 // Runs the full client-side sign-up: derive keys, build a fresh vault, register
 // (server sees only authKey/recoveryAuthKey + ciphertext), prime the vault in
 // memory, and hand the one-time recovery code to the next screen.
+//
+// Registering no longer signs the user in: the backend answers 202 with no
+// tokens and no cookie, and the session is only issued once the emailed code is
+// submitted on /welcome/verify-email. So we hand the address on too.
 export function useSignupLogic() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -66,21 +70,19 @@ export function useSignupLogic() {
         values.password,
       );
 
-      const response = await registerAccount({
+      await registerAccount({
         email,
         authKey,
         recoveryAuthKey,
         vault: toBase64(blob),
       });
 
-      return { response, recoveryCode, vault };
+      return { email, recoveryCode, vault };
     },
-    onSuccess: async ({ response, recoveryCode, vault }) => {
+    onSuccess: ({ email, recoveryCode, vault }) => {
       setVaultSession(vault);
-      if (response.tokens?.accessToken) {
-        await establishSession(response.tokens.accessToken, response.user);
-      }
       setPendingRecoveryCode(recoveryCode);
+      setPendingVerificationEmail(email);
       void navigate({ to: "/welcome/recovery-code" });
     },
     onError: (error: unknown) => {

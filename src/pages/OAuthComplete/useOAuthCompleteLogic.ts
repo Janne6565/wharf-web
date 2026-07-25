@@ -11,10 +11,25 @@ export const OAUTH_ERROR_CODES = [
   "provider_disabled",
   "invalid_state",
   "email_not_verified",
+  "unverified_account_conflict",
+  "account_not_verified",
   "provider_error",
   "server_error",
 ] as const;
 export type OAuthErrorCode = (typeof OAUTH_ERROR_CODES)[number] | "generic";
+
+// The two failures caused by an unverified *wharf* account (as opposed to an
+// unverified provider address): both are cleared by completing the emailed-code
+// flow, so the card offers a way there. The redirect carries no address, so the
+// link goes via sign-in, which knows the typed email.
+const UNVERIFIED_ACCOUNT_CODES: readonly OAuthErrorCode[] = [
+  "unverified_account_conflict",
+  "account_not_verified",
+];
+
+export function isUnverifiedAccountError(code: OAuthErrorCode): boolean {
+  return UNVERIFIED_ACCOUNT_CODES.includes(code);
+}
 
 // Maps a raw ?error= value to a known i18n key, falling back to "generic".
 export function toOAuthErrorCode(raw: string): OAuthErrorCode {

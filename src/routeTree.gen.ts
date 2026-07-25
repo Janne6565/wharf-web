@@ -18,6 +18,7 @@ import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as DeviceRouteImport } from './routes/device'
 import { Route as ConnectionsRouteImport } from './routes/connections'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WelcomeVerifyEmailRouteImport } from './routes/welcome.verify-email'
 import { Route as WelcomeRecoveryCodeRouteImport } from './routes/welcome.recovery-code'
 import { Route as ProjectsProjectIdRouteImport } from './routes/projects.$projectId'
 import { Route as OauthCompleteRouteImport } from './routes/oauth.complete'
@@ -67,6 +68,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WelcomeVerifyEmailRoute = WelcomeVerifyEmailRouteImport.update({
+  id: '/welcome/verify-email',
+  path: '/welcome/verify-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WelcomeRecoveryCodeRoute = WelcomeRecoveryCodeRouteImport.update({
   id: '/welcome/recovery-code',
   path: '/welcome/recovery-code',
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/oauth/complete': typeof OauthCompleteRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/welcome/recovery-code': typeof WelcomeRecoveryCodeRoute
+  '/welcome/verify-email': typeof WelcomeVerifyEmailRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/oauth/complete': typeof OauthCompleteRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/welcome/recovery-code': typeof WelcomeRecoveryCodeRoute
+  '/welcome/verify-email': typeof WelcomeVerifyEmailRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/oauth/complete': typeof OauthCompleteRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/welcome/recovery-code': typeof WelcomeRecoveryCodeRoute
+  '/welcome/verify-email': typeof WelcomeVerifyEmailRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/oauth/complete'
     | '/projects/$projectId'
     | '/welcome/recovery-code'
+    | '/welcome/verify-email'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/oauth/complete'
     | '/projects/$projectId'
     | '/welcome/recovery-code'
+    | '/welcome/verify-email'
   id:
     | '__root__'
     | '/'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/oauth/complete'
     | '/projects/$projectId'
     | '/welcome/recovery-code'
+    | '/welcome/verify-email'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -183,6 +195,7 @@ export interface RootRouteChildren {
   UnlockRoute: typeof UnlockRoute
   OauthCompleteRoute: typeof OauthCompleteRoute
   WelcomeRecoveryCodeRoute: typeof WelcomeRecoveryCodeRoute
+  WelcomeVerifyEmailRoute: typeof WelcomeVerifyEmailRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -250,6 +263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/welcome/verify-email': {
+      id: '/welcome/verify-email'
+      path: '/welcome/verify-email'
+      fullPath: '/welcome/verify-email'
+      preLoaderRoute: typeof WelcomeVerifyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/welcome/recovery-code': {
       id: '/welcome/recovery-code'
       path: '/welcome/recovery-code'
@@ -298,7 +318,17 @@ const rootRouteChildren: RootRouteChildren = {
   UnlockRoute: UnlockRoute,
   OauthCompleteRoute: OauthCompleteRoute,
   WelcomeRecoveryCodeRoute: WelcomeRecoveryCodeRoute,
+  WelcomeVerifyEmailRoute: WelcomeVerifyEmailRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

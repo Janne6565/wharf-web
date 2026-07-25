@@ -66,7 +66,10 @@ async function runBootstrap(): Promise<void> {
       return;
     }
   } catch {
-    // No valid refresh cookie — treat as anonymous.
+    // No valid refresh cookie — treat as anonymous. This also covers the 403
+    // email_not_verified case (an account that never completed verification):
+    // there is nothing to retry, so the app resolves to anonymous and the
+    // guards send the visitor to sign in rather than looping on refresh.
   }
   store.dispatch(sessionResolvedAnonymous());
 }

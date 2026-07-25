@@ -12,12 +12,14 @@ import type {
   RecoveryResetRequest,
   RecoveryVerifyRequest,
   RegisterRequest,
+  ResendVerificationRequest,
   RotateProjectRequest,
   SubmitWrappedKeyRequest,
   UpdateMemberRoleRequest,
   UpdateProjectRequest,
   UpdatePublicKeyRequest,
   UpdateVaultRequest,
+  VerifyEmailRequest,
 } from "./generated/model";
 import { getOauth } from "./generated/oauth/oauth";
 import { getProjects } from "./generated/projects/projects";
@@ -31,7 +33,15 @@ const deviceCodes = getDeviceCodes();
 const oauth = getOauth();
 const projects = getProjects();
 
+// Register only creates the account and mails a 6-digit code (202) — it issues
+// no tokens and sets no cookie. The session comes from verifyEmail below.
 export const registerAccount = (body: RegisterRequest) => auth.register(body);
+// Completes registration: same SessionResponse shape as login.
+export const verifyEmail = (body: VerifyEmailRequest) => auth.verifyEmail(body);
+// Always 202 with an empty body (and a silent 60s cooldown), so the endpoint
+// never reveals whether the address belongs to an account.
+export const resendVerification = (body: ResendVerificationRequest) =>
+  auth.resendVerification(body);
 export const login = (body: LoginRequest) => auth.login(body);
 // One-time OAuth onboarding: registers the recovery key + initial vault (and,
 // when authKey is present, a password credential) atomically. Returns 204.

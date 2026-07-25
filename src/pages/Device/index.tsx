@@ -26,10 +26,10 @@ export function DevicePage() {
 
   return (
     <>
-      {/* During onboarding this is the final "[3] connect device" step; a
+      {/* During onboarding this is the final "[4] connect device" step; a
           returning user pairing a device instead gets a back link to their
           connections. */}
-      <AuthShell step={onboarding ? 3 : undefined} backTo={onboarding ? undefined : "/connections"}>
+      <AuthShell step={onboarding ? 4 : undefined} backTo={onboarding ? undefined : "/connections"}>
         <Card label={t("cards.device")} maxWidth={480}>
           <div className="text-center">
             <h2 className="mb-2 text-[20px] font-bold text-text">{t("device.title")}</h2>

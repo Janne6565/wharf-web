@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { getHttpStatus } from "@/api/httpError";
+import { getHttpStatus, getProblemCode, PROBLEM_CODES } from "@/api/httpError";
 import { login } from "@/api/wharf";
 import { establishSession } from "@/auth/session";
 import { unlockVaultWithPassword } from "@/auth/vaultUnlock";
@@ -23,6 +23,9 @@ export function useSigninLogic() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // Set when the account exists but its address was never verified: the screen
+  // then offers a link on to the verification step, carrying the typed address.
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
   const schema = useMemo(
     () =>
@@ -68,7 +71,10 @@ export function useSigninLogic() {
     },
     onError: (error: unknown) => {
       const status = getHttpStatus(error);
-      if (status === 401) {
+      if (status === 403 && getProblemCode(error) === PROBLEM_CODES.emailNotVerified) {
+        setUnverifiedEmail(normalizeEmail(form.getValues("email")));
+        setSubmitError(t("errors.emailNotVerified"));
+      } else if (status === 401) {
         setSubmitError(t("errors.invalidCredentials"));
       } else if (status === 429) {
         setSubmitError(t("errors.rateLimited"));
@@ -80,6 +86,7 @@ export function useSigninLogic() {
 
   const onSubmit = form.handleSubmit((values) => {
     setSubmitError(null);
+    setUnverifiedEmail(null);
     mutation.mutate(values);
   });
 
@@ -90,6 +97,7 @@ export function useSigninLogic() {
     form,
     onSubmit,
     submitError,
+    unverifiedEmail,
     isSubmitting: mutation.isPending,
     canSubmit: email.trim().length > 0 && password.length > 0,
   };

@@ -10,7 +10,8 @@ import { useSigninLogic } from "./useSigninLogic";
 
 export function SigninPage() {
   const { t } = useTranslation();
-  const { form, onSubmit, submitError, isSubmitting, canSubmit } = useSigninLogic();
+  const { form, onSubmit, submitError, unverifiedEmail, isSubmitting, canSubmit } =
+    useSigninLogic();
   const { register, formState } = form;
   const { errors } = formState;
 
@@ -42,6 +43,19 @@ export function SigninPage() {
           </div>
 
           {submitError ? <p className="mt-4 text-[13px] text-danger">{submitError}</p> : null}
+          {/* An unverified account can't be signed into at all, so pair the
+              message with the only way forward — carrying the typed address so
+              the verify screen has something to work with. */}
+          {unverifiedEmail ? (
+            <Link
+              to="/welcome/verify-email"
+              search={{ email: unverifiedEmail }}
+              data-testid="signin-verify-email"
+              className="mt-2 inline-block text-[13px] text-accent hover:text-accent-strong"
+            >
+              {t("signin.verifyEmail")}
+            </Link>
+          ) : null}
 
           <Button
             type="submit"

@@ -6,6 +6,7 @@
 
 import Axios, { type AxiosError, type AxiosRequestConfig } from "axios";
 import { clearAccessToken, getAccessToken, setAccessToken } from "@/auth/tokenStore";
+import { getProblemCode, PROBLEM_CODES } from "./httpError";
 
 // Base origin of the backend API. Empty in dev (the Vite proxy forwards /api to
 // :8080) or when same-origin in prod; set via VITE_API_URL for a cross-origin
@@ -64,6 +65,15 @@ AXIOS_INSTANCE.interceptors.response.use(
     const status = error.response?.status;
     const url = original?.url ?? "";
     const isAuthCall = url.startsWith(AUTH_PREFIX);
+
+    // An unverified account can never hold a session, so /auth/refresh answers
+    // 403 email_not_verified. Drop the (stale) in-memory token instead of
+    // retrying: without this a guarded screen would keep re-issuing a call that
+    // can never succeed, spinning forever.
+    if (status === 403 && getProblemCode(error) === PROBLEM_CODES.emailNotVerified) {
+      clearAccessToken();
+      return Promise.reject(error);
+    }
 
     if (status === 401 && original && !original._retried && !isAuthCall) {
       original._retried = true;

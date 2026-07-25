@@ -72,7 +72,54 @@ async function get(path: string, token?: string) {
 }
 
 describe.skipIf(!process.env.E2E)("backend E2E (live server)", () => {
-  it("register -> device-code -> login -> vault -> recover reset, full contract", async () => {
+  it("register returns 202 and issues no session until the email is verified", async () => {
+    const email = `e2e+${Date.now()}@wharf.test`;
+    const password = "correct horse battery staple";
+
+    const masterKey = await deriveMasterKey(password, email);
+    const authKey = await deriveAuthKey(masterKey);
+    const { blob, recoveryCode } = await createVault(password, initialVaultPayload());
+    const recoveryAuthKey = await deriveRecoveryAuthKey(recoverySecretFromCode(recoveryCode));
+
+    const reg = await post("/auth/register", {
+      email,
+      authKey,
+      recoveryAuthKey,
+      vault: toBase64(blob),
+    });
+    expect(reg.status).toBe(202);
+    expect(reg.json.verificationRequired).toBe(true);
+    // The whole point of the change: no credential of any kind comes back here.
+    expect(reg.json.tokens ?? null).toBeNull();
+
+    const dup = await post("/auth/register", {
+      email,
+      authKey,
+      recoveryAuthKey,
+      vault: toBase64(blob),
+    });
+    expect(dup.status).toBe(409);
+
+    // The account exists but is unverified, so login must be refused with the
+    // machine-readable code the clients branch on.
+    const login = await post("/auth/login", { email, authKey });
+    expect(login.status).toBe(403);
+    expect(login.json.code).toBe("email_not_verified");
+
+    // Resend is deliberately a non-oracle: 202 whether or not the address exists.
+    expect((await post("/auth/resend-verification", { email })).status).toBe(202);
+    expect((await post("/auth/resend-verification", { email: "nobody@wharf.test" })).status).toBe(
+      202,
+    );
+  });
+
+  // BLOCKED, not obsolete: everything below needs a *verified* account, and the
+  // only way to verify is the 6-digit code sent by email — which this suite has
+  // no way to read. Re-enable once the environment offers one of: a test mailbox
+  // (Mailpit/MailHog) the suite can poll, or a test-profile-only endpoint that
+  // returns the pending code. Left unskipped-but-failing would be worse: it would
+  // assert a contract that no longer exists.
+  it.skip("register -> device-code -> login -> vault -> recover reset, full contract", async () => {
     const email = `e2e+${Date.now()}@wharf.test`;
     const password = "correct horse battery staple";
     const expectedPayload = decoder.decode(initialVaultPayload());

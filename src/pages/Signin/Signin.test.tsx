@@ -15,7 +15,20 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => mocks.navigate,
-  Link: ({ children, ...props }: { children: React.ReactNode }) => <a {...props}>{children}</a>,
+  // `search` is an object, so serialise it onto a data attribute the assertions
+  // can read (a raw object prop would render as "[object Object]").
+  Link: ({
+    children,
+    search,
+    ...props
+  }: {
+    children: React.ReactNode;
+    search?: Record<string, string>;
+  }) => (
+    <a data-search={search ? JSON.stringify(search) : undefined} {...props}>
+      {children}
+    </a>
+  ),
 }));
 vi.mock("@/api/wharf", () => ({
   login: mocks.login,
@@ -100,6 +113,26 @@ describe("SigninPage", () => {
       id: "u1",
       email: "deniz@acme.io",
     });
+  });
+
+  it("tells an unverified account to verify and links on with the typed email", async () => {
+    mocks.login.mockRejectedValue({
+      isAxiosError: true,
+      response: { status: 403, data: { code: "email_not_verified" } },
+    });
+    const user = userEvent.setup();
+    renderWithProviders(<SigninPage />);
+
+    await user.type(screen.getByTestId("signin-email"), "Deniz@Acme.io");
+    await user.type(screen.getByTestId("signin-password"), "super-secret-pass");
+    await user.click(screen.getByTestId("signin-submit"));
+
+    expect(await screen.findByText(/your account is not verified yet/i)).toBeInTheDocument();
+    const link = screen.getByTestId("signin-verify-email");
+    expect(link).toHaveAttribute("to", "/welcome/verify-email");
+    // The address is normalized before it is handed on, exactly as login sends it.
+    expect(link).toHaveAttribute("data-search", JSON.stringify({ email: "deniz@acme.io" }));
+    expect(mocks.navigate).not.toHaveBeenCalled();
   });
 
   it("surfaces an invalid-credentials error on 401", async () => {

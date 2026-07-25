@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { clearPendingRecoveryCode, getPendingRecoveryCode } from "@/auth/recoveryHandoff";
+import { getPendingVerificationEmail } from "@/auth/verificationHandoff";
 import { formatRecoveryGroups } from "@/crypto";
 import { copyToClipboard, downloadTextFile, printText } from "@/lib/browser";
 
@@ -37,7 +38,17 @@ export function useRecoveryCodeLogic() {
 
   const handleContinue = useCallback(() => {
     clearPendingRecoveryCode();
-    // Final onboarding step — flag it so /device shows the step indicator.
+    // Classic sign-up: this screen deliberately runs *before* email verification
+    // because it is purely client-side (the code lives in memory and the vault
+    // already exists server-side from register). Verifying first would risk an
+    // account whose owner closed the tab without ever seeing their recovery code.
+    if (getPendingVerificationEmail()) {
+      void navigate({ to: "/welcome/verify-email" });
+      return;
+    }
+    // OAuth onboarding reaches this screen from /set-password with a session
+    // already in hand and the address verified by the provider — nothing to
+    // verify, so go straight to the final step.
     void navigate({ to: "/device", search: { onboarding: true } });
   }, [navigate]);
 
