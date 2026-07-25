@@ -1,13 +1,19 @@
-import { Link } from "@tanstack/react-router";
+import { LockOpen } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { AuthShell } from "@/components/AuthShell";
-import { Button } from "@/components/Button";
+import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/Card";
-import { FormField } from "@/components/FormField";
-import { hostTarget, type VaultHost } from "@/lib/vaultDocument";
-import { DangerZone } from "./DangerZone";
+import { cn } from "@/lib/utils";
+import { HostFilter } from "./HostFilter";
+import { HostList } from "./HostList";
+import { LockedVault } from "./LockedVault";
+import { PairTerminal } from "./PairTerminal";
 import { useConnectionsLogic } from "./useConnectionsLogic";
 
+const CARD_WIDTH = 640;
+
+// The post-auth hub. Two states in one card: sealed vault (unlock form), or the
+// unlocked host list — which itself is either the list or, with nothing stored,
+// the promoted pair-a-terminal invitation.
 export function ConnectionsPage() {
   const { t } = useTranslation();
   const {
@@ -22,190 +28,166 @@ export function ConnectionsPage() {
     totalHosts,
     query,
     setQuery,
+    clearFilter,
+    listRef,
+    listOverflowing,
+    lockedHostCount,
     handleLock,
   } = useConnectionsLogic();
+  const open = vaultUnlocked || noVault;
 
   return (
-    <AuthShell backTo="/">
-      <Card label={t("cards.connections")} maxWidth={640}>
-        <Header count={totalHosts} unlocked={vaultUnlocked} onLock={handleLock} />
-        {vaultUnlocked || noVault ? (
-          <VaultBody hosts={hosts} totalHosts={totalHosts} query={query} setQuery={setQuery} />
+    <AppShell nav="account" width={CARD_WIDTH}>
+      <Card
+        label={open ? t("cards.connections") : t("cards.lockedVault")}
+        maxWidth={CARD_WIDTH}
+        // The open card runs its rows and strips edge to edge; the locked one
+        // is an ordinary padded panel.
+        padded={!open}
+      >
+        {open ? (
+          <UnlockedBody
+            hosts={hosts}
+            totalHosts={totalHosts}
+            query={query}
+            setQuery={setQuery}
+            clearFilter={clearFilter}
+            onLock={handleLock}
+            listRef={listRef}
+          />
         ) : (
-          <LockedPanel
+          <LockedVault
             form={form}
             onSubmit={onSubmit}
             error={unlockError}
             loading={isUnlocking}
             canSubmit={canSubmit}
+            hostCount={lockedHostCount}
           />
         )}
-        <Footer />
-        <DangerZone />
       </Card>
-    </AuthShell>
+      {open && totalHosts > 0 && hosts.length > 0 ? (
+        <ListHint shown={hosts.length} total={totalHosts} overflowing={listOverflowing} />
+      ) : null}
+    </AppShell>
+  );
+}
+
+interface UnlockedBodyProps {
+  readonly hosts: ReturnType<typeof useConnectionsLogic>["hosts"];
+  readonly totalHosts: number;
+  readonly query: string;
+  readonly setQuery: (value: string) => void;
+  readonly clearFilter: () => void;
+  readonly onLock: () => void;
+  readonly listRef: ReturnType<typeof useConnectionsLogic>["listRef"];
+}
+
+// The open vault. <PairTerminal> appears exactly once in either branch — as the
+// promoted empty state, or as the footer strip under the list.
+function UnlockedBody({
+  hosts,
+  totalHosts,
+  query,
+  setQuery,
+  clearFilter,
+  onLock,
+  listRef,
+}: UnlockedBodyProps) {
+  const empty = totalHosts === 0;
+  return (
+    <>
+      <Header
+        shown={hosts.length}
+        total={totalHosts}
+        filtering={query.trim().length > 0}
+        onLock={onLock}
+      />
+      <HostFilter query={query} setQuery={setQuery} onClear={clearFilter} disabled={empty} />
+      {empty ? (
+        <PairTerminal promoted />
+      ) : (
+        <>
+          <HostList
+            hosts={hosts}
+            listRef={listRef}
+            totalHosts={totalHosts}
+            query={query}
+            onClearFilter={clearFilter}
+          />
+          <PairTerminal />
+        </>
+      )}
+    </>
+  );
+}
+
+interface ListHintProps {
+  readonly shown: number;
+  readonly total: number;
+  readonly overflowing: boolean;
+}
+
+// The line under the card. It only ever states what is actually true: the
+// "scroll for more" half appears only when the list really overflows, and the
+// whole hint is dropped when everything in the vault is on screen.
+function ListHint({ shown, total, overflowing }: ListHintProps) {
+  const { t } = useTranslation();
+  if (!overflowing && shown === total) return null;
+  return (
+    <p
+      data-testid="connections-list-hint"
+      className="mx-auto mt-3 w-full text-right text-[12px] text-faint"
+      style={{ maxWidth: CARD_WIDTH }}
+    >
+      {overflowing
+        ? t("connections.listHintScroll", { shown: String(shown), total: String(total) })
+        : t("connections.listHint", { shown: String(shown), total: String(total) })}
+    </p>
   );
 }
 
 interface HeaderProps {
-  readonly count: number;
-  readonly unlocked: boolean;
+  readonly shown: number;
+  readonly total: number;
+  readonly filtering: boolean;
   readonly onLock: () => void;
 }
 
-function Header({ count, unlocked, onLock }: HeaderProps) {
+// Title, a count chip that narrows to "shown / total" while filtering, and the
+// control that seals the vault again.
+function Header({ shown, total, filtering, onLock }: HeaderProps) {
   const { t } = useTranslation();
   return (
-    <div className="mb-4 flex items-center justify-between gap-3">
+    <div className="flex items-start justify-between gap-4 px-6 pt-[26px] pb-[18px]">
       <div className="flex items-baseline gap-2.5">
-        <h2 className="text-[20px] font-bold text-text">{t("connections.title")}</h2>
-        {unlocked ? (
-          <span className="text-[12.5px] text-dim">{t("connections.count", { count })}</span>
-        ) : null}
-      </div>
-      {unlocked ? (
-        <button
-          type="button"
-          onClick={onLock}
-          data-testid="connections-lock"
-          className="text-[12.5px] text-dim hover:text-accent"
+        <h2 className="text-[19px] font-bold text-text">{t("connections.title")}</h2>
+        <span
+          data-testid="connections-count"
+          // The chip is a bare number by design; the spelled-out count stays
+          // reachable as its title rather than being dropped altogether.
+          title={t("connections.count", { count: total })}
+          className={cn(
+            "border border-border px-[7px] py-px text-[12px]",
+            total === 0 ? "text-dim" : "text-muted",
+          )}
         >
-          [ {t("connections.lock")} ]
-        </button>
-      ) : null}
-    </div>
-  );
-}
-
-interface VaultBodyProps {
-  readonly hosts: readonly VaultHost[];
-  readonly totalHosts: number;
-  readonly query: string;
-  readonly setQuery: (value: string) => void;
-}
-
-function VaultBody({ hosts, totalHosts, query, setQuery }: VaultBodyProps) {
-  const { t } = useTranslation();
-  if (totalHosts === 0) return <EmptyState />;
-  return (
-    <div>
-      <FormField
-        label={t("connections.filter")}
-        data-testid="connections-filter"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
-      {hosts.length === 0 ? (
-        <p className="mt-6 text-center text-[13px] text-dim">{t("connections.noMatches")}</p>
-      ) : (
-        <div className="mt-4 flex flex-col gap-2.5">
-          {hosts.map((host) => (
-            <HostRow key={host.id} host={host} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function authMarker(host: VaultHost): "key" | "password" | null {
-  if (host.authMethod === "password") return "password";
-  if (host.authMethod === "key" || host.keyPath) return "key";
-  return null;
-}
-
-function HostRow({ host }: { readonly host: VaultHost }) {
-  const { t } = useTranslation();
-  const marker = authMarker(host);
-  return (
-    <div className="border border-border bg-input px-4 py-3">
-      <div className="flex items-baseline justify-between gap-3">
-        <span className="text-[14px] text-text">{host.name}</span>
-        {marker ? (
-          <span className="text-[11.5px] text-dim">
-            {marker === "key" ? t("connections.authKey") : t("connections.authPassword")}
-          </span>
-        ) : null}
+          {filtering
+            ? t("connections.countFiltered", { shown: String(shown), total: String(total) })
+            : String(total)}
+        </span>
       </div>
-      <div className="break-all text-[12.5px] text-dim">{hostTarget(host)}</div>
-      {host.tags && host.tags.length > 0 ? (
-        <div className="mt-1.5 flex flex-wrap gap-2">
-          {host.tags.map((tag) => (
-            <span key={tag} className="text-[11.5px] text-blue">
-              #{tag}
-            </span>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function EmptyState() {
-  const { t } = useTranslation();
-  return (
-    <div className="py-6 text-center">
-      <p className="text-[13px] text-muted">{t("connections.empty")}</p>
-      <Link
-        to="/device"
-        search={{ onboarding: false }}
-        className="mt-3 inline-block text-[13px] text-accent hover:text-accent-strong"
+      <button
+        type="button"
+        onClick={onLock}
+        data-testid="connections-lock"
+        className="flex shrink-0 items-center gap-[7px] border border-border px-[11px] py-1.5 text-[12.5px] text-subtle hover:border-accent hover:text-text"
       >
-        {t("connections.pairTerminal")}
-      </Link>
+        <LockOpen size={14} aria-hidden className="text-muted" />
+        {"[ "}
+        {t("connections.lock")}
+        {" ]"}
+      </button>
     </div>
-  );
-}
-
-interface LockedPanelProps {
-  readonly form: ReturnType<typeof useConnectionsLogic>["form"];
-  readonly onSubmit: ReturnType<typeof useConnectionsLogic>["onSubmit"];
-  readonly error: string | null;
-  readonly loading: boolean;
-  readonly canSubmit: boolean;
-}
-
-function LockedPanel({ form, onSubmit, error, loading, canSubmit }: LockedPanelProps) {
-  const { t } = useTranslation();
-  const { register, formState } = form;
-  return (
-    <div>
-      <p className="mb-6 text-[13px] leading-relaxed text-muted">{t("connections.lockedHint")}</p>
-      <form onSubmit={onSubmit} noValidate>
-        <FormField
-          label={t("fields.masterPassword")}
-          type="password"
-          autoComplete="current-password"
-          data-testid="connections-password"
-          error={formState.errors.password?.message}
-          {...register("password")}
-        />
-        {error ? <p className="mt-4 text-[13px] text-danger">{error}</p> : null}
-        <Button
-          type="submit"
-          loading={loading}
-          disabled={!canSubmit}
-          data-testid="connections-unlock"
-          className="mt-6"
-        >
-          {t("connections.unlock")}
-        </Button>
-      </form>
-    </div>
-  );
-}
-
-function Footer() {
-  const { t } = useTranslation();
-  return (
-    <p className="mt-5 border-t border-border pt-3.5 text-center text-[12.5px] text-dim">
-      <Link
-        to="/device"
-        search={{ onboarding: false }}
-        className="text-accent hover:text-accent-strong"
-      >
-        {t("connections.pairTerminal")}
-      </Link>
-    </p>
   );
 }

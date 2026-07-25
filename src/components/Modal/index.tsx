@@ -1,7 +1,10 @@
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 import { useModalLogic } from "./useModalLogic";
+
+type Tone = "default" | "danger";
 
 interface ModalProps {
   readonly open: boolean;
@@ -10,11 +13,29 @@ interface ModalProps {
   readonly label: string;
   // Max panel width in px (mirrors <Card>); defaults to 440.
   readonly maxWidth?: number;
+  // "danger" paints the panel border red, for confirmations whose outcome is
+  // destructive and irreversible.
+  readonly tone?: Tone;
+  // Off when the dialog's own sections carry the padding (the delete-account
+  // confirmation runs its project table and warning edge to edge).
+  readonly padded?: boolean;
   readonly children: ReactNode;
   readonly "data-testid"?: string;
 }
 
 const DEFAULT_MAX_WIDTH = 440;
+
+const TONES: Record<Tone, string> = {
+  default: "border-border",
+  danger: "border-danger-border",
+};
+
+// The label chip sits on the panel itself, so it takes the panel's background
+// (unlike <Card>, whose chip sits on the page).
+const LABEL_TONES: Record<Tone, string> = {
+  default: "text-dim",
+  danger: "text-danger",
+};
 
 // A centered dialog over a dimmed backdrop, styled like <Card> (square panel,
 // 1px border, notched label chip). Closes on Escape, backdrop click, or the
@@ -25,6 +46,8 @@ export function Modal({
   onClose,
   label,
   maxWidth = DEFAULT_MAX_WIDTH,
+  tone = "default",
+  padded = true,
   children,
   "data-testid": testId,
 }: ModalProps) {
@@ -37,7 +60,7 @@ export function Modal({
         type="button"
         aria-label={t("common.close")}
         onClick={onClose}
-        className="absolute inset-0 cursor-default bg-bg/80"
+        className="absolute inset-0 cursor-default bg-backdrop"
       />
       <div
         role="dialog"
@@ -45,9 +68,17 @@ export function Modal({
         aria-label={label}
         data-testid={testId}
         style={{ maxWidth }}
-        className="relative mx-auto w-full border border-border bg-card p-5 sm:p-8"
+        className={cn(
+          "relative mx-auto w-full border bg-card shadow-[0_24px_70px_rgba(0,0,0,0.6)]",
+          padded && "p-5 sm:p-8",
+          TONES[tone],
+        )}
       >
-        <span className="absolute -top-2.5 left-3 bg-bg px-2 text-[13px] text-dim">{label}</span>
+        <span
+          className={cn("absolute -top-2.5 left-3 bg-card px-2 text-[12.5px]", LABEL_TONES[tone])}
+        >
+          {label}
+        </span>
         <button
           type="button"
           onClick={onClose}

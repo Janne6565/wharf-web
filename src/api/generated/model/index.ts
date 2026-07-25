@@ -20,6 +20,7 @@ export * from './deviceCodeExchangeRequest';
 export * from './deviceCodeResponse';
 export * from './loginRequest';
 export * from './loginRequestTokenMode';
+export * from './logoutRequest';
 export * from './myInvite';
 export * from './oAuthProvidersResponse';
 export * from './oauthAuthorizeParams';

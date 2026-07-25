@@ -17,6 +17,7 @@ import { Route as RecoverRouteImport } from './routes/recover'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as DeviceRouteImport } from './routes/device'
 import { Route as ConnectionsRouteImport } from './routes/connections'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WelcomeVerifyEmailRouteImport } from './routes/welcome.verify-email'
 import { Route as WelcomeRecoveryCodeRouteImport } from './routes/welcome.recovery-code'
@@ -63,6 +64,11 @@ const ConnectionsRoute = ConnectionsRouteImport.update({
   path: '/connections',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -91,6 +97,7 @@ const OauthCompleteRoute = OauthCompleteRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/connections': typeof ConnectionsRoute
   '/device': typeof DeviceRoute
   '/projects': typeof ProjectsRouteWithChildren
@@ -106,6 +113,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/connections': typeof ConnectionsRoute
   '/device': typeof DeviceRoute
   '/projects': typeof ProjectsRouteWithChildren
@@ -122,6 +130,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/connections': typeof ConnectionsRoute
   '/device': typeof DeviceRoute
   '/projects': typeof ProjectsRouteWithChildren
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/account'
     | '/connections'
     | '/device'
     | '/projects'
@@ -154,6 +164,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/account'
     | '/connections'
     | '/device'
     | '/projects'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/account'
     | '/connections'
     | '/device'
     | '/projects'
@@ -185,6 +197,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRoute
   ConnectionsRoute: typeof ConnectionsRoute
   DeviceRoute: typeof DeviceRoute
   ProjectsRoute: typeof ProjectsRouteWithChildren
@@ -256,6 +269,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ConnectionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -308,6 +328,7 @@ const ProjectsRouteWithChildren = ProjectsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRoute,
   ConnectionsRoute: ConnectionsRoute,
   DeviceRoute: DeviceRoute,
   ProjectsRoute: ProjectsRouteWithChildren,

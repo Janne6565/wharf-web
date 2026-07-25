@@ -41,6 +41,17 @@
   --color-danger: #e0685e;
   --color-danger-bg: #120a0a;
   --color-danger-border: #5a2a28;
+  /* Prose inside a danger box (a muted red-grey), and the dark ink that sits on
+     a solid danger button. */
+  --color-danger-muted: #a08a88;
+  --color-danger-ink: #1a0906;
+
+  /* The dim wash a modal lays over the page. */
+  --color-backdrop: rgba(4, 7, 10, 0.82);
+
+  /* The quietest step below --color-dim: a control that is present but has
+     nothing to act on (the filter over an empty vault, the no-match icon). */
+  --color-faint: #33465a;
 
   /* Empty password-strength segment, and the disabled primary-button block. */
   --color-meter-empty: #141b23;

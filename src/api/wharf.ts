@@ -52,6 +52,10 @@ export const listOAuthProviders = () => oauth.listOAuthProviders();
 // Cookie-mode refresh: the httpOnly refresh cookie is read server-side, so the
 // body is empty. Used by the app-load silent refresh.
 export const refreshSession = () => auth.refresh({});
+// Ends the session in this browser (204). Always returns the clearing refresh
+// cookie, even when the access token has already expired — which is exactly
+// when people sign out. The `allDevices` variant is deliberately not surfaced.
+export const logout = () => auth.logout({});
 export const recoverVerify = (body: RecoveryVerifyRequest) => auth.recoverVerify(body);
 export const recoverReset = (body: RecoveryResetRequest) => auth.recoverReset(body);
 

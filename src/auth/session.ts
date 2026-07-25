@@ -12,7 +12,7 @@ import {
 } from "./authSlice";
 import { decodeIdentityToken } from "./jwt";
 import { clearAccessToken, setAccessToken } from "./tokenStore";
-import { clearVaultSession } from "./vaultSession";
+import { clearVaultSession, forgetHostCount } from "./vaultSession";
 
 // establishSession stores the access token and publishes the signed-in user to
 // Redux. Prefer the user object returned by the auth endpoint; otherwise read
@@ -39,6 +39,7 @@ export async function establishSession(
 export function clearSession(): void {
   clearAccessToken();
   clearVaultSession();
+  forgetHostCount();
   store.dispatch(sessionCleared());
 }
 

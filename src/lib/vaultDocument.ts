@@ -11,6 +11,9 @@
 //       ONLY inside this encrypted payload. A schema-1 document is a valid
 //       schema-2 document with `identity` absent, so parsing accepts both and
 //       never rejects on version.
+//   3 — schema 2 plus an optional `keys[]` array of stored SSH keyfiles. We do
+//       NOT map those onto a type: only their number is surfaced (see
+//       keyCount below).
 
 // A stored SSH connection. Mirrors the Go host shape minus `password`, which is
 // intentionally absent from the type so it is never carried into the UI.
@@ -41,6 +44,14 @@ export interface VaultDocument {
   readonly schema: number;
   readonly hosts: readonly VaultHost[];
   readonly identity?: VaultIdentity;
+  // How many SSH keyfiles the schema-3 `keys[]` array holds, and how many hosts
+  // carry a stored password. These exist ONLY so the account-deletion warning
+  // can say what is destroyed. They are counts on purpose: the key material and
+  // the password values are never mapped onto a type and must never gain a
+  // value accessor here — the whole point of toHost() below is that a secret
+  // cannot reach the UI by rendering a parsed document.
+  readonly keyCount: number;
+  readonly storedPasswordCount: number;
 }
 
 interface RawHost {
@@ -106,6 +117,15 @@ function toIdentity(raw: unknown): VaultIdentity | undefined {
   return { x25519Priv, x25519Pub, createdAt };
 }
 
+// How many raw hosts carry a non-empty stored password. Only the number is
+// returned — the value itself is dropped by toHost() and never read again.
+function countStoredPasswords(rawHosts: readonly unknown[]): number {
+  return rawHosts.filter((host) => {
+    const password = (host as { password?: unknown }).password;
+    return typeof password === "string" && password.length > 0;
+  }).length;
+}
+
 // Decode and parse the decrypted vault payload into a typed document. Tolerates
 // a missing/absent `hosts` array (defaults to []) and a missing `identity`
 // (schema-1 documents, or accounts without an identity yet).
@@ -114,6 +134,7 @@ export function parseVaultDocument(payload: Uint8Array): VaultDocument {
     schema?: unknown;
     hosts?: unknown;
     identity?: unknown;
+    keys?: unknown;
   };
   const rawHosts = Array.isArray(raw.hosts) ? raw.hosts : [];
   const identity = toIdentity(raw.identity);
@@ -121,6 +142,8 @@ export function parseVaultDocument(payload: Uint8Array): VaultDocument {
     schema: typeof raw.schema === "number" ? raw.schema : 1,
     hosts: rawHosts.map((h) => toHost(h as RawHost)),
     ...(identity ? { identity } : {}),
+    keyCount: Array.isArray(raw.keys) ? raw.keys.length : 0,
+    storedPasswordCount: countStoredPasswords(rawHosts),
   };
 }
 

@@ -61,7 +61,7 @@ const acceptInvite = (
       options);
     }
   /**
- * Includes hasPassword / hasRecovery / hasVault flags and the account's public key.
+ * Includes the emailVerified flag, the hasPassword / hasRecovery / hasVault flags and the account's public key.
  * @summary Get the authenticated account's profile
  */
 const getCurrentUser = (

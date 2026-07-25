@@ -1,15 +1,22 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getHttpStatus } from "@/api/httpError";
 import { getVault } from "@/api/wharf";
-import { clearVaultSession, getVaultSession, setVaultSession } from "@/auth/vaultSession";
+import {
+  clearVaultSession,
+  getRememberedHostCount,
+  getVaultSession,
+  rememberHostCount,
+  setVaultSession,
+} from "@/auth/vaultSession";
 import type { UnlockedVault } from "@/crypto";
 import { fromBase64, unlockWithPassword } from "@/crypto";
 import { parseVaultDocument, type VaultHost } from "@/lib/vaultDocument";
+import { useHostListOverflow } from "./useHostListOverflow";
 
 interface UnlockValues {
   password: string;
@@ -43,12 +50,19 @@ export function useConnectionsLogic() {
 
   const document = useMemo(() => (vault ? parseVaultDocument(vault.payload) : null), [vault]);
   const totalHosts = document?.hosts.length ?? 0;
+  // Remember the size of the open vault so the locked screen can still name it
+  // after a lock in this session (see vaultSession.rememberHostCount).
+  useEffect(() => {
+    if (document) rememberHostCount(document.hosts.length);
+  }, [document]);
 
   const hosts = useMemo(() => {
     if (!document) return [];
     const needle = query.trim().toLowerCase();
     return document.hosts.filter((host) => matchesQuery(host, needle));
   }, [document, query]);
+
+  const { listRef, listOverflowing } = useHostListOverflow(hosts.length);
 
   const mutation = useMutation({
     mutationFn: async (values: UnlockValues) => {
@@ -78,11 +92,14 @@ export function useConnectionsLogic() {
     mutation.mutate(values);
   });
 
+  const clearFilter = useCallback(() => setQuery(""), []);
+
   const handleLock = useCallback(() => {
     clearVaultSession();
     setVault(null);
     setNoVault(false);
     setUnlockError(null);
+    setQuery("");
     form.reset({ password: "" });
   }, [form]);
 
@@ -100,6 +117,13 @@ export function useConnectionsLogic() {
     totalHosts,
     query,
     setQuery,
+    clearFilter,
+    // The capped, scrollable list and whether it actually overflows, so the
+    // hint under the card can only ever describe what is on screen.
+    listRef,
+    listOverflowing,
+    // Known only if this session had the vault open; null on a cold load.
+    lockedHostCount: getRememberedHostCount(),
     handleLock,
   };
 }

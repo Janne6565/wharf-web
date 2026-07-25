@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { Spinner } from "@/components/Spinner";
 import { cn } from "@/lib/utils";
 
-type Variant = "primary" | "secondary" | "ghost";
+type Variant = "primary" | "secondary" | "danger" | "danger-outline" | "ghost";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   readonly variant?: Variant;
@@ -18,6 +18,13 @@ const VARIANTS: Record<Variant, string> = {
     "h-12 bg-accent text-[14px] font-bold text-accent-ink hover:bg-accent-strong disabled:border disabled:border-border disabled:bg-disabled-bg disabled:text-dim",
   secondary:
     "h-[42px] border border-border text-[13px] text-subtle hover:border-accent hover:text-text",
+  // Red outline: the same destructive action where the stakes are low enough
+  // that a solid block would be shouting.
+  "danger-outline":
+    "h-[42px] border border-danger text-[13px] font-bold text-danger hover:bg-danger hover:text-danger-ink disabled:border-border disabled:text-dim disabled:hover:bg-transparent",
+  // Solid red: only for a control that destroys something irreversibly.
+  danger:
+    "h-12 bg-danger text-[14px] font-bold text-danger-ink hover:bg-danger/90 disabled:border disabled:border-border disabled:bg-disabled-bg disabled:text-dim",
   ghost: "h-[42px] text-[13px] text-muted hover:text-text",
 };
 
