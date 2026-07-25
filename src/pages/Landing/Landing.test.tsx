@@ -26,6 +26,11 @@ describe("LandingPage", () => {
     expect(screen.queryByTestId("landing-profile")).not.toBeInTheDocument();
   });
 
+  it("links to the legal notice from the footer", () => {
+    renderWithProviders(<LandingPage />);
+    expect(screen.getByTestId("landing-impressum")).toHaveAttribute("to", "/impressum");
+  });
+
   it("shows a profile link into the unlock flow for a signed-in visitor", () => {
     renderWithProviders(<LandingPage />, { user: { id: "u1", email: "deniz@acme.io" } });
     const profile = screen.getByTestId("landing-profile");

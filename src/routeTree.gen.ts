@@ -15,6 +15,7 @@ import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SetPasswordRouteImport } from './routes/set-password'
 import { Route as RecoverRouteImport } from './routes/recover'
 import { Route as ProjectsRouteImport } from './routes/projects'
+import { Route as ImpressumRouteImport } from './routes/impressum'
 import { Route as DeviceRouteImport } from './routes/device'
 import { Route as ConnectionsRouteImport } from './routes/connections'
 import { Route as AccountRouteImport } from './routes/account'
@@ -52,6 +53,11 @@ const RecoverRoute = RecoverRouteImport.update({
 const ProjectsRoute = ProjectsRouteImport.update({
   id: '/projects',
   path: '/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImpressumRoute = ImpressumRouteImport.update({
+  id: '/impressum',
+  path: '/impressum',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DeviceRoute = DeviceRouteImport.update({
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/connections': typeof ConnectionsRoute
   '/device': typeof DeviceRoute
+  '/impressum': typeof ImpressumRoute
   '/projects': typeof ProjectsRouteWithChildren
   '/recover': typeof RecoverRoute
   '/set-password': typeof SetPasswordRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/connections': typeof ConnectionsRoute
   '/device': typeof DeviceRoute
+  '/impressum': typeof ImpressumRoute
   '/projects': typeof ProjectsRouteWithChildren
   '/recover': typeof RecoverRoute
   '/set-password': typeof SetPasswordRoute
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/connections': typeof ConnectionsRoute
   '/device': typeof DeviceRoute
+  '/impressum': typeof ImpressumRoute
   '/projects': typeof ProjectsRouteWithChildren
   '/recover': typeof RecoverRoute
   '/set-password': typeof SetPasswordRoute
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/connections'
     | '/device'
+    | '/impressum'
     | '/projects'
     | '/recover'
     | '/set-password'
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/connections'
     | '/device'
+    | '/impressum'
     | '/projects'
     | '/recover'
     | '/set-password'
@@ -183,6 +194,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/connections'
     | '/device'
+    | '/impressum'
     | '/projects'
     | '/recover'
     | '/set-password'
@@ -200,6 +212,7 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   ConnectionsRoute: typeof ConnectionsRoute
   DeviceRoute: typeof DeviceRoute
+  ImpressumRoute: typeof ImpressumRoute
   ProjectsRoute: typeof ProjectsRouteWithChildren
   RecoverRoute: typeof RecoverRoute
   SetPasswordRoute: typeof SetPasswordRoute
@@ -253,6 +266,13 @@ declare module '@tanstack/react-router' {
       path: '/projects'
       fullPath: '/projects'
       preLoaderRoute: typeof ProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/impressum': {
+      id: '/impressum'
+      path: '/impressum'
+      fullPath: '/impressum'
+      preLoaderRoute: typeof ImpressumRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/device': {
@@ -331,6 +351,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRoute,
   ConnectionsRoute: ConnectionsRoute,
   DeviceRoute: DeviceRoute,
+  ImpressumRoute: ImpressumRoute,
   ProjectsRoute: ProjectsRouteWithChildren,
   RecoverRoute: RecoverRoute,
   SetPasswordRoute: SetPasswordRoute,

@@ -324,6 +324,9 @@ const enCommon = {
       security: "security",
       docs: "docs",
       github: "github",
+      // The legal notice itself is German (see pages/Impressum/lib.ts); only
+      // the link label lives here, and "impressum" reads the same either way.
+      impressum: "impressum",
       copyright: "© 2026 wharf",
     },
   },

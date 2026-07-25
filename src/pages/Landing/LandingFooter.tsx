@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { INSTALL_COMMAND } from "@/lib/install";
 
@@ -27,6 +28,13 @@ export function LandingFooter() {
           >
             {t("landing.footer.github")}
           </a>
+          <Link
+            to="/impressum"
+            data-testid="landing-impressum"
+            className="text-dim hover:text-accent-strong"
+          >
+            {t("landing.footer.impressum")}
+          </Link>
           <span>{t("landing.footer.copyright")}</span>
         </div>
       </div>
