@@ -14,6 +14,7 @@ export {
   recoverySecretFromCode,
 } from "./crockford";
 export { CryptoError, type CryptoErrorCode } from "./errors";
+export { fingerprintPublicKey } from "./fingerprint";
 export {
   AUTH_INFO,
   deriveAuthKey,

@@ -4,8 +4,13 @@
 // half is published (PUT /users/me/public-key) so others can seal project DEKs
 // to it.
 //
-// Three cases, mirroring the TUI:
-//   * vault has an identity  → idempotently publish it if the server lacks one.
+// Four cases, mirroring the TUI:
+//   * vault has an identity  → idempotently publish it if the server lacks one,
+//     and — critically — verify that the key the server publishes FOR US is the
+//     one in this vault. The server distributes the public keys everyone seals
+//     project DEKs to; if it publishes a key of its own choosing for our account,
+//     every DEK shared "with us" is sealed to whoever holds that key instead. A
+//     divergence is reported as "key-mismatch" and must stop the client dead.
 //   * no identity, server HAS a key → this vault is behind the device that
 //     created the identity; we must NOT mint a second keypair (that would strand
 //     every DEK wrapped to the real key). Report "needs-sync" so the UI can tell
@@ -17,14 +22,26 @@ import { getHttpStatus } from "@/api/httpError";
 import { getCurrentUser, getVault, updatePublicKey, updateVault } from "@/api/wharf";
 import { setVaultSession } from "@/auth/vaultSession";
 import type { UnlockedVault } from "@/crypto";
-import { fromBase64, generateKeypair, HEADER_LEN, sealPayload, toBase64 } from "@/crypto";
+import {
+  fingerprintPublicKey,
+  fromBase64,
+  generateKeypair,
+  HEADER_LEN,
+  sealPayload,
+  toBase64,
+} from "@/crypto";
 import { parseVaultDocument, type VaultIdentity } from "@/lib/vaultDocument";
 
 const CONFLICT = 409;
 
 export type IdentityStatus =
   | { readonly kind: "ready"; readonly identity: VaultIdentity }
-  | { readonly kind: "needs-sync" };
+  | { readonly kind: "needs-sync" }
+  | {
+      readonly kind: "key-mismatch";
+      readonly localFingerprint: string;
+      readonly serverFingerprint: string;
+    };
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -96,8 +113,43 @@ async function generateAndStore(vault: UnlockedVault): Promise<VaultIdentity> {
   return identity;
 }
 
+// keyBytes decodes a base64 public key. A key the server sends that isn't even
+// valid base64 is a mismatch by definition; we still want *something* stable to
+// fingerprint and display, so fall back to the raw characters it sent.
+function keyBytes(base64: string): Uint8Array {
+  try {
+    return fromBase64(base64);
+  } catch {
+    return encoder.encode(base64);
+  }
+}
+
+function sameKey(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+  return diff === 0;
+}
+
+// compareToServer checks the key the server publishes for this account against
+// the one this vault holds. Equal → ready. Different → key-mismatch, with both
+// fingerprints so the user can compare them against another device.
+async function compareToServer(
+  identity: VaultIdentity,
+  serverKey: string,
+): Promise<IdentityStatus> {
+  const local = keyBytes(identity.x25519Pub);
+  const remote = keyBytes(serverKey);
+  if (sameKey(local, remote)) return { kind: "ready", identity };
+  return {
+    kind: "key-mismatch",
+    localFingerprint: await fingerprintPublicKey(local),
+    serverFingerprint: await fingerprintPublicKey(remote),
+  };
+}
+
 // ensureIdentity resolves the account's project identity for the given unlocked
-// vault, performing whichever of the three cases applies. It only ever writes on
+// vault, performing whichever of the four cases applies. It only ever writes on
 // the generate path; the publish path is idempotent.
 export async function ensureIdentity(vault: UnlockedVault): Promise<IdentityStatus> {
   const doc = parseVaultDocument(vault.payload);
@@ -105,8 +157,11 @@ export async function ensureIdentity(vault: UnlockedVault): Promise<IdentityStat
   const serverKey = me.publicKey ?? null;
 
   if (doc.identity) {
-    if (!serverKey) await publishKey(doc.identity.x25519Pub);
-    return { kind: "ready", identity: doc.identity };
+    if (!serverKey) {
+      await publishKey(doc.identity.x25519Pub);
+      return { kind: "ready", identity: doc.identity };
+    }
+    return compareToServer(doc.identity, serverKey);
   }
   if (serverKey) {
     // Server has a key but this vault carries no identity: sync the vault from
@@ -130,6 +185,23 @@ export async function resetIdentity(vault: UnlockedVault): Promise<VaultIdentity
   await storeIdentity(vault, identity);
   await updatePublicKey({ publicKey: identity.x25519Pub, rotate: true });
   return identity;
+}
+
+// republishLocalKey is the remediation for the key-mismatch outcome: the key in
+// this vault is fine, it is the server's published copy that is wrong, so we
+// re-publish OUR key over it. Deliberately NOT resetIdentity — minting a new
+// keypair would throw away a perfectly good identity and every DEK already
+// sealed to it.
+//
+// rotate: true is required because the server refuses to replace an existing key
+// otherwise; as a side effect it nulls every wrapped project DEK the account
+// holds, so all projects re-enter awaiting-access until an admin re-grants
+// access. The caller must confirm that with the user first.
+export async function republishLocalKey(vault: UnlockedVault): Promise<VaultIdentity> {
+  const doc = parseVaultDocument(vault.payload);
+  if (!doc.identity) throw new Error("no local identity to republish");
+  await updatePublicKey({ publicKey: doc.identity.x25519Pub, rotate: true });
+  return doc.identity;
 }
 
 // identityKeys decodes a ready identity's base64 keypair into raw bytes for the

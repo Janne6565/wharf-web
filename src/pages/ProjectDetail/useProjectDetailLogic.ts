@@ -49,6 +49,16 @@ export function useProjectDetailLogic(projectId: string) {
   });
   const identity: VaultIdentity | null =
     identityQuery.data?.kind === "ready" ? identityQuery.data.identity : null;
+  // The server publishes a different public key for this account than the one in
+  // this vault — anything sealed "to us" may not be ours. Surfaced instead of the
+  // project body (see index.tsx).
+  const keyMismatch =
+    identityQuery.data?.kind === "key-mismatch"
+      ? {
+          localFingerprint: identityQuery.data.localFingerprint,
+          serverFingerprint: identityQuery.data.serverFingerprint,
+        }
+      : null;
 
   const meQuery = useQuery({ queryKey: ME_QUERY_KEY, queryFn: getCurrentUser });
 
@@ -132,6 +142,7 @@ export function useProjectDetailLogic(projectId: string) {
       : identityQuery.data
         ? identityQuery.data.kind
         : "loading",
+    keyMismatch,
     project,
     loading: projectQuery.isLoading,
     notFound: getHttpStatus(projectQuery.error) === NOT_FOUND,

@@ -28,7 +28,11 @@ vi.mock("@/api/wharf", () => ({
   createProject: mocks.createProject,
   getVault: mocks.getVault,
 }));
-vi.mock("@/vault/identity", () => ({ ensureIdentity: mocks.ensureIdentity }));
+vi.mock("@/vault/identity", () => ({
+  ensureIdentity: mocks.ensureIdentity,
+  republishLocalKey: vi.fn(),
+  resetIdentity: vi.fn(),
+}));
 vi.mock("@/vault/finalize", () => ({ runFinalizePass: mocks.runFinalizePass }));
 
 import { ProjectsPage } from "./index";
@@ -92,6 +96,27 @@ describe("ProjectsPage", () => {
     renderWithProviders(<ProjectsPage />);
 
     expect(await screen.findByText(/no projects yet/i)).toBeInTheDocument();
+  });
+
+  it("warns with both fingerprints and skips the finalize pass on a key mismatch", async () => {
+    primeVault();
+    mocks.ensureIdentity.mockResolvedValue({
+      kind: "key-mismatch",
+      localFingerprint: "Zmh6 rfhi vXds j8GL",
+      serverFingerprint: "cs1u hCLE B/tt CYaQ",
+    });
+    mocks.getMyInvites.mockResolvedValue([]);
+    mocks.listProjects.mockResolvedValue([
+      { id: "p1", name: "Atlas", role: "OWNER", memberCount: 3 },
+    ]);
+
+    renderWithProviders(<ProjectsPage />);
+
+    expect(await screen.findByTestId("key-mismatch-notice")).toBeInTheDocument();
+    expect(screen.getByTestId("key-fingerprint-local")).toHaveTextContent("Zmh6 rfhi vXds j8GL");
+    expect(screen.getByTestId("key-fingerprint-server")).toHaveTextContent("cs1u hCLE B/tt CYaQ");
+    // Sealing DEKs to server-supplied keys is halted while the server is suspect.
+    expect(mocks.runFinalizePass).not.toHaveBeenCalled();
   });
 
   it("shows the locked panel until the vault is unlocked", () => {

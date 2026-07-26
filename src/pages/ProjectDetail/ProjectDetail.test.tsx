@@ -34,6 +34,7 @@ vi.mock("@/api/wharf", () => ({
 vi.mock("@/vault/identity", () => ({
   ensureIdentity: mocks.ensureIdentity,
   resetIdentity: vi.fn(),
+  republishLocalKey: vi.fn(),
 }));
 vi.mock("@/vault/projectVaultAccess", () => ({ loadProjectVault: mocks.loadProjectVault }));
 

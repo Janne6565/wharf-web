@@ -6,6 +6,7 @@ import { Alert } from "@/components/Alert";
 import { AuthShell } from "@/components/AuthShell";
 import { Card } from "@/components/Card";
 import { IdentityNotice } from "@/components/IdentityNotice";
+import { KeyMismatchNotice } from "@/components/KeyMismatchNotice";
 import { LockedVaultPanel } from "@/components/LockedVaultPanel";
 import { DangerZone } from "./DangerZone";
 import { HostsCard } from "./HostsCard";
@@ -55,6 +56,20 @@ function Body({ logic, inviteOpen, setInviteOpen }: BodyProps) {
       <div className="flex flex-col gap-5">
         <BackLink />
         <IdentityNotice vault={logic.gate.vault} />
+      </div>
+    );
+  }
+  // The server's published key for this account isn't ours: nothing sealed to it
+  // can be trusted, so show only the warning rather than the project.
+  if (logic.keyMismatch && logic.gate.vault) {
+    return (
+      <div className="flex flex-col gap-5">
+        <BackLink />
+        <KeyMismatchNotice
+          vault={logic.gate.vault}
+          localFingerprint={logic.keyMismatch.localFingerprint}
+          serverFingerprint={logic.keyMismatch.serverFingerprint}
+        />
       </div>
     );
   }

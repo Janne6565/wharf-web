@@ -371,6 +371,23 @@ const enCommon = {
         cancel: "cancel",
         failed: "couldn't reset your identity — please try again.",
       },
+      mismatch: {
+        title: "Public key mismatch",
+        body: "The public key the server publishes for this account does not match the one in this vault. Project keys shared with this account may be going to someone else. Do not accept project invites until this is resolved.",
+        compare:
+          "Compare these against another device where your vault is unlocked — they should be identical.",
+        local: "in this vault",
+        server: "published by the server",
+        republish: {
+          action: "republish my key",
+          title: "Republish your public key",
+          body: "This re-publishes the key already in this vault over the server's copy — no new key is created. Replacing a published key also resets every wrapped project key on the server, so all your projects re-enter awaiting-access until an admin re-grants you access. If the server itself is compromised it can overwrite your key again — check the fingerprint afterwards.",
+          acknowledge: "I understand all my projects will re-enter awaiting-access.",
+          confirm: "republish key",
+          cancel: "cancel",
+          failed: "couldn't republish your key — please try again.",
+        },
+      },
     },
     errors: {
       loadFailed: "couldn't load your projects — please try again.",

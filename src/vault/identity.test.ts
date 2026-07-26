@@ -17,7 +17,7 @@ vi.mock("@/api/wharf", () => ({
 vi.mock("@/auth/vaultSession", () => ({ setVaultSession: mocks.setVaultSession }));
 
 import type { UnlockedVault } from "@/crypto";
-import { ensureIdentity, resetIdentity, withIdentity } from "./identity";
+import { ensureIdentity, republishLocalKey, resetIdentity, withIdentity } from "./identity";
 
 const encode = (value: unknown) => new TextEncoder().encode(JSON.stringify(value));
 const decode = (bytes: Uint8Array) => JSON.parse(new TextDecoder().decode(bytes));
@@ -71,6 +71,28 @@ describe("ensureIdentity", () => {
     expect(mocks.updateVault).not.toHaveBeenCalled();
   });
 
+  it("reports key-mismatch with both fingerprints when the server publishes a different key", async () => {
+    mocks.getCurrentUser.mockResolvedValue({ publicKey: "c2VydmVyLWtleQ==" });
+
+    const result = await ensureIdentity(vaultOf({ schema: 2, hosts: [], identity: IDENTITY }));
+
+    expect(result.kind).toBe("key-mismatch");
+    if (result.kind !== "key-mismatch") throw new Error("unreachable");
+    // Both fingerprints are shown so the user can compare against another device.
+    expect(result.localFingerprint).toMatch(/^\S{4} \S{4} \S{4} \S{4}$/);
+    expect(result.serverFingerprint).toMatch(/^\S{4} \S{4} \S{4} \S{4}$/);
+    expect(result.localFingerprint).not.toBe(result.serverFingerprint);
+    // Detection never writes or republishes anything on its own.
+    expect(mocks.updatePublicKey).not.toHaveBeenCalled();
+    expect(mocks.updateVault).not.toHaveBeenCalled();
+  });
+
+  it("stays ready when the server key is byte-identical to the vault's", async () => {
+    mocks.getCurrentUser.mockResolvedValue({ publicKey: IDENTITY.x25519Pub });
+    const result = await ensureIdentity(vaultOf({ schema: 2, hosts: [], identity: IDENTITY }));
+    expect(result).toEqual({ kind: "ready", identity: IDENTITY });
+  });
+
   it("reports needs-sync when the server has a key but this vault has no identity", async () => {
     mocks.getCurrentUser.mockResolvedValue({ publicKey: "someServerKey" });
     const result = await ensureIdentity(vaultOf({ schema: 1, hosts: [] }));
@@ -91,6 +113,28 @@ describe("ensureIdentity", () => {
     expect(mocks.updateVault.mock.calls[0][0].expectedVersion).toBe(7);
     expect(mocks.setVaultSession).toHaveBeenCalledTimes(1);
     expect(mocks.updatePublicKey).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("republishLocalKey", () => {
+  it("re-publishes the vault's own key with rotate and never mints a new one", async () => {
+    mocks.updatePublicKey.mockResolvedValue(undefined);
+
+    const identity = await republishLocalKey(vaultOf({ schema: 2, hosts: [], identity: IDENTITY }));
+
+    expect(identity).toEqual(IDENTITY);
+    expect(mocks.updatePublicKey).toHaveBeenCalledWith({
+      publicKey: IDENTITY.x25519Pub,
+      rotate: true,
+    });
+    // The local keypair is fine — only the server's copy was wrong.
+    expect(mocks.updateVault).not.toHaveBeenCalled();
+    expect(mocks.setVaultSession).not.toHaveBeenCalled();
+  });
+
+  it("refuses when this vault carries no identity", async () => {
+    await expect(republishLocalKey(vaultOf({ schema: 1, hosts: [] }))).rejects.toThrow();
+    expect(mocks.updatePublicKey).not.toHaveBeenCalled();
   });
 });
 

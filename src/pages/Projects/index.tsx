@@ -3,6 +3,7 @@ import { Alert } from "@/components/Alert";
 import { AuthShell } from "@/components/AuthShell";
 import { Card } from "@/components/Card";
 import { IdentityNotice } from "@/components/IdentityNotice";
+import { KeyMismatchNotice } from "@/components/KeyMismatchNotice";
 import { LockedVaultPanel } from "@/components/LockedVaultPanel";
 import { CreateProjectForm } from "./CreateProjectForm";
 import { InvitesBanner } from "./InvitesBanner";
@@ -64,6 +65,13 @@ function UnlockedBody({ logic }: { readonly logic: ReturnType<typeof useProjects
     <div className="flex flex-col gap-4">
       {logic.identityState === "needs-sync" && logic.gate.vault ? (
         <IdentityNotice vault={logic.gate.vault} />
+      ) : null}
+      {logic.keyMismatch && logic.gate.vault ? (
+        <KeyMismatchNotice
+          vault={logic.gate.vault}
+          localFingerprint={logic.keyMismatch.localFingerprint}
+          serverFingerprint={logic.keyMismatch.serverFingerprint}
+        />
       ) : null}
       {logic.identityState === "error" ? (
         <Alert tone="danger" className="mt-1">

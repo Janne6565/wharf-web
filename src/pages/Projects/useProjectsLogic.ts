@@ -15,7 +15,7 @@ import { runFinalizePass } from "@/vault/finalize";
 import { ensureIdentity } from "@/vault/identity";
 import { buildCreateProject } from "@/vault/projectCrypto";
 
-export type IdentityState = "loading" | "ready" | "needs-sync" | "error";
+export type IdentityState = "loading" | "ready" | "needs-sync" | "key-mismatch" | "error";
 
 const IDENTITY_KEY = ["projectIdentity"] as const;
 const PROJECTS_KEY = ["projects"] as const;
@@ -59,11 +59,16 @@ export function useProjectsLogic() {
   const identityState: IdentityState = identityQuery.isError
     ? "error"
     : identityQuery.data
-      ? identityQuery.data.kind === "needs-sync"
-        ? "needs-sync"
-        : "ready"
+      ? identityQuery.data.kind
       : "loading";
   const identityReady = identityQuery.data?.kind === "ready";
+  const keyMismatch =
+    identityQuery.data?.kind === "key-mismatch"
+      ? {
+          localFingerprint: identityQuery.data.localFingerprint,
+          serverFingerprint: identityQuery.data.serverFingerprint,
+        }
+      : null;
 
   const form = useForm<CreateValues>({
     defaultValues: { name: "", description: "" },
@@ -98,10 +103,12 @@ export function useProjectsLogic() {
 
   useEffect(() => {
     if (!identityReady || !listQuery.data || finalizedRef.current) return;
+    const status = identityQuery.data;
+    if (!status) return;
     finalizedRef.current = true;
-    const identity = identityQuery.data?.kind === "ready" ? identityQuery.data.identity : null;
-    if (!identity) return;
-    void runFinalizePass(identity, listQuery.data).then(() => {
+    // The pass re-checks the status itself and refuses anything but "ready" —
+    // this is only the early-out.
+    void runFinalizePass(status, listQuery.data).then(() => {
       void qc.invalidateQueries({ queryKey: PROJECTS_KEY });
     });
   }, [identityReady, listQuery.data, identityQuery.data, qc]);
@@ -129,6 +136,7 @@ export function useProjectsLogic() {
   return {
     gate,
     identityState,
+    keyMismatch,
     projects,
     listLoading: listQuery.isLoading,
     listError: listQuery.isError,
