@@ -17,6 +17,7 @@ import { Route as RecoverRouteImport } from './routes/recover'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as ImpressumRouteImport } from './routes/impressum'
 import { Route as DeviceRouteImport } from './routes/device'
+import { Route as DatenschutzRouteImport } from './routes/datenschutz'
 import { Route as ConnectionsRouteImport } from './routes/connections'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
@@ -65,6 +66,11 @@ const DeviceRoute = DeviceRouteImport.update({
   path: '/device',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DatenschutzRoute = DatenschutzRouteImport.update({
+  id: '/datenschutz',
+  path: '/datenschutz',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConnectionsRoute = ConnectionsRouteImport.update({
   id: '/connections',
   path: '/connections',
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/connections': typeof ConnectionsRoute
+  '/datenschutz': typeof DatenschutzRoute
   '/device': typeof DeviceRoute
   '/impressum': typeof ImpressumRoute
   '/projects': typeof ProjectsRouteWithChildren
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/connections': typeof ConnectionsRoute
+  '/datenschutz': typeof DatenschutzRoute
   '/device': typeof DeviceRoute
   '/impressum': typeof ImpressumRoute
   '/projects': typeof ProjectsRouteWithChildren
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/connections': typeof ConnectionsRoute
+  '/datenschutz': typeof DatenschutzRoute
   '/device': typeof DeviceRoute
   '/impressum': typeof ImpressumRoute
   '/projects': typeof ProjectsRouteWithChildren
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/connections'
+    | '/datenschutz'
     | '/device'
     | '/impressum'
     | '/projects'
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/connections'
+    | '/datenschutz'
     | '/device'
     | '/impressum'
     | '/projects'
@@ -193,6 +204,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/connections'
+    | '/datenschutz'
     | '/device'
     | '/impressum'
     | '/projects'
@@ -211,6 +223,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
   ConnectionsRoute: typeof ConnectionsRoute
+  DatenschutzRoute: typeof DatenschutzRoute
   DeviceRoute: typeof DeviceRoute
   ImpressumRoute: typeof ImpressumRoute
   ProjectsRoute: typeof ProjectsRouteWithChildren
@@ -282,6 +295,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeviceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/datenschutz': {
+      id: '/datenschutz'
+      path: '/datenschutz'
+      fullPath: '/datenschutz'
+      preLoaderRoute: typeof DatenschutzRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/connections': {
       id: '/connections'
       path: '/connections'
@@ -350,6 +370,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   ConnectionsRoute: ConnectionsRoute,
+  DatenschutzRoute: DatenschutzRoute,
   DeviceRoute: DeviceRoute,
   ImpressumRoute: ImpressumRoute,
   ProjectsRoute: ProjectsRouteWithChildren,

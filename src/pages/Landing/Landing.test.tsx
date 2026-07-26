@@ -31,6 +31,11 @@ describe("LandingPage", () => {
     expect(screen.getByTestId("landing-impressum")).toHaveAttribute("to", "/impressum");
   });
 
+  it("links to the privacy notice from the footer", () => {
+    renderWithProviders(<LandingPage />);
+    expect(screen.getByTestId("landing-datenschutz")).toHaveAttribute("to", "/datenschutz");
+  });
+
   it("shows a profile link into the unlock flow for a signed-in visitor", () => {
     renderWithProviders(<LandingPage />, { user: { id: "u1", email: "deniz@acme.io" } });
     const profile = screen.getByTestId("landing-profile");

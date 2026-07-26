@@ -35,6 +35,13 @@ export function LandingFooter() {
           >
             {t("landing.footer.impressum")}
           </Link>
+          <Link
+            to="/datenschutz"
+            data-testid="landing-datenschutz"
+            className="text-dim hover:text-accent-strong"
+          >
+            {t("landing.footer.datenschutz")}
+          </Link>
           <span>{t("landing.footer.copyright")}</span>
         </div>
       </div>
