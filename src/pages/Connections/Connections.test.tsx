@@ -9,6 +9,7 @@ import { renderWithProviders } from "@/test/utils";
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   getVault: vi.fn(),
+  getMyInvites: vi.fn(() => Promise.resolve([])),
   unlockWithPassword: vi.fn(),
   fromBase64: vi.fn(() => new Uint8Array(0)),
 }));
@@ -19,6 +20,8 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 vi.mock("@/api/wharf", () => ({
   getVault: mocks.getVault,
+  // Read by the shell header's invite badge.
+  getMyInvites: mocks.getMyInvites,
   // Read by the danger zone's deletion modal (both only fire once it opens).
   getCurrentUser: vi.fn(),
   getAccountDeletionPreview: vi.fn(),

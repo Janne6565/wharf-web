@@ -84,7 +84,17 @@ describe("DatenschutzPage", () => {
   it("cites the legal bases from Art. 6 DSGVO", () => {
     renderWithProviders(<DatenschutzPage />);
     expect(screen.getAllByText(/Art\. 6 Abs\. 1 lit\. b DSGVO/).length).toBe(2);
-    expect(screen.getByText(/Art\. 6 Abs\. 1 lit\. f DSGVO/)).toBeInTheDocument();
+    // Section 4 (Missbrauchsschutz) and section 8 (Sicherungskopien).
+    expect(screen.getAllByText(/Art\. 6 Abs\. 1 lit\. f DSGVO/).length).toBe(2);
+  });
+
+  // Backups outlive an account deletion by up to 60 days, so section 8 claiming a
+  // deletion is simply final would understate the retention. Keep the disclosure and
+  // its retention figure in step with strata.backup.retention-tiers.
+  it("discloses that backups retain deleted data for a bounded period", () => {
+    renderWithProviders(<DatenschutzPage />);
+    expect(screen.getByText(/Sicherungskopien \(Backups\) der Datenbank/)).toBeInTheDocument();
+    expect(screen.getByText(/längstens 60 Tage enthalten sein/)).toBeInTheDocument();
   });
 
   it("offers a back link to the landing page", () => {

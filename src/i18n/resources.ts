@@ -18,6 +18,9 @@ const enCommon = {
   nav: {
     account: "account",
     backToConnections: "back to connections",
+    projects: "projects",
+    pendingInvites_one: "{{count}} pending invite",
+    pendingInvites_other: "{{count}} pending invites",
   },
   common: {
     comingSoon: "coming soon",
@@ -185,11 +188,12 @@ const enCommon = {
     heading: "danger zone",
     dangerTitle: "Delete account",
     intro:
-      "removes your account, your vault and every project you own. permanent — wharf keeps no readable copy to restore from.",
+      "removes your account, your vault and every project you own. permanent — wharf will not bring any of it back. your vault stays unreadable to us either way.",
     action: "delete account",
     modalLabel: "confirm deletion",
     title: "Delete {{email}}",
-    subtitle: "this cannot be undone, paused or restored from a backup.",
+    subtitle:
+      "this cannot be undone or paused. backups are never used to restore a deleted account.",
     previewLoading: "checking what this will delete…",
     previewFailed: "couldn't check what this will delete — please try again.",
     ownedHeading: "projects deleted with it",

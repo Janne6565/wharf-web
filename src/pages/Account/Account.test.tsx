@@ -19,6 +19,8 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 vi.mock("@/api/wharf", () => ({
   logout: mocks.logout,
+  // Read by the shell header's invite badge.
+  getMyInvites: vi.fn(() => Promise.resolve([])),
   getCurrentUser: mocks.getCurrentUser,
   getAccountDeletionPreview: vi.fn(),
   deleteAccount: vi.fn(),

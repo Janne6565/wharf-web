@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { MyInvite, ProjectSummary } from "@/api/generated/model";
+import { MY_INVITES_KEY } from "@/api/queryKeys";
 import {
   acceptInvite,
   createProject,
@@ -19,7 +20,6 @@ export type IdentityState = "loading" | "ready" | "needs-sync" | "key-mismatch" 
 
 const IDENTITY_KEY = ["projectIdentity"] as const;
 const PROJECTS_KEY = ["projects"] as const;
-const INVITES_KEY = ["myInvites"] as const;
 
 interface CreateValues {
   name: string;
@@ -50,7 +50,7 @@ export function useProjectsLogic() {
   });
 
   const invitesQuery = useQuery({
-    queryKey: INVITES_KEY,
+    queryKey: MY_INVITES_KEY,
     queryFn: getMyInvites,
     enabled: gate.vaultUnlocked,
     retry: false,
@@ -117,14 +117,14 @@ export function useProjectsLogic() {
     mutationFn: (id: string) => acceptInvite(id),
     onSuccess: () => {
       armFinalize();
-      void qc.invalidateQueries({ queryKey: INVITES_KEY });
+      void qc.invalidateQueries({ queryKey: MY_INVITES_KEY });
       void qc.invalidateQueries({ queryKey: PROJECTS_KEY });
     },
   });
 
   const declineMutation = useMutation({
     mutationFn: (id: string) => declineInvite(id),
-    onSuccess: () => void qc.invalidateQueries({ queryKey: INVITES_KEY }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: MY_INVITES_KEY }),
   });
 
   const onCreateSubmit = form.handleSubmit((values) => createMutation.mutate(values));

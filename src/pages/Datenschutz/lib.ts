@@ -89,12 +89,14 @@ export const DATENSCHUTZ_SECTIONS: readonly DatenschutzSection[] = [
       "Sitzungs-Token: Zugriffstoken 15 Minuten, Erneuerungstoken 30 Tage.",
       "Verifizierungscodes 15 Minuten, Geräte-Codes zur Terminal-Kopplung 10 Minuten, Einladungen 14 Tage.",
       "IP-Adressen zur Anfragebegrenzung längstens eine Stunde.",
+      "Sicherungskopien der Datenbank längstens 60 Tage (siehe Abschnitt 8).",
     ],
   },
   {
     heading: "8. Löschung des Kontos",
     paragraphs: [
-      "Du kannst dein Konto jederzeit selbst löschen (Bereich „Account“). Dabei werden das Konto, der verschlüsselte Vault, deine Mitgliedschaften sowie alle Projekte gelöscht, deren Eigentümer du bist — auch dann, wenn diese Projekte weitere Mitglieder haben. Die Löschung ist endgültig.",
+      "Du kannst dein Konto jederzeit selbst löschen (Bereich „Account“). Dabei werden das Konto, der verschlüsselte Vault, deine Mitgliedschaften sowie alle Projekte gelöscht, deren Eigentümer du bist — auch dann, wenn diese Projekte weitere Mitglieder haben. Die Löschung ist endgültig; ein gelöschtes Konto wird nicht wiederhergestellt.",
+      "Zur Absicherung gegen Datenverlust und Systemausfälle werden regelmäßig Sicherungskopien (Backups) der Datenbank erstellt — berechtigtes Interesse an einem sicheren Betrieb, Art. 6 Abs. 1 lit. f DSGVO in Verbindung mit Art. 32 DSGVO. Nach einer Löschung können deine Kontodaten in diesen Sicherungen noch längstens 60 Tage enthalten sein; sie werden dort nicht mehr aktiv verarbeitet und danach automatisch gelöscht. Sicherungen werden ausschließlich zur Wiederherstellung nach einem Systemausfall verwendet, nicht zur Wiederherstellung einzelner Konten. Für die Vault-Inhalte ändert sich dadurch nichts: Sie liegen auch in einer Sicherung ausschließlich als Chiffrat vor (siehe Abschnitt 2).",
     ],
   },
 ];
