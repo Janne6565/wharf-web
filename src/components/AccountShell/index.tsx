@@ -25,17 +25,24 @@ interface AccountShellProps {
 export function AccountShell({ active, children }: AccountShellProps) {
   const { t } = useTranslation();
   return (
-    <AppShell nav="connections" width={SHELL_WIDTH}>
+    <AppShell nav="connections" width={SHELL_WIDTH} align="top">
       <div
-        className="mx-auto flex w-full flex-col gap-6 md:flex-row md:gap-0"
+        className="mx-auto flex w-full flex-col gap-6 md:flex-row md:items-start md:gap-0"
         style={{ maxWidth: SHELL_WIDTH }}
       >
         {/* On mobile the sidebar becomes a row of tabs above the panel rather
             than a drawer: there are two items, and a drawer to hold two items
-            is a control the user has to learn for no gain. */}
+            is a control the user has to learn for no gain.
+
+            md:self-start (via the row's items-start) is what keeps the nav from
+            stretching to the height of whatever is beside it. A flex item
+            stretches by default, so without it the nav — and the divider it used
+            to draw — was as tall as the panel, and every page with different
+            content resized the navigation itself. It now measures its own two
+            items and nothing else; sticky keeps it in view on the long pages. */}
         <nav
           aria-label={t("account.navLabel")}
-          className="flex shrink-0 gap-2 border-border md:w-[220px] md:flex-col md:gap-1 md:border-r md:pr-4"
+          className="flex shrink-0 gap-2 md:sticky md:top-10 md:w-[220px] md:flex-col md:gap-1 md:self-start md:pr-4"
         >
           <NavItem
             to="/account"
@@ -52,7 +59,12 @@ export function AccountShell({ active, children }: AccountShellProps) {
             testId="account-nav-notifications"
           />
         </nav>
-        <div className="flex min-w-0 flex-1 flex-col gap-[26px] md:pl-8">{children}</div>
+        {/* The divider belongs to the panel, not to the nav. Drawn here it spans
+            the content it separates — the full-height rule the design shows —
+            while leaving the nav's own height independent of it. */}
+        <div className="flex min-w-0 flex-1 flex-col gap-[26px] border-border md:border-l md:pl-8">
+          {children}
+        </div>
       </div>
     </AppShell>
   );
