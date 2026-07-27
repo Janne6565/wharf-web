@@ -84,6 +84,22 @@ describe("SetPasswordPage", () => {
     );
   });
 
+  it("stays on the recovery-code screen after setup flips hasVault in the profile cache", async () => {
+    // Regression: onSuccess writes hasVault:true into the ME cache, which re-runs
+    // the "already has a vault" effect. If that effect still navigates, it lands
+    // after the recovery-code navigation and the one-time code is never shown.
+    seedHappyPath();
+    const user = userEvent.setup();
+    renderWithProviders(<SetPasswordPage />);
+
+    await fillAndSubmit(user);
+
+    await waitFor(() =>
+      expect(mocks.navigate).toHaveBeenCalledWith({ to: "/welcome/recovery-code" }),
+    );
+    expect(mocks.navigate).not.toHaveBeenCalledWith({ to: "/unlock" });
+  });
+
   it("routes forward instead of erroring when setup reports 409 (already set up)", async () => {
     seedHappyPath();
     mocks.setupAccount.mockRejectedValue({ isAxiosError: true, response: { status: 409 } });

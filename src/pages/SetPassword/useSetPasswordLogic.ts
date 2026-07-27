@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -36,8 +36,15 @@ export function useSetPasswordLogic() {
   // vault already exists (e.g. a reload after setup), route forward instead.
   const profile = useQuery({ queryKey: ME_QUERY_KEY, queryFn: getCurrentUser, retry: false });
 
+  // Set once this screen has routed onwards itself. Our own success handler
+  // flips hasVault in the profile cache, which re-runs the effect below — without
+  // this latch it would immediately overrule the navigation to the recovery-code
+  // screen and the one-time code would never be shown.
+  const routedRef = useRef(false);
+
   useEffect(() => {
-    if (profile.data?.hasVault) {
+    if (profile.data?.hasVault && !routedRef.current) {
+      routedRef.current = true;
       void navigate({ to: "/unlock" });
     }
   }, [profile.data, navigate]);
@@ -88,6 +95,7 @@ export function useSetPasswordLogic() {
       queryClient.setQueryData<UserProfile>(ME_QUERY_KEY, (old) =>
         old ? { ...old, hasPassword: true, hasRecovery: true, hasVault: true } : old,
       );
+      routedRef.current = true;
       void navigate({ to: "/welcome/recovery-code" });
     },
     onError: async (error: unknown) => {
@@ -97,6 +105,7 @@ export function useSetPasswordLogic() {
         try {
           const me = await getCurrentUser();
           queryClient.setQueryData<UserProfile>(ME_QUERY_KEY, me);
+          routedRef.current = true;
           void navigate({ to: me.hasVault ? "/unlock" : "/device" });
           return;
         } catch {
