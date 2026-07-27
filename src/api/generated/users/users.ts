@@ -11,7 +11,9 @@ import type {
   AccountDeletionPreview,
   DeleteAccountRequest,
   MyInvite,
+  NotificationPreferencesResponse,
   ProjectSummary,
+  UpdateNotificationPreferencesRequest,
   UpdatePublicKeyRequest,
   UserProfile
 } from '.././model';
@@ -57,6 +59,32 @@ const acceptInvite = (
  options?: SecondParameter<typeof customInstance<ProjectSummary>>,) => {
       return customInstance<ProjectSummary>(
       {url: `/api/v1/users/me/invites/${id}/accept`, method: 'POST'
+    },
+      options);
+    }
+  /**
+ * Returns all seven keys, always. Security notices (recovery code used, master password changed/set, device paired, sign-in provider linked, account deleted) are not listed: they have no key and cannot be turned off.
+ * @summary Get the account's collaboration-mail preferences
+ */
+const getNotificationPreferences = (
+    
+ options?: SecondParameter<typeof customInstance<NotificationPreferencesResponse>>,) => {
+      return customInstance<NotificationPreferencesResponse>(
+      {url: `/api/v1/users/me/notifications`, method: 'GET'
+    },
+      options);
+    }
+  /**
+ * Partial: only the keys present are changed. Send a single key to toggle one notification, or all seven to set the whole group at once. Every key is validated before any is applied, so one bad key changes nothing. Returns the full, updated set.
+ * @summary Change one or more collaboration-mail preferences
+ */
+const updateNotificationPreferences = (
+    updateNotificationPreferencesRequest: BodyType<UpdateNotificationPreferencesRequest>,
+ options?: SecondParameter<typeof customInstance<NotificationPreferencesResponse>>,) => {
+      return customInstance<NotificationPreferencesResponse>(
+      {url: `/api/v1/users/me/notifications`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updateNotificationPreferencesRequest
     },
       options);
     }
@@ -109,10 +137,12 @@ const getAccountDeletionPreview = (
     },
       options);
     }
-  return {updatePublicKey,declineInvite,acceptInvite,getCurrentUser,deleteAccount,getMyInvites,getAccountDeletionPreview}};
+  return {updatePublicKey,declineInvite,acceptInvite,getNotificationPreferences,updateNotificationPreferences,getCurrentUser,deleteAccount,getMyInvites,getAccountDeletionPreview}};
 export type UpdatePublicKeyResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['updatePublicKey']>>>
 export type DeclineInviteResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['declineInvite']>>>
 export type AcceptInviteResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['acceptInvite']>>>
+export type GetNotificationPreferencesResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['getNotificationPreferences']>>>
+export type UpdateNotificationPreferencesResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['updateNotificationPreferences']>>>
 export type GetCurrentUserResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['getCurrentUser']>>>
 export type DeleteAccountResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['deleteAccount']>>>
 export type GetMyInvitesResult = NonNullable<Awaited<ReturnType<ReturnType<typeof getUsers>['getMyInvites']>>>

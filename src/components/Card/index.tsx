@@ -8,8 +8,9 @@ interface CardProps {
   readonly label: string;
   // Exact width in px per the design (signup 460, recovery-code 540, device 480,
   // signin 440, recover 500). Passed as an inline max-width because it is an
-  // exact, per-screen value rather than a shared design token.
-  readonly maxWidth: number;
+  // exact, per-screen value rather than a shared design token. Omitted where the
+  // card sits inside a column that already constrains it (the account panels).
+  readonly maxWidth?: number;
   // Off for cards whose sections carry their own padding and run edge to edge
   // (the connections list: full-bleed host rows and divider lines).
   readonly padded?: boolean;

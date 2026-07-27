@@ -17,6 +17,7 @@ import type {
   RotateProjectRequest,
   SubmitWrappedKeyRequest,
   UpdateMemberRoleRequest,
+  UpdateNotificationPreferencesRequest,
   UpdateProjectRequest,
   UpdatePublicKeyRequest,
   UpdateVaultRequest,
@@ -60,6 +61,12 @@ export const recoverVerify = (body: RecoveryVerifyRequest) => auth.recoverVerify
 export const recoverReset = (body: RecoveryResetRequest) => auth.recoverReset(body);
 
 export const getCurrentUser = () => users.getCurrentUser();
+
+// Collaboration-mail opt-outs. The update is a PATCH of only the keys that
+// changed, so one row's failed write cannot clobber the other six.
+export const getNotificationPreferences = () => users.getNotificationPreferences();
+export const updateNotificationPreferences = (body: UpdateNotificationPreferencesRequest) =>
+  users.updateNotificationPreferences(body);
 
 export const getVault = () => vault.getVault();
 export const updateVault = (body: UpdateVaultRequest) => vault.updateVault(body);

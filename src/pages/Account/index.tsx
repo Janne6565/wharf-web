@@ -1,29 +1,28 @@
 import { BadgeAlert, BadgeCheck, LogOut, Mail } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { AppShell } from "@/components/AppShell";
+import { AccountShell } from "@/components/AccountShell";
 import { Card } from "@/components/Card";
 import { Spinner } from "@/components/Spinner";
 import { cn } from "@/lib/utils";
 import { DangerZone } from "./DangerZone";
 import { useAccountLogic } from "./useAccountLogic";
 
-const CARD_WIDTH = 640;
-
-// The account screen: who you are signed in as, how to sign out, and the
-// irreversible way out.
+// The account overview: who you are signed in as, how to sign out, and the
+// irreversible way out. One section of the account area — the nav beside it is
+// what makes the others reachable.
 export function AccountPage() {
   const { t } = useTranslation();
   const { email, emailVerified, signOut, isSigningOut } = useAccountLogic();
 
   return (
-    <AppShell nav="connections" width={CARD_WIDTH}>
-      <Card label={t("cards.account")} maxWidth={CARD_WIDTH}>
+    <AccountShell active="overview">
+      <Card label={t("cards.account")}>
         <h2 className="mb-[22px] text-[19px] font-bold text-text">{t("account.title")}</h2>
         <EmailRow email={email} verified={emailVerified} />
         <SignOutRow onSignOut={signOut} loading={isSigningOut} />
         <DangerZone />
       </Card>
-    </AppShell>
+    </AccountShell>
   );
 }
 

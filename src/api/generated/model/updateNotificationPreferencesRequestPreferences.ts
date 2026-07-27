@@ -8,15 +8,4 @@ keys. It never sees passwords or plaintext vault contents.
  * OpenAPI spec version: v1
  */
 
-/**
- * A member's copy of the new DEK, sealed to their public key
- */
-export interface WrappedKeyEntry {
-  /** The member the key is wrapped for */
-  userId: string;
-  /**
-   * Base64-encoded DEK sealed to that member's public key (exactly 80 bytes)
-   * @minLength 1
-   */
-  wrappedDek: string;
-}
+export type UpdateNotificationPreferencesRequestPreferences = {[key: string]: boolean};

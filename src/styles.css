@@ -56,6 +56,23 @@
   /* Empty password-strength segment, and the disabled primary-button block. */
   --color-meter-empty: #141b23;
   --color-disabled-bg: #10161d;
+
+  /* Switch track and knob. Four states, so the values are tokens rather than
+     inline one-offs: on, off, and the muted half-lit pair shared by the
+     indeterminate master toggle and a row whose write is still in flight. */
+  --color-switch-on-bg: #123832;
+  --color-switch-off-bg: #10161d;
+  --color-switch-off-border: #2b3946;
+  --color-switch-off-knob: #46586a;
+  --color-switch-partial-bg: #0f2a26;
+  --color-switch-partial-knob: #2c7e72;
+
+  /* Hairline between rows inside a settings panel — a step below --color-border-subtle,
+     so a long list of rows reads as one block rather than a stack of boxes. */
+  --color-row-divider: #16202a;
+  /* Row copy: the secondary line under a row title, and both lines once the row is off. */
+  --color-row-hint: #6f7e8b;
+  --color-row-off-hint: #5e6c78;
 }
 
 html,

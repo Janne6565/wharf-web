@@ -12,7 +12,10 @@ keys. It never sees passwords or plaintext vault contents.
  * Publish or rotate the account's X25519 public key
  */
 export interface UpdatePublicKeyRequest {
-  /** Base64-encoded X25519 public key (exactly 32 bytes) */
+  /**
+   * Base64-encoded X25519 public key (exactly 32 bytes)
+   * @minLength 1
+   */
   publicKey: string;
   /** When true, replace an existing key and reset every wrapped key the account holds (each affected project membership re-enters the awaiting-key state) */
   rotate?: boolean;

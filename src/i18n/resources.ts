@@ -183,6 +183,91 @@ const enCommon = {
     unverified: "not verified",
     signOutHint: "signing out locks the vault on this device.",
     signOut: "sign out",
+    navLabel: "account settings",
+    navOverview: "account",
+    navNotifications: "notifications",
+  },
+  notifications: {
+    title: "Notifications",
+    subtitle: "wharf only sends email. changes save as you make them.",
+    securityLabel: "security notices",
+    collaborationLabel: "collaboration mail",
+    alwaysOn: "Always on",
+    securityExplainer:
+      "these cannot be turned off. wharf has no password reset on our side, no support-side recovery and no server-side activity log — email is the only channel where you can find out that something changed on your account.",
+    lockedOn: "locked on",
+    allCollaboration: "All collaboration mail",
+    groupHint:
+      "mail about projects and people. turning these off does not change security notices.",
+    groupPartial: "some of these are off. use this toggle to turn the whole group on or off.",
+    groupOff: "off. wharf will not email you about projects or people.",
+    enabledCount: "{{enabled}} / {{total}}",
+    allOffNote:
+      "invites, role changes and project deletions still happen — you will only see them inside wharf when you next open it. security notices are sent either way.",
+    noProjectsNote:
+      "this account is not part of any project yet, so none of these will send. the settings are saved now and take effect when you create or join a project.",
+    saving: "saving",
+    saved: "saved",
+    retry: "retry",
+    saveFailed:
+      "not saved — the request did not reach wharf. the switch is back to its stored value.",
+    groupSaveFailed: "nothing was saved — the request did not reach wharf.",
+    loadFailed: "couldn't load your notification settings.",
+    sentTo: "sent to the address on your account.",
+    items: {
+      recoveryCodeUsed: {
+        title: "Recovery code used",
+        description: "Sent when your recovery code unlocks the vault for a password reset.",
+      },
+      passwordChanged: {
+        title: "Master password changed",
+        description: "Sent when the master password on this account is replaced.",
+      },
+      passwordSet: {
+        title: "Master password set",
+        description: "Sent when a master password is set on an account that had none.",
+      },
+      devicePaired: {
+        title: "New device paired",
+        description: "Sent when a new terminal or browser finishes pairing with this account.",
+      },
+      providerLinked: {
+        title: "Sign-in provider linked",
+        description: "Sent when a Google or GitHub account is linked as a way to sign in.",
+      },
+      accountDeleted: {
+        title: "Account deleted",
+        description: "Sent when deletion of this account is confirmed.",
+      },
+      projectInvite: {
+        title: "Project invite",
+        description: "Sent when someone invites you to a project.",
+      },
+      inviteAccepted: {
+        title: "Invite accepted",
+        description: "Sent when someone you invited joins the project.",
+      },
+      inviteDeclined: {
+        title: "Invite declined",
+        description: "Sent when someone you invited declines.",
+      },
+      projectAccessGranted: {
+        title: "Project access granted",
+        description: "Sent when you are given access to a project.",
+      },
+      projectAccessRemoved: {
+        title: "Removed from project",
+        description: "Sent when your access to a project is removed.",
+      },
+      roleChanged: {
+        title: "Role changed",
+        description: "Sent when your role on a project changes.",
+      },
+      projectDeleted: {
+        title: "Project deleted",
+        description: "Sent when a project you have access to is deleted.",
+      },
+    },
   },
   deleteAccount: {
     heading: "danger zone",

@@ -25,6 +25,7 @@ import { Route as WelcomeVerifyEmailRouteImport } from './routes/welcome.verify-
 import { Route as WelcomeRecoveryCodeRouteImport } from './routes/welcome.recovery-code'
 import { Route as ProjectsProjectIdRouteImport } from './routes/projects.$projectId'
 import { Route as OauthCompleteRouteImport } from './routes/oauth.complete'
+import { Route as AccountNotificationsRouteImport } from './routes/account_.notifications'
 
 const UnlockRoute = UnlockRouteImport.update({
   id: '/unlock',
@@ -106,6 +107,11 @@ const OauthCompleteRoute = OauthCompleteRouteImport.update({
   path: '/oauth/complete',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountNotificationsRoute = AccountNotificationsRouteImport.update({
+  id: '/account_/notifications',
+  path: '/account/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/unlock': typeof UnlockRoute
+  '/account/notifications': typeof AccountNotificationsRoute
   '/oauth/complete': typeof OauthCompleteRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/welcome/recovery-code': typeof WelcomeRecoveryCodeRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/unlock': typeof UnlockRoute
+  '/account/notifications': typeof AccountNotificationsRoute
   '/oauth/complete': typeof OauthCompleteRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/welcome/recovery-code': typeof WelcomeRecoveryCodeRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/unlock': typeof UnlockRoute
+  '/account_/notifications': typeof AccountNotificationsRoute
   '/oauth/complete': typeof OauthCompleteRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/welcome/recovery-code': typeof WelcomeRecoveryCodeRoute
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/unlock'
+    | '/account/notifications'
     | '/oauth/complete'
     | '/projects/$projectId'
     | '/welcome/recovery-code'
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/unlock'
+    | '/account/notifications'
     | '/oauth/complete'
     | '/projects/$projectId'
     | '/welcome/recovery-code'
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/unlock'
+    | '/account_/notifications'
     | '/oauth/complete'
     | '/projects/$projectId'
     | '/welcome/recovery-code'
@@ -232,6 +244,7 @@ export interface RootRouteChildren {
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
   UnlockRoute: typeof UnlockRoute
+  AccountNotificationsRoute: typeof AccountNotificationsRoute
   OauthCompleteRoute: typeof OauthCompleteRoute
   WelcomeRecoveryCodeRoute: typeof WelcomeRecoveryCodeRoute
   WelcomeVerifyEmailRoute: typeof WelcomeVerifyEmailRoute
@@ -351,6 +364,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OauthCompleteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account_/notifications': {
+      id: '/account_/notifications'
+      path: '/account/notifications'
+      fullPath: '/account/notifications'
+      preLoaderRoute: typeof AccountNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -379,6 +399,7 @@ const rootRouteChildren: RootRouteChildren = {
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
   UnlockRoute: UnlockRoute,
+  AccountNotificationsRoute: AccountNotificationsRoute,
   OauthCompleteRoute: OauthCompleteRoute,
   WelcomeRecoveryCodeRoute: WelcomeRecoveryCodeRoute,
   WelcomeVerifyEmailRoute: WelcomeVerifyEmailRoute,
