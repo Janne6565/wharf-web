@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { Check, Copy } from "lucide-react";
 import { Trans, useTranslation } from "react-i18next";
 import { AuthShell } from "@/components/AuthShell";
 import { Card } from "@/components/Card";
@@ -11,6 +12,8 @@ export function DevicePage() {
     email,
     onboarding,
     formattedCode,
+    codeCopied,
+    copyCode,
     timeLabel,
     hasCode,
     isIssuing,
@@ -46,6 +49,23 @@ export function DevicePage() {
               className="mx-auto mt-6 border border-accent bg-input p-4 text-[26px] font-bold tracking-[0.2em] text-accent sm:p-5 sm:text-[34px] sm:tracking-[0.25em]"
             >
               {formattedCode ?? "····-····"}
+            </div>
+
+            <div className="mt-3 flex justify-center">
+              <button
+                type="button"
+                onClick={() => void copyCode()}
+                disabled={!formattedCode}
+                data-testid="device-code-copy"
+                className="inline-flex items-center gap-x-2 border border-border px-3 py-1 text-[12.5px] text-accent hover:text-accent-strong disabled:cursor-not-allowed disabled:text-dim disabled:hover:text-dim"
+              >
+                {codeCopied ? (
+                  <Check aria-hidden className="size-3.5" />
+                ) : (
+                  <Copy aria-hidden className="size-3.5" />
+                )}
+                {codeCopied ? t("device.codeCopied") : t("device.codeCopy")}
+              </button>
             </div>
 
             <div className="mt-3 text-[12.5px] text-dim" data-testid="device-status">

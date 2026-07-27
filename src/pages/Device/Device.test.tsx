@@ -60,6 +60,21 @@ describe("DevicePage", () => {
     expect(screen.queryByTestId("back-link")).not.toBeInTheDocument();
   });
 
+  it("copies the pairing code in its displayed form", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<DevicePage />, { user: { id: "u1", email: "deniz@acme.io" } });
+
+    const copy = screen.getByTestId("device-code-copy");
+    // Nothing to copy until the first code has been issued.
+    expect(copy).toBeDisabled();
+
+    await waitFor(() => expect(copy).toBeEnabled());
+    await user.click(copy);
+
+    expect(mocks.copyToClipboard).toHaveBeenCalledWith("K7PQ-M2XR");
+    await waitFor(() => expect(copy).toHaveTextContent(/copied/i));
+  });
+
   it("opens an install modal with the install command and copies it", async () => {
     const user = userEvent.setup();
     renderWithProviders(<DevicePage />, { user: { id: "u1", email: "deniz@acme.io" } });

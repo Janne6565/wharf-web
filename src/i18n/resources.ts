@@ -134,6 +134,8 @@ const enCommon = {
   device: {
     title: "Pair your terminal",
     subtitle: "signed in as <1>{{email}}</1> · type this code into wharf in your terminal:",
+    codeCopy: "copy code",
+    codeCopied: "copied",
     issuing: "issuing code…",
     expiresIn: "expires in {{time}}",
     reissuing: "code expired — issuing a fresh one…",

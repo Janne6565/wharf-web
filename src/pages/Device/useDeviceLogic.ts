@@ -31,6 +31,7 @@ export function useDeviceLogic() {
   const { onboarding } = deviceRoute.useSearch();
   const [installOpen, setInstallOpen] = useState(false);
   const [installCopied, setInstallCopied] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
   const [code, setCode] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<number | null>(null);
   const [remainingMs, setRemainingMs] = useState<number>(0);
@@ -40,6 +41,9 @@ export function useDeviceLogic() {
     mutationFn: issueDeviceCode,
     onSuccess: (data) => {
       setCode(data.code ?? null);
+      // A reissued code is a different code — the "copied" confirmation from the
+      // previous one would otherwise claim the new one is on the clipboard.
+      setCodeCopied(false);
       const expiry = data.expiresAt ? Date.parse(data.expiresAt) : null;
       setExpiresAt(expiry);
       // Seed the remaining time from the fresh expiry immediately, so the UI never
@@ -80,6 +84,17 @@ export function useDeviceLogic() {
     return () => globalThis.clearTimeout(id);
   }, [issue.isError]);
 
+  // Copied in the displayed XXXX-XXXX form: every client (TUI, mobile) strips
+  // non-alphanumerics from the pairing input, so the dash is harmless and what
+  // lands on the clipboard matches what is on screen.
+  const formattedCode = code ? formatCode(code) : null;
+  const copyCode = useCallback(async () => {
+    if (!formattedCode) return;
+    await copyToClipboard(formattedCode);
+    setCodeCopied(true);
+    globalThis.setTimeout(() => setCodeCopied(false), COPIED_RESET_MS);
+  }, [formattedCode]);
+
   const openInstall = useCallback(() => setInstallOpen(true), []);
   const closeInstall = useCallback(() => setInstallOpen(false), []);
   const copyInstall = useCallback(async () => {
@@ -97,7 +112,9 @@ export function useDeviceLogic() {
     openInstall,
     closeInstall,
     copyInstall,
-    formattedCode: code ? formatCode(code) : null,
+    formattedCode,
+    codeCopied,
+    copyCode,
     timeLabel: formatRemaining(remainingMs),
     hasCode: code !== null,
     isIssuing: issue.isPending,
