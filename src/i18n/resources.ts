@@ -17,7 +17,6 @@ const enCommon = {
   },
   nav: {
     account: "account",
-    backToConnections: "back to connections",
     projects: "projects",
     pendingInvites_one: "{{count}} pending invite",
     pendingInvites_other: "{{count}} pending invites",
@@ -499,7 +498,6 @@ const enCommon = {
     },
   },
   projectDetail: {
-    back: "projects",
     hostCount_one: "{{count}} host",
     hostCount_other: "{{count}} hosts",
     notFound: "this project no longer exists, or you have been removed from it.",

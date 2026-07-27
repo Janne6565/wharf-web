@@ -48,7 +48,7 @@ describe("DevicePage", () => {
   it("shows a back link to connections and no onboarding steps when paired from the hub", () => {
     renderWithProviders(<DevicePage />, { user: { id: "u1", email: "deniz@acme.io" } });
 
-    expect(screen.getByTestId("auth-back")).toHaveAttribute("to", "/connections");
+    expect(screen.getByTestId("back-link")).toHaveAttribute("to", "/connections");
     expect(screen.queryByText(/connect device/i)).not.toBeInTheDocument();
   });
 
@@ -57,7 +57,7 @@ describe("DevicePage", () => {
     renderWithProviders(<DevicePage />, { user: { id: "u1", email: "deniz@acme.io" } });
 
     expect(screen.getByText(/connect device/i)).toBeInTheDocument();
-    expect(screen.queryByTestId("auth-back")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("back-link")).not.toBeInTheDocument();
   });
 
   it("opens an install modal with the install command and copies it", async () => {

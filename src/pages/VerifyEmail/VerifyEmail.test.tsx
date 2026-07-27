@@ -37,7 +37,7 @@ describe("VerifyEmailPage", () => {
 
     expect(screen.getByRole("heading", { name: /verify your email/i })).toBeInTheDocument();
     expect(screen.getByText(/deniz@acme.io/)).toBeInTheDocument();
-    expect(screen.queryByTestId("auth-back")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("back-link")).not.toBeInTheDocument();
   });
 
   it("keeps the submit button disabled until a code is entered", async () => {

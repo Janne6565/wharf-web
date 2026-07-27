@@ -62,7 +62,7 @@ describe("SigninPage", () => {
 
   it("renders a back link to the landing page", () => {
     renderWithProviders(<SigninPage />);
-    expect(screen.getByTestId("auth-back")).toHaveAttribute("to", "/");
+    expect(screen.getByTestId("back-link")).toHaveAttribute("to", "/");
   });
 
   it("keeps the submit button disabled until both fields are filled", async () => {

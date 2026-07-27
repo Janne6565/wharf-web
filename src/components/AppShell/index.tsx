@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronLeft, CircleUser, Users } from "lucide-react";
+import { CircleUser, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { BackLink } from "@/components/BackLink";
 import { LogoChip } from "@/components/LogoChip";
 import { cn } from "@/lib/utils";
 import { useAppShellLogic } from "./useAppShellLogic";
@@ -11,8 +12,9 @@ type ShellNav = "account" | "connections";
 
 interface AppShellProps {
   readonly children: ReactNode;
-  // Where the header's trailing link points: "account" renders the account
-  // link (shown on connections), "connections" the back link (on /account).
+  // Which control the header gets besides the always-present projects link:
+  // "account" renders the account link on the right (shown on connections),
+  // "connections" the back link on the left (on /account).
   readonly nav: ShellNav;
   // Width of the header row in px. Matches the card below it so the brand chip
   // and the nav link line up with the card's edges.
@@ -44,10 +46,13 @@ export function AppShell({ children, nav, width, align = "center" }: AppShellPro
         className="mx-auto flex w-full items-center justify-between gap-3"
         style={{ maxWidth: width }}
       >
-        <LogoChip />
+        <div className="flex items-center gap-4">
+          <LogoChip />
+          {nav === "connections" ? <BackLink to="/connections" /> : null}
+        </div>
         <nav className="flex items-center gap-4">
           <ProjectsLink inviteCount={inviteCount} />
-          {nav === "account" ? <AccountLink email={email} /> : <BackToConnectionsLink />}
+          {nav === "account" ? <AccountLink email={email} /> : null}
         </nav>
       </header>
       <div className="w-full">{children}</div>
@@ -92,20 +97,6 @@ function AccountLink({ email }: { readonly email: string | null }) {
     >
       <CircleUser size={15} aria-hidden className="text-dim" />
       {email ?? t("nav.account")}
-    </Link>
-  );
-}
-
-function BackToConnectionsLink() {
-  const { t } = useTranslation();
-  return (
-    <Link
-      to="/connections"
-      data-testid="shell-back"
-      className="flex items-center gap-2 text-[12.5px] text-accent hover:text-accent-strong"
-    >
-      <ChevronLeft size={15} aria-hidden />
-      {t("nav.backToConnections")}
     </Link>
   );
 }

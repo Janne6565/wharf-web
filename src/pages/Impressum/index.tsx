@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
-import { useTranslation } from "react-i18next";
+import { BackLink } from "@/components/BackLink";
 import { LogoChip } from "@/components/LogoChip";
 import {
   IMPRESSUM_CONTACT_HEADING,
@@ -16,23 +15,15 @@ import {
   IMPRESSUM_VAT,
 } from "./lib";
 
-// Quiet header: the brand chip links home and a back link sits opposite. The
+// Quiet header: the brand chip links home, with the shared back link beside it. The
 // landing nav's marketing actions have no place on a legal page.
 function ImpressumNav() {
-  const { t } = useTranslation();
   return (
     <nav className="mx-auto flex max-w-[1080px] items-center gap-5 px-5 py-[22px] sm:gap-8 sm:px-8">
       <Link to="/">
         <LogoChip />
       </Link>
-      <Link
-        to="/"
-        data-testid="impressum-back"
-        className="ml-auto flex items-center gap-1.5 text-[13px] text-dim hover:text-accent-strong"
-      >
-        <ArrowLeft size={14} aria-hidden />
-        {t("common.back")}
-      </Link>
+      <BackLink to="/" />
     </nav>
   );
 }

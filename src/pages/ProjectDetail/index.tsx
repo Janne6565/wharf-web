@@ -1,5 +1,3 @@
-import { Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert } from "@/components/Alert";
@@ -52,25 +50,17 @@ function Body({ logic, inviteOpen, setInviteOpen }: BodyProps) {
   // decrypted here, so surface the same needs-sync notice as the hub (with its
   // reset action) instead of leaving the hosts list spinning indefinitely.
   if (logic.identityState === "needs-sync" && logic.gate.vault) {
-    return (
-      <div className="flex flex-col gap-5">
-        <BackLink />
-        <IdentityNotice vault={logic.gate.vault} />
-      </div>
-    );
+    return <IdentityNotice vault={logic.gate.vault} />;
   }
   // The server's published key for this account isn't ours: nothing sealed to it
   // can be trusted, so show only the warning rather than the project.
   if (logic.keyMismatch && logic.gate.vault) {
     return (
-      <div className="flex flex-col gap-5">
-        <BackLink />
-        <KeyMismatchNotice
-          vault={logic.gate.vault}
-          localFingerprint={logic.keyMismatch.localFingerprint}
-          serverFingerprint={logic.keyMismatch.serverFingerprint}
-        />
-      </div>
+      <KeyMismatchNotice
+        vault={logic.gate.vault}
+        localFingerprint={logic.keyMismatch.localFingerprint}
+        serverFingerprint={logic.keyMismatch.serverFingerprint}
+      />
     );
   }
   if (logic.loading || !logic.project) {
@@ -78,7 +68,6 @@ function Body({ logic, inviteOpen, setInviteOpen }: BodyProps) {
   }
   return (
     <div className="flex flex-col gap-5">
-      <BackLink />
       <MetadataHeader
         name={logic.project.name ?? ""}
         description={logic.project.description ?? ""}
@@ -105,18 +94,5 @@ function Body({ logic, inviteOpen, setInviteOpen }: BodyProps) {
         reset={logic.resetInvite}
       />
     </div>
-  );
-}
-
-function BackLink() {
-  const { t } = useTranslation();
-  return (
-    <Link
-      to="/projects"
-      className="flex items-center gap-1.5 text-[13px] text-dim hover:text-accent"
-    >
-      <ArrowLeft size={14} aria-hidden />
-      {t("projectDetail.back")}
-    </Link>
   );
 }

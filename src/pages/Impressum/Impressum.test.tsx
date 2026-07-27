@@ -51,6 +51,6 @@ describe("ImpressumPage", () => {
 
   it("offers a back link to the landing page", () => {
     renderWithProviders(<ImpressumPage />);
-    expect(screen.getByTestId("impressum-back")).toHaveAttribute("to", "/");
+    expect(screen.getByTestId("back-link")).toHaveAttribute("to", "/");
   });
 });

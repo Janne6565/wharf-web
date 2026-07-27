@@ -99,6 +99,6 @@ describe("DatenschutzPage", () => {
 
   it("offers a back link to the landing page", () => {
     renderWithProviders(<DatenschutzPage />);
-    expect(screen.getByTestId("datenschutz-back")).toHaveAttribute("to", "/");
+    expect(screen.getByTestId("back-link")).toHaveAttribute("to", "/");
   });
 });
