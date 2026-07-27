@@ -6,7 +6,7 @@ import { ProjectDetailPage } from "@/pages/ProjectDetail";
 // Client-only + vault-gated like the projects hub. The route reads the path param
 // and hands it to the page as a prop, keeping the page router-independent (and so
 // trivially testable).
-export const Route = createFileRoute("/projects/$projectId")({
+export const Route = createFileRoute("/projects_/$projectId")({
   ssr: false,
   beforeLoad: () => requireVault(),
   component: RouteComponent,

@@ -23,7 +23,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WelcomeVerifyEmailRouteImport } from './routes/welcome.verify-email'
 import { Route as WelcomeRecoveryCodeRouteImport } from './routes/welcome.recovery-code'
-import { Route as ProjectsProjectIdRouteImport } from './routes/projects.$projectId'
+import { Route as ProjectsProjectIdRouteImport } from './routes/projects_.$projectId'
 import { Route as OauthCompleteRouteImport } from './routes/oauth.complete'
 import { Route as AccountNotificationsRouteImport } from './routes/account_.notifications'
 
@@ -98,9 +98,9 @@ const WelcomeRecoveryCodeRoute = WelcomeRecoveryCodeRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProjectsProjectIdRoute = ProjectsProjectIdRouteImport.update({
-  id: '/$projectId',
-  path: '/$projectId',
-  getParentRoute: () => ProjectsRoute,
+  id: '/projects_/$projectId',
+  path: '/projects/$projectId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const OauthCompleteRoute = OauthCompleteRouteImport.update({
   id: '/oauth/complete',
@@ -120,7 +120,7 @@ export interface FileRoutesByFullPath {
   '/datenschutz': typeof DatenschutzRoute
   '/device': typeof DeviceRoute
   '/impressum': typeof ImpressumRoute
-  '/projects': typeof ProjectsRouteWithChildren
+  '/projects': typeof ProjectsRoute
   '/recover': typeof RecoverRoute
   '/set-password': typeof SetPasswordRoute
   '/signin': typeof SigninRoute
@@ -139,7 +139,7 @@ export interface FileRoutesByTo {
   '/datenschutz': typeof DatenschutzRoute
   '/device': typeof DeviceRoute
   '/impressum': typeof ImpressumRoute
-  '/projects': typeof ProjectsRouteWithChildren
+  '/projects': typeof ProjectsRoute
   '/recover': typeof RecoverRoute
   '/set-password': typeof SetPasswordRoute
   '/signin': typeof SigninRoute
@@ -159,7 +159,7 @@ export interface FileRoutesById {
   '/datenschutz': typeof DatenschutzRoute
   '/device': typeof DeviceRoute
   '/impressum': typeof ImpressumRoute
-  '/projects': typeof ProjectsRouteWithChildren
+  '/projects': typeof ProjectsRoute
   '/recover': typeof RecoverRoute
   '/set-password': typeof SetPasswordRoute
   '/signin': typeof SigninRoute
@@ -167,7 +167,7 @@ export interface FileRoutesById {
   '/unlock': typeof UnlockRoute
   '/account_/notifications': typeof AccountNotificationsRoute
   '/oauth/complete': typeof OauthCompleteRoute
-  '/projects/$projectId': typeof ProjectsProjectIdRoute
+  '/projects_/$projectId': typeof ProjectsProjectIdRoute
   '/welcome/recovery-code': typeof WelcomeRecoveryCodeRoute
   '/welcome/verify-email': typeof WelcomeVerifyEmailRoute
 }
@@ -226,7 +226,7 @@ export interface FileRouteTypes {
     | '/unlock'
     | '/account_/notifications'
     | '/oauth/complete'
-    | '/projects/$projectId'
+    | '/projects_/$projectId'
     | '/welcome/recovery-code'
     | '/welcome/verify-email'
   fileRoutesById: FileRoutesById
@@ -238,7 +238,7 @@ export interface RootRouteChildren {
   DatenschutzRoute: typeof DatenschutzRoute
   DeviceRoute: typeof DeviceRoute
   ImpressumRoute: typeof ImpressumRoute
-  ProjectsRoute: typeof ProjectsRouteWithChildren
+  ProjectsRoute: typeof ProjectsRoute
   RecoverRoute: typeof RecoverRoute
   SetPasswordRoute: typeof SetPasswordRoute
   SigninRoute: typeof SigninRoute
@@ -246,6 +246,7 @@ export interface RootRouteChildren {
   UnlockRoute: typeof UnlockRoute
   AccountNotificationsRoute: typeof AccountNotificationsRoute
   OauthCompleteRoute: typeof OauthCompleteRoute
+  ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
   WelcomeRecoveryCodeRoute: typeof WelcomeRecoveryCodeRoute
   WelcomeVerifyEmailRoute: typeof WelcomeVerifyEmailRoute
 }
@@ -350,12 +351,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WelcomeRecoveryCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/projects/$projectId': {
-      id: '/projects/$projectId'
-      path: '/$projectId'
+    '/projects_/$projectId': {
+      id: '/projects_/$projectId'
+      path: '/projects/$projectId'
       fullPath: '/projects/$projectId'
       preLoaderRoute: typeof ProjectsProjectIdRouteImport
-      parentRoute: typeof ProjectsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/oauth/complete': {
       id: '/oauth/complete'
@@ -374,18 +375,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface ProjectsRouteChildren {
-  ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
-}
-
-const ProjectsRouteChildren: ProjectsRouteChildren = {
-  ProjectsProjectIdRoute: ProjectsProjectIdRoute,
-}
-
-const ProjectsRouteWithChildren = ProjectsRoute._addFileChildren(
-  ProjectsRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
@@ -393,7 +382,7 @@ const rootRouteChildren: RootRouteChildren = {
   DatenschutzRoute: DatenschutzRoute,
   DeviceRoute: DeviceRoute,
   ImpressumRoute: ImpressumRoute,
-  ProjectsRoute: ProjectsRouteWithChildren,
+  ProjectsRoute: ProjectsRoute,
   RecoverRoute: RecoverRoute,
   SetPasswordRoute: SetPasswordRoute,
   SigninRoute: SigninRoute,
@@ -401,18 +390,10 @@ const rootRouteChildren: RootRouteChildren = {
   UnlockRoute: UnlockRoute,
   AccountNotificationsRoute: AccountNotificationsRoute,
   OauthCompleteRoute: OauthCompleteRoute,
+  ProjectsProjectIdRoute: ProjectsProjectIdRoute,
   WelcomeRecoveryCodeRoute: WelcomeRecoveryCodeRoute,
   WelcomeVerifyEmailRoute: WelcomeVerifyEmailRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
