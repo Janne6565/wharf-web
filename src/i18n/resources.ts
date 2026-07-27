@@ -45,6 +45,7 @@ const enCommon = {
     oauth: "connecting",
     projects: "projects",
     project: "project",
+    host: "connection",
   },
   oauth: {
     google: "google",
@@ -175,6 +176,20 @@ const enCommon = {
     },
     authKey: "key",
     authPassword: "password",
+  },
+  hostDetail: {
+    notFound: "that connection is not in this vault.",
+    auth: "auth",
+    keyPath: "key path",
+    user: "user",
+    address: "address",
+    port: "port",
+    tags: "tags",
+    source: "source",
+    sourceManual: "added in wharf",
+    sourceConfig: "imported from ~/.ssh/config",
+    editHint: "connections are edited in your terminal, never here.",
+    editCommand: "run wharf, select {{name}} and press e",
   },
   account: {
     title: "Account",

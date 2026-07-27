@@ -25,6 +25,7 @@ import { Route as WelcomeVerifyEmailRouteImport } from './routes/welcome.verify-
 import { Route as WelcomeRecoveryCodeRouteImport } from './routes/welcome.recovery-code'
 import { Route as ProjectsProjectIdRouteImport } from './routes/projects_.$projectId'
 import { Route as OauthCompleteRouteImport } from './routes/oauth.complete'
+import { Route as ConnectionsHostIdRouteImport } from './routes/connections_.$hostId'
 import { Route as AccountNotificationsRouteImport } from './routes/account_.notifications'
 
 const UnlockRoute = UnlockRouteImport.update({
@@ -107,6 +108,11 @@ const OauthCompleteRoute = OauthCompleteRouteImport.update({
   path: '/oauth/complete',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConnectionsHostIdRoute = ConnectionsHostIdRouteImport.update({
+  id: '/connections_/$hostId',
+  path: '/connections/$hostId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AccountNotificationsRoute = AccountNotificationsRouteImport.update({
   id: '/account_/notifications',
   path: '/account/notifications',
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/unlock': typeof UnlockRoute
   '/account/notifications': typeof AccountNotificationsRoute
+  '/connections/$hostId': typeof ConnectionsHostIdRoute
   '/oauth/complete': typeof OauthCompleteRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/welcome/recovery-code': typeof WelcomeRecoveryCodeRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/unlock': typeof UnlockRoute
   '/account/notifications': typeof AccountNotificationsRoute
+  '/connections/$hostId': typeof ConnectionsHostIdRoute
   '/oauth/complete': typeof OauthCompleteRoute
   '/projects/$projectId': typeof ProjectsProjectIdRoute
   '/welcome/recovery-code': typeof WelcomeRecoveryCodeRoute
@@ -166,6 +174,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/unlock': typeof UnlockRoute
   '/account_/notifications': typeof AccountNotificationsRoute
+  '/connections_/$hostId': typeof ConnectionsHostIdRoute
   '/oauth/complete': typeof OauthCompleteRoute
   '/projects_/$projectId': typeof ProjectsProjectIdRoute
   '/welcome/recovery-code': typeof WelcomeRecoveryCodeRoute
@@ -187,6 +196,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/unlock'
     | '/account/notifications'
+    | '/connections/$hostId'
     | '/oauth/complete'
     | '/projects/$projectId'
     | '/welcome/recovery-code'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/unlock'
     | '/account/notifications'
+    | '/connections/$hostId'
     | '/oauth/complete'
     | '/projects/$projectId'
     | '/welcome/recovery-code'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/unlock'
     | '/account_/notifications'
+    | '/connections_/$hostId'
     | '/oauth/complete'
     | '/projects_/$projectId'
     | '/welcome/recovery-code'
@@ -245,6 +257,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   UnlockRoute: typeof UnlockRoute
   AccountNotificationsRoute: typeof AccountNotificationsRoute
+  ConnectionsHostIdRoute: typeof ConnectionsHostIdRoute
   OauthCompleteRoute: typeof OauthCompleteRoute
   ProjectsProjectIdRoute: typeof ProjectsProjectIdRoute
   WelcomeRecoveryCodeRoute: typeof WelcomeRecoveryCodeRoute
@@ -365,6 +378,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OauthCompleteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/connections_/$hostId': {
+      id: '/connections_/$hostId'
+      path: '/connections/$hostId'
+      fullPath: '/connections/$hostId'
+      preLoaderRoute: typeof ConnectionsHostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/account_/notifications': {
       id: '/account_/notifications'
       path: '/account/notifications'
@@ -389,6 +409,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   UnlockRoute: UnlockRoute,
   AccountNotificationsRoute: AccountNotificationsRoute,
+  ConnectionsHostIdRoute: ConnectionsHostIdRoute,
   OauthCompleteRoute: OauthCompleteRoute,
   ProjectsProjectIdRoute: ProjectsProjectIdRoute,
   WelcomeRecoveryCodeRoute: WelcomeRecoveryCodeRoute,

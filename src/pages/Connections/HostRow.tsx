@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Asterisk, ChevronRight, Key } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { hostTarget, type VaultHost } from "@/lib/vaultDocument";
@@ -10,8 +11,8 @@ function authMarker(host: VaultHost): "key" | "password" | null {
 }
 
 // One stored connection: how it authenticates, its name, its target and its
-// tags. The trailing chevron is decorative for now — the web app has no
-// host-detail screen yet — so the row is not a link and not focusable.
+// tags. The whole row links to the read-only detail screen, which is what the
+// hover tint and trailing chevron have always promised.
 export function HostRow({ host }: { readonly host: VaultHost }) {
   const { t } = useTranslation();
   const marker = authMarker(host);
@@ -22,7 +23,12 @@ export function HostRow({ host }: { readonly host: VaultHost }) {
         ? t("connections.authKey")
         : undefined;
   return (
-    <div className="flex items-center gap-[14px] border-b border-border-subtle px-6 py-[13px] last:border-b-0 hover:bg-code">
+    <Link
+      to="/connections/$hostId"
+      params={{ hostId: host.id }}
+      data-testid={`host-row-${host.id}`}
+      className="flex items-center gap-[14px] border-b border-border-subtle px-6 py-[13px] last:border-b-0 hover:bg-code"
+    >
       {/* Left blank when the vault does not record an auth method — guessing
           one would state something the document does not say. */}
       <span className="w-[15px] shrink-0" title={markerLabel}>
@@ -41,6 +47,6 @@ export function HostRow({ host }: { readonly host: VaultHost }) {
         </div>
       ) : null}
       <ChevronRight size={15} aria-hidden className="shrink-0 text-faint" />
-    </div>
+    </Link>
   );
 }

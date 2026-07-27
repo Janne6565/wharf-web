@@ -74,6 +74,14 @@ describe("ConnectionsPage", () => {
     expect(screen.getByTestId("connections-count")).toHaveAttribute("title", "2 hosts");
   });
 
+  it("links each host row to its detail screen", () => {
+    primeVault(TWO_HOSTS);
+    renderWithProviders(<ConnectionsPage />);
+
+    // The row's hover tint and trailing chevron promise a target; this is it.
+    expect(screen.getByTestId("host-row-h1")).toHaveAttribute("to", "/connections/$hostId");
+  });
+
   it("filters the list down to matching hosts", async () => {
     primeVault(TWO_HOSTS);
     const user = userEvent.setup();
