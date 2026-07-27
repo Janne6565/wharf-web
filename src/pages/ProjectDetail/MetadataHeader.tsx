@@ -1,6 +1,6 @@
 import { Pencil } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/Button";
+import { Button, PAIRED_CANCEL_CLASS } from "@/components/Button";
 import { FormField } from "@/components/FormField";
 import { useMetadataHeaderLogic } from "./useMetadataHeaderLogic";
 
@@ -53,7 +53,12 @@ export function MetadataHeader({
           >
             {t("projectDetail.meta.save")}
           </Button>
-          <Button type="button" variant="secondary" onClick={editor.cancel} className="w-auto px-4">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={editor.cancel}
+            className={PAIRED_CANCEL_CLASS}
+          >
             {t("projectDetail.meta.cancel")}
           </Button>
         </div>

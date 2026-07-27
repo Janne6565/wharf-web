@@ -93,3 +93,12 @@ body {
 ::selection {
   background: rgba(87, 215, 194, 0.24);
 }
+
+/* Tailwind v4 dropped the browser's pointer cursor on buttons, which left every
+   control in the app with a text/arrow cursor. Restore it once here rather than
+   per button; disabled controls are excluded so `disabled:cursor-not-allowed`
+   still reads. */
+button:not(:disabled),
+[role="button"]:not(:disabled) {
+  cursor: pointer;
+}

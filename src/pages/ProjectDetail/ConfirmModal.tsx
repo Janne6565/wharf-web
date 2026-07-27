@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/Button";
+import { Button, PAIRED_CANCEL_CLASS } from "@/components/Button";
 import { Modal } from "@/components/Modal";
 
 interface ConfirmModalProps {
@@ -37,7 +37,12 @@ export function ConfirmModal({
         >
           {t("projectDetail.danger.confirm")}
         </Button>
-        <Button type="button" variant="secondary" onClick={onCancel} className="w-auto px-4">
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onCancel}
+          className={PAIRED_CANCEL_CLASS}
+        >
           {t("projectDetail.danger.cancel")}
         </Button>
       </div>

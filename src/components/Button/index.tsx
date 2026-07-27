@@ -28,6 +28,12 @@ const VARIANTS: Record<Variant, string> = {
   ghost: "h-[42px] text-[13px] text-muted hover:text-text",
 };
 
+// The cancel half of a submit + cancel row. The secondary variant is 42px tall
+// on its own, so pairing it with a 48px primary reads as a misaligned row; and
+// next to a w-full submit it needs shrink-0, or the flex row squeezes it until
+// its label wraps.
+export const PAIRED_CANCEL_CLASS = "h-12 w-auto shrink-0 px-4";
+
 // Shared button: square accent (primary) / outline (secondary) block with a
 // bracketed lowercase label per the v2 design. Disables and shows an inline
 // spinner while `loading`, so every request-triggering control gives consistent
@@ -47,7 +53,9 @@ export function Button({
       type={type}
       disabled={disabled || loading}
       className={cn(
-        "flex w-full items-center justify-center gap-2 transition-colors disabled:cursor-not-allowed",
+        // whitespace-nowrap: the bracketed label is three text nodes, so a
+        // squeezed button would otherwise break "[ cancel ]" across two lines.
+        "flex w-full items-center justify-center gap-2 whitespace-nowrap transition-colors disabled:cursor-not-allowed",
         VARIANTS[variant],
         className,
       )}

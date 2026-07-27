@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/Button";
+import { Button, PAIRED_CANCEL_CLASS } from "@/components/Button";
 import { FormField } from "@/components/FormField";
 import { Modal } from "@/components/Modal";
 import { useInviteModalLogic } from "./useInviteModalLogic";
@@ -61,7 +61,12 @@ export function InviteModal({
           >
             {t("projectDetail.invite.submit")}
           </Button>
-          <Button type="button" variant="secondary" onClick={logic.close} className="w-auto px-4">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={logic.close}
+            className={PAIRED_CANCEL_CLASS}
+          >
             {t("projectDetail.invite.cancel")}
           </Button>
         </div>

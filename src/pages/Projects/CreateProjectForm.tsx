@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 import type { FormEventHandler } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/Button";
+import { Button, PAIRED_CANCEL_CLASS } from "@/components/Button";
 import { FormField } from "@/components/FormField";
 
 interface CreateValues {
@@ -75,7 +75,12 @@ export function CreateProjectForm({
         >
           {t("projects.create.submit")}
         </Button>
-        <Button type="button" variant="secondary" onClick={onToggle} className="w-auto px-4">
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onToggle}
+          className={PAIRED_CANCEL_CLASS}
+        >
           {t("projects.create.cancel")}
         </Button>
       </div>
