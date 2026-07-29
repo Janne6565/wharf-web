@@ -17,9 +17,6 @@ export function LandingFooter() {
           <a href="#security" className="text-dim hover:text-accent-strong">
             {t("landing.footer.security")}
           </a>
-          <a href="#docs" className="text-dim hover:text-accent-strong">
-            {t("landing.footer.docs")}
-          </a>
           <a
             href={GITHUB_URL}
             target="_blank"
