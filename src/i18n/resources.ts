@@ -153,8 +153,17 @@ const enCommon = {
     count_one: "{{count}} host",
     count_other: "{{count}} hosts",
     countFiltered: "{{shown}} / {{total}}",
-    vaultHostCount_one: "{{count}} host in this vault",
-    vaultHostCount_other: "{{count}} hosts in this vault",
+    // Counts the whole fleet on screen — the personal vault plus every project
+    // this account can read — so it is deliberately not "in this vault".
+    fleetHostCount_one: "{{count}} host available",
+    fleetHostCount_other: "{{count}} hosts available",
+    personalSection: "personal",
+    sectionCount_one: "{{count}} host",
+    sectionCount_other: "{{count}} hosts",
+    unreadableProjects_one:
+      "1 project's hosts can't be shown yet — open projects to check its access.",
+    unreadableProjects_other:
+      "{{count}} projects' hosts can't be shown yet — open projects to check their access.",
     listHint: "{{shown}} of {{total}} shown",
     listHintScroll: "{{shown}} of {{total}} shown · scroll for more",
     filter: "filter",
@@ -180,6 +189,7 @@ const enCommon = {
   },
   hostDetail: {
     notFound: "that connection is not in this vault.",
+    loading: "decrypting…",
     auth: "auth",
     keyPath: "key path",
     user: "user",

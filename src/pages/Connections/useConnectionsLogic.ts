@@ -16,11 +16,25 @@ import {
 import type { UnlockedVault } from "@/crypto";
 import { fromBase64, unlockWithPassword } from "@/crypto";
 import { parseVaultDocument, type VaultHost } from "@/lib/vaultDocument";
+import { useProjectHosts } from "@/vault/useProjectHosts";
 import { useHostListOverflow } from "./useHostListOverflow";
 
 interface UnlockValues {
   password: string;
 }
+
+// A run of hosts under one heading: one per project the account can read, plus
+// the personal vault. Project sections come first, matching wharf-mobile's
+// hosts tab.
+export type HostSection =
+  | { readonly kind: "personal"; readonly key: string; readonly hosts: readonly VaultHost[] }
+  | {
+      readonly kind: "project";
+      readonly key: string;
+      readonly projectId: string;
+      readonly name: string;
+      readonly hosts: readonly VaultHost[];
+    };
 
 function matchesQuery(host: VaultHost, needle: string): boolean {
   if (!needle) return true;
@@ -30,7 +44,10 @@ function matchesQuery(host: VaultHost, needle: string): boolean {
 
 // Owns the connections view: reads the in-memory vault (primed at sign-in), and
 // — after a reload drops the memory-only DEK — re-unlocks it locally from the
-// master password before parsing the decrypted payload into hosts.
+// master password before parsing the decrypted payload into hosts. Shared
+// project hosts live in their own per-project blobs, so they are decrypted
+// separately (useProjectHosts) and grouped alongside the personal ones — the
+// list is the whole fleet, not just what this account stores privately.
 export function useConnectionsLogic() {
   const { t } = useTranslation();
   const [vault, setVault] = useState<UnlockedVault | null>(() => getVaultSession());
@@ -49,20 +66,50 @@ export function useConnectionsLogic() {
   });
 
   const document = useMemo(() => (vault ? parseVaultDocument(vault.payload) : null), [vault]);
-  const totalHosts = document?.hosts.length ?? 0;
-  // Remember the size of the open vault so the locked screen can still name it
-  // after a lock in this session (see vaultSession.rememberHostCount).
+  const projectHosts = useProjectHosts(vault);
+
+  const personalHosts = document?.hosts ?? [];
+  const totalHosts =
+    personalHosts.length + projectHosts.groups.reduce((sum, g) => sum + g.hosts.length, 0);
+
+  // Remember the size of the open *personal* vault so the locked screen can
+  // still name it after a lock in this session — that screen describes the
+  // sealed vault on this device, which never held the project blobs.
   useEffect(() => {
     if (document) rememberHostCount(document.hosts.length);
   }, [document]);
 
-  const hosts = useMemo(() => {
+  const sections: readonly HostSection[] = useMemo(() => {
     if (!document) return [];
     const needle = query.trim().toLowerCase();
-    return document.hosts.filter((host) => matchesQuery(host, needle));
-  }, [document, query]);
+    const filter = (hosts: readonly VaultHost[]) => hosts.filter((h) => matchesQuery(h, needle));
 
-  const { listRef, listOverflowing } = useHostListOverflow(hosts.length);
+    const projectSections = projectHosts.groups
+      .map(
+        (group): HostSection => ({
+          kind: "project",
+          key: `project:${group.id}`,
+          projectId: group.id,
+          name: group.name,
+          hosts: filter(group.hosts),
+        }),
+      )
+      // A section that filters down to nothing is dropped rather than shown as
+      // an empty heading.
+      .filter((section) => section.hosts.length > 0);
+
+    const personal = filter(document.hosts);
+    return personal.length > 0
+      ? [...projectSections, { kind: "personal" as const, key: "personal", hosts: personal }]
+      : projectSections;
+  }, [document, projectHosts.groups, query]);
+
+  const shownHosts = useMemo(
+    () => sections.reduce((sum, section) => sum + section.hosts.length, 0),
+    [sections],
+  );
+
+  const { listRef, listOverflowing } = useHostListOverflow(shownHosts);
 
   const mutation = useMutation({
     mutationFn: async (values: UnlockValues) => {
@@ -113,8 +160,15 @@ export function useConnectionsLogic() {
     canSubmit: password.length > 0,
     vaultUnlocked: vault !== null,
     noVault,
-    hosts,
+    sections,
+    shownHosts,
     totalHosts,
+    // The shared blobs decrypt after the personal vault opens, so the list can
+    // still be growing while it is on screen.
+    projectsLoading: projectHosts.loading,
+    // Projects whose hosts exist but cannot be read here (awaiting a key, or an
+    // identity this device cannot use) — stated rather than silently omitted.
+    unreadableProjects: projectHosts.unreadable,
     query,
     setQuery,
     clearFilter,

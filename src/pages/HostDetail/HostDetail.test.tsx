@@ -9,9 +9,20 @@ vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => vi.fn(),
   Link: ({ children, ...props }: { children: React.ReactNode }) => <a {...props}>{children}</a>,
 }));
+const mocks = vi.hoisted(() => ({
+  listProjects: vi.fn((): Promise<unknown[]> => Promise.resolve([])),
+  ensureIdentity: vi.fn(() =>
+    Promise.resolve({ kind: "ready", identity: { x25519Pub: "pub", x25519Priv: "priv" } }),
+  ),
+  loadProjectVault: vi.fn((): Promise<unknown> => Promise.resolve({ awaiting: true, hosts: [] })),
+}));
+
 vi.mock("@/api/wharf", () => ({
   getVault: vi.fn(),
+  listProjects: mocks.listProjects,
 }));
+vi.mock("@/vault/identity", () => ({ ensureIdentity: mocks.ensureIdentity }));
+vi.mock("@/vault/projectVaultAccess", () => ({ loadProjectVault: mocks.loadProjectVault }));
 vi.mock("@/crypto", () => ({
   fromBase64: vi.fn(() => new Uint8Array(0)),
   unlockWithPassword: vi.fn(),
@@ -83,5 +94,42 @@ describe("HostDetailPage", () => {
 
     expect(screen.getByTestId("host-password")).toBeInTheDocument();
     expect(screen.queryByTestId("host-name")).not.toBeInTheDocument();
+  });
+
+  // A shared host is not in the personal vault at all, so the page has to open
+  // the project's own blob to render it.
+  describe("a host shared through a project", () => {
+    const PROJECT_HOST = { id: "ph1", name: "atlas-edge", user: "ops", addr: "10.9.0.1", port: 22 };
+
+    function primeProject(): void {
+      mocks.listProjects.mockResolvedValue([{ id: "p1", name: "Atlas Platform" }]);
+      mocks.loadProjectVault.mockResolvedValue({ awaiting: false, hosts: [PROJECT_HOST] });
+    }
+
+    it("resolves it from the project blob and names the project", async () => {
+      primeVault();
+      primeProject();
+      renderWithProviders(<HostDetailPage hostId="ph1" projectId="p1" />);
+
+      expect(await screen.findByTestId("host-name")).toHaveTextContent("atlas-edge");
+      expect(screen.getByText("ops@10.9.0.1:22")).toBeInTheDocument();
+      expect(screen.getByTestId("host-project")).toHaveTextContent("Atlas Platform");
+    });
+
+    it("does not claim the host is missing while the blob is still decrypting", () => {
+      primeVault();
+      primeProject();
+      renderWithProviders(<HostDetailPage hostId="ph1" projectId="p1" />);
+
+      expect(screen.queryByText("that connection is not in this vault.")).toBeNull();
+    });
+
+    it("reports a host that is in no project the account can read", async () => {
+      primeVault();
+      primeProject();
+      renderWithProviders(<HostDetailPage hostId="nope" projectId="p1" />);
+
+      expect(await screen.findByText("that connection is not in this vault.")).toBeInTheDocument();
+    });
   });
 });

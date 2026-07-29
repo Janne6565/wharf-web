@@ -13,7 +13,8 @@ const CARD_WIDTH = 640;
 
 // The post-auth hub. Two states in one card: sealed vault (unlock form), or the
 // unlocked host list — which itself is either the list or, with nothing stored,
-// the promoted pair-a-terminal invitation.
+// the promoted pair-a-terminal invitation. The list spans the whole fleet: the
+// personal vault plus every project this account can decrypt.
 export function ConnectionsPage() {
   const { t } = useTranslation();
   const {
@@ -24,8 +25,11 @@ export function ConnectionsPage() {
     canSubmit,
     vaultUnlocked,
     noVault,
-    hosts,
+    sections,
+    shownHosts,
     totalHosts,
+    projectsLoading,
+    unreadableProjects,
     query,
     setQuery,
     clearFilter,
@@ -47,8 +51,11 @@ export function ConnectionsPage() {
       >
         {open ? (
           <UnlockedBody
-            hosts={hosts}
+            sections={sections}
+            shownHosts={shownHosts}
             totalHosts={totalHosts}
+            projectsLoading={projectsLoading}
+            unreadableProjects={unreadableProjects}
             query={query}
             setQuery={setQuery}
             clearFilter={clearFilter}
@@ -66,16 +73,19 @@ export function ConnectionsPage() {
           />
         )}
       </Card>
-      {open && totalHosts > 0 && hosts.length > 0 ? (
-        <ListHint shown={hosts.length} total={totalHosts} overflowing={listOverflowing} />
+      {open && totalHosts > 0 && shownHosts > 0 ? (
+        <ListHint shown={shownHosts} total={totalHosts} overflowing={listOverflowing} />
       ) : null}
     </AppShell>
   );
 }
 
 interface UnlockedBodyProps {
-  readonly hosts: ReturnType<typeof useConnectionsLogic>["hosts"];
+  readonly sections: ReturnType<typeof useConnectionsLogic>["sections"];
+  readonly shownHosts: number;
   readonly totalHosts: number;
+  readonly projectsLoading: boolean;
+  readonly unreadableProjects: number;
   readonly query: string;
   readonly setQuery: (value: string) => void;
   readonly clearFilter: () => void;
@@ -86,19 +96,25 @@ interface UnlockedBodyProps {
 // The open vault. <PairTerminal> appears exactly once in either branch — as the
 // promoted empty state, or as the footer strip under the list.
 function UnlockedBody({
-  hosts,
+  sections,
+  shownHosts,
   totalHosts,
+  projectsLoading,
+  unreadableProjects,
   query,
   setQuery,
   clearFilter,
   onLock,
   listRef,
 }: UnlockedBodyProps) {
-  const empty = totalHosts === 0;
+  // Only truly empty once the shared blobs have been decrypted too — promoting
+  // "no hosts yet" while projects are still loading would be a lie that
+  // corrects itself a moment later.
+  const empty = totalHosts === 0 && !projectsLoading;
   return (
     <>
       <Header
-        shown={hosts.length}
+        shown={shownHosts}
         total={totalHosts}
         filtering={query.trim().length > 0}
         onLock={onLock}
@@ -109,16 +125,31 @@ function UnlockedBody({
       ) : (
         <>
           <HostList
-            hosts={hosts}
+            sections={sections}
             listRef={listRef}
             totalHosts={totalHosts}
             query={query}
             onClearFilter={clearFilter}
           />
+          {unreadableProjects > 0 ? <UnreadableNote count={unreadableProjects} /> : null}
           <PairTerminal />
         </>
       )}
     </>
+  );
+}
+
+// Projects whose hosts exist but this device cannot decrypt. Named here so the
+// list is never quietly incomplete; the fix itself lives on /projects.
+function UnreadableNote({ count }: { readonly count: number }) {
+  const { t } = useTranslation();
+  return (
+    <p
+      data-testid="connections-unreadable-projects"
+      className="border-t border-border-subtle px-6 py-2.5 text-[12px] text-warn"
+    >
+      {t("connections.unreadableProjects", { count })}
+    </p>
   );
 }
 
@@ -130,7 +161,7 @@ interface ListHintProps {
 
 // The line under the card. It only ever states what is actually true: the
 // "scroll for more" half appears only when the list really overflows, and the
-// whole hint is dropped when everything in the vault is on screen.
+// whole hint is dropped when everything is on screen.
 function ListHint({ shown, total, overflowing }: ListHintProps) {
   const { t } = useTranslation();
   if (!overflowing && shown === total) return null;

@@ -12,11 +12,31 @@ const mocks = vi.hoisted(() => ({
   getMyInvites: vi.fn(() => Promise.resolve([])),
   unlockWithPassword: vi.fn(),
   fromBase64: vi.fn(() => new Uint8Array(0)),
+  // The shared-project side of the list. Mocked at the vault-access seam so the
+  // page's grouping is tested without standing up real X25519 identities.
+  listProjects: vi.fn((): Promise<unknown[]> => Promise.resolve([])),
+  ensureIdentity: vi.fn(() =>
+    Promise.resolve({ kind: "ready", identity: { x25519Pub: "pub", x25519Priv: "priv" } }),
+  ),
+  loadProjectVault: vi.fn((): Promise<unknown> => Promise.resolve({ awaiting: true, hosts: [] })),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => mocks.navigate,
-  Link: ({ children, ...props }: { children: React.ReactNode }) => <a {...props}>{children}</a>,
+  // `search` is an object; serialize it so a test can assert what a row carries
+  // instead of reading "[object Object]".
+  Link: ({
+    children,
+    search,
+    ...props
+  }: {
+    children: React.ReactNode;
+    search?: Record<string, string>;
+  }) => (
+    <a {...props} data-search={JSON.stringify(search ?? {})}>
+      {children}
+    </a>
+  ),
 }));
 vi.mock("@/api/wharf", () => ({
   getVault: mocks.getVault,
@@ -27,7 +47,10 @@ vi.mock("@/api/wharf", () => ({
   getAccountDeletionPreview: vi.fn(),
   deleteAccount: vi.fn(),
   refreshSession: vi.fn(),
+  listProjects: mocks.listProjects,
 }));
+vi.mock("@/vault/identity", () => ({ ensureIdentity: mocks.ensureIdentity }));
+vi.mock("@/vault/projectVaultAccess", () => ({ loadProjectVault: mocks.loadProjectVault }));
 vi.mock("@/crypto", () => ({
   fromBase64: mocks.fromBase64,
   unlockWithPassword: mocks.unlockWithPassword,
@@ -153,13 +176,15 @@ describe("ConnectionsPage", () => {
     expect(screen.getAllByTestId("pair-terminal-link")).toHaveLength(1);
   });
 
-  it("promotes the same pair-terminal element — still once — when there are no hosts", () => {
+  it("promotes the same pair-terminal element — still once — when there are no hosts", async () => {
     primeVault([]);
     renderWithProviders(<ConnectionsPage />);
 
+    // Awaited, not immediate: the shared project blobs decrypt after the
+    // personal vault opens, and "No hosts yet" must not flash before they land.
+    expect(await screen.findByText("No hosts yet")).toBeInTheDocument();
     expect(screen.getAllByTestId("pair-terminal")).toHaveLength(1);
     expect(screen.getAllByTestId("pair-terminal-link")).toHaveLength(1);
-    expect(screen.getByText("No hosts yet")).toBeInTheDocument();
     // The filter stays in place but inert — there is nothing to filter.
     expect(screen.getByTestId("connections-filter")).toBeDisabled();
   });
@@ -173,7 +198,7 @@ describe("ConnectionsPage", () => {
 
     expect(screen.getByTestId("connections-count")).toHaveTextContent("0 / 2");
     expect(screen.getByText("no host matches “nothing-matches”")).toBeInTheDocument();
-    expect(screen.getByText(/2 hosts in this vault/)).toBeInTheDocument();
+    expect(screen.getByText(/2 hosts available/)).toBeInTheDocument();
     // The footer strip survives a fruitless filter.
     expect(screen.getAllByTestId("pair-terminal")).toHaveLength(1);
 
@@ -181,6 +206,96 @@ describe("ConnectionsPage", () => {
 
     expect(screen.getByText("prod-web")).toBeInTheDocument();
     expect(screen.getByTestId("connections-count")).toHaveTextContent("2");
+  });
+
+  // Project hosts live in their own per-project blobs, not the personal vault.
+  // The hub decrypts them too, so the list is the whole fleet.
+  describe("shared project hosts", () => {
+    const PROJECT_HOST = {
+      id: "ph1",
+      name: "atlas-edge",
+      user: "ops",
+      addr: "10.9.0.1",
+      port: 22,
+      tags: ["shared"],
+    };
+
+    function primeProject(hosts: unknown[]): void {
+      mocks.listProjects.mockResolvedValue([{ id: "p1", name: "Atlas Platform", role: "MEMBER" }]);
+      mocks.loadProjectVault.mockResolvedValue({ awaiting: false, hosts });
+    }
+
+    it("lists hosts stored in a project alongside the personal ones", async () => {
+      primeVault(TWO_HOSTS);
+      primeProject([PROJECT_HOST]);
+      renderWithProviders(<ConnectionsPage />);
+
+      expect(await screen.findByText("atlas-edge")).toBeInTheDocument();
+      expect(screen.getByText("ops@10.9.0.1:22")).toBeInTheDocument();
+      // Personal hosts stay where they were.
+      expect(screen.getByText("prod-web")).toBeInTheDocument();
+      // The count is the fleet, not the personal vault.
+      expect(screen.getByTestId("connections-count")).toHaveTextContent("3");
+    });
+
+    it("labels each run of hosts with where it comes from", async () => {
+      primeVault(TWO_HOSTS);
+      primeProject([PROJECT_HOST]);
+      renderWithProviders(<ConnectionsPage />);
+
+      expect(await screen.findByText("Atlas Platform")).toBeInTheDocument();
+      expect(screen.getByText("personal")).toBeInTheDocument();
+    });
+
+    it("carries the project on the row's link so the detail screen can find it", async () => {
+      primeVault(TWO_HOSTS);
+      primeProject([PROJECT_HOST]);
+      renderWithProviders(<ConnectionsPage />);
+
+      const row = await screen.findByTestId("host-row-ph1");
+      expect(row).toHaveAttribute("to", "/connections/$hostId");
+      expect(row).toHaveAttribute("data-search", '{"project":"p1"}');
+      // A personal row must not claim a project.
+      expect(screen.getByTestId("host-row-h1")).toHaveAttribute("data-search", "{}");
+    });
+
+    it("shows project hosts even when the personal vault is empty", async () => {
+      primeVault([]);
+      primeProject([PROJECT_HOST]);
+      renderWithProviders(<ConnectionsPage />);
+
+      expect(await screen.findByText("atlas-edge")).toBeInTheDocument();
+      // The "no hosts yet" invitation would be false here.
+      expect(screen.queryByText("No hosts yet")).toBeNull();
+    });
+
+    it("filters across both origins at once", async () => {
+      primeVault(TWO_HOSTS);
+      primeProject([PROJECT_HOST]);
+      const user = userEvent.setup();
+      renderWithProviders(<ConnectionsPage />);
+
+      await screen.findByText("atlas-edge");
+      await user.type(screen.getByTestId("connections-filter"), "atlas");
+
+      expect(screen.getByText("atlas-edge")).toBeInTheDocument();
+      expect(screen.queryByText("prod-web")).toBeNull();
+      // A section that filters to nothing takes its heading with it.
+      expect(screen.queryByText("personal")).toBeNull();
+      expect(screen.getByTestId("connections-count")).toHaveTextContent("1 / 3");
+    });
+
+    it("says so when a project's hosts cannot be decrypted rather than hiding them", async () => {
+      primeVault(TWO_HOSTS);
+      mocks.listProjects.mockResolvedValue([
+        { id: "p1", name: "Atlas Platform", awaitingKey: true },
+      ]);
+      renderWithProviders(<ConnectionsPage />);
+
+      expect(await screen.findByTestId("connections-unreadable-projects")).toHaveTextContent(
+        /1 project's hosts can't be shown yet/,
+      );
+    });
   });
 
   it("clears the filter from the field's own control", async () => {

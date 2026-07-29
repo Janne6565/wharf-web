@@ -1,4 +1,4 @@
-import { Asterisk, Key, Terminal } from "lucide-react";
+import { Asterisk, Key, Terminal, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Alert } from "@/components/Alert";
 import { AuthShell } from "@/components/AuthShell";
@@ -9,21 +9,24 @@ import { useHostDetailLogic } from "./useHostDetailLogic";
 
 interface HostDetailPageProps {
   readonly hostId: string;
+  // Present when the row came from a shared project section — host ids are only
+  // unique inside one vault, so the origin has to travel with the id.
+  readonly projectId?: string;
 }
 
 // One stored connection, read-only. Everything shown comes from the decrypted
 // vault document, which by construction carries no secrets: parseVaultDocument
 // drops stored passwords and key material, so nothing sensitive can reach this
 // screen by rendering a host.
-export function HostDetailPage({ hostId }: HostDetailPageProps) {
+export function HostDetailPage({ hostId, projectId }: HostDetailPageProps) {
   const { t } = useTranslation();
-  const { gate, host, notFound } = useHostDetailLogic(hostId);
+  const { gate, host, projectName, loading, notFound } = useHostDetailLogic(hostId, projectId);
 
   return (
     <AuthShell backTo="/connections">
       <Card label={t("cards.host")} maxWidth={640}>
         {gate.vaultUnlocked ? (
-          <Body host={host} notFound={notFound} />
+          <Body host={host} projectName={projectName} loading={loading} notFound={notFound} />
         ) : (
           <LockedVaultPanel gate={gate} testIdPrefix="host" />
         )}
@@ -32,21 +35,39 @@ export function HostDetailPage({ hostId }: HostDetailPageProps) {
   );
 }
 
-function Body({ host, notFound }: { readonly host: VaultHost | null; readonly notFound: boolean }) {
+interface BodyProps {
+  readonly host: VaultHost | null;
+  readonly projectName: string | undefined;
+  readonly loading: boolean;
+  readonly notFound: boolean;
+}
+
+function Body({ host, projectName, loading, notFound }: BodyProps) {
   const { t } = useTranslation();
+  // A shared host's blob is decrypted after the gate opens; saying "not found"
+  // while that is still in flight would be wrong.
+  if (loading && !host) {
+    return <p className="py-4 text-center text-[13px] text-dim">{t("hostDetail.loading")}</p>;
+  }
   if (notFound || !host) {
     return <Alert tone="danger">{t("hostDetail.notFound")}</Alert>;
   }
   return (
     <div className="flex flex-col gap-6">
-      <HostHeader host={host} />
+      <HostHeader host={host} projectName={projectName} />
       <HostFacts host={host} />
       <TerminalHint name={host.name} />
     </div>
   );
 }
 
-function HostHeader({ host }: { readonly host: VaultHost }) {
+function HostHeader({
+  host,
+  projectName,
+}: {
+  readonly host: VaultHost;
+  readonly projectName: string | undefined;
+}) {
   const key = host.authMethod === "key" || (host.authMethod !== "password" && host.keyPath);
   return (
     <div className="flex items-start gap-3">
@@ -61,6 +82,14 @@ function HostHeader({ host }: { readonly host: VaultHost }) {
           {host.name}
         </h2>
         <p className="mt-1 break-all text-[13px] text-dim">{hostTarget(host)}</p>
+        {/* A shared host is read from a project blob, not this account's vault —
+            worth naming, since it is not the user's alone to change. */}
+        {projectName ? (
+          <p data-testid="host-project" className="mt-2 text-[12px] text-accent">
+            <Users size={13} aria-hidden className="mr-1.5 inline align-[-2px]" />
+            {projectName}
+          </p>
+        ) : null}
       </div>
     </div>
   );

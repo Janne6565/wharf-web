@@ -10,10 +10,17 @@ function authMarker(host: VaultHost): "key" | "password" | null {
   return null;
 }
 
+interface HostRowProps {
+  readonly host: VaultHost;
+  // Set for a shared host, so the detail screen knows to look in that project's
+  // blob rather than the personal vault (host ids are only unique per vault).
+  readonly projectId?: string;
+}
+
 // One stored connection: how it authenticates, its name, its target and its
 // tags. The whole row links to the read-only detail screen, which is what the
 // hover tint and trailing chevron have always promised.
-export function HostRow({ host }: { readonly host: VaultHost }) {
+export function HostRow({ host, projectId }: HostRowProps) {
   const { t } = useTranslation();
   const marker = authMarker(host);
   const markerLabel =
@@ -26,6 +33,7 @@ export function HostRow({ host }: { readonly host: VaultHost }) {
     <Link
       to="/connections/$hostId"
       params={{ hostId: host.id }}
+      search={projectId ? { project: projectId } : {}}
       data-testid={`host-row-${host.id}`}
       className="flex items-center gap-[14px] border-b border-border-subtle px-6 py-[13px] last:border-b-0 hover:bg-code"
     >
