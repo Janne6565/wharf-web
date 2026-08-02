@@ -3,6 +3,9 @@ import { useTranslation } from "react-i18next";
 import { INSTALL_COMMAND } from "@/lib/install";
 
 const GITHUB_URL = "https://github.com/Janne6565/wharf-tui";
+// The README is the documentation. This used to point at "#docs", an anchor
+// that has never existed on this page, so the link did nothing at all.
+const DOCS_URL = `${GITHUB_URL}#readme`;
 
 // Footer: the install one-liner on the left, secondary links on the right.
 export function LandingFooter() {
@@ -17,7 +20,12 @@ export function LandingFooter() {
           <a href="#security" className="text-dim hover:text-accent-strong">
             {t("landing.footer.security")}
           </a>
-          <a href="#docs" className="text-dim hover:text-accent-strong">
+          <a
+            href={DOCS_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="text-dim hover:text-accent-strong"
+          >
             {t("landing.footer.docs")}
           </a>
           <a

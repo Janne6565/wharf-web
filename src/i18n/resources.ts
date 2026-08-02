@@ -415,12 +415,12 @@ const enCommon = {
       projects: {
         kicker: "projects",
         title: "Share hosts, not secrets",
-        body: "Invite teammates into a project to share its hosts. Roles decide who connects where. Private keys always stay yours.",
+        body: "Invite teammates into a project to share its hosts. Membership decides who sees which hosts. Private keys always stay yours.",
       },
       signin: {
         kicker: "sign-in",
         title: "Browser once, terminal forever",
-        body: "Authenticate in the browser, pair your terminal with a short device code. No passwords typed into the TUI, ever.",
+        body: "Authenticate in the browser, pair your terminal with a short device code. Your account password never goes near the terminal.",
       },
     },
     security: {
