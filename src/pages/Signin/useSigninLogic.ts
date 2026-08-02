@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -22,6 +22,8 @@ interface SigninValues {
 export function useSigninLogic() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  // Validated by the route's validateSearch, so this is a safe internal path.
+  const { redirect: pendingRedirect } = useSearch({ strict: false }) as { redirect?: string };
   const [submitError, setSubmitError] = useState<string | null>(null);
   // Set when the account exists but its address was never verified: the screen
   // then offers a link on to the verification step, carrying the typed address.
@@ -67,7 +69,7 @@ export function useSigninLogic() {
       }
     },
     onSuccess: () => {
-      void navigate({ to: "/connections" });
+      void navigate({ to: pendingRedirect ?? "/connections" });
     },
     onError: (error: unknown) => {
       const status = getHttpStatus(error);

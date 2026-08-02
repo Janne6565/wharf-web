@@ -23,6 +23,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => mocks.navigate,
+  useSearch: () => ({}),
   // `search` is an object; serialize it so a test can assert what a row carries
   // instead of reading "[object Object]".
   Link: ({

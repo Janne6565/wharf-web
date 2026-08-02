@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderWithProviders } from "@/test/utils";
 
 const mocks = vi.hoisted(() => ({
+  search: {} as { redirect?: string },
   navigate: vi.fn(),
   login: vi.fn(),
   getVault: vi.fn(),
@@ -15,6 +16,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@tanstack/react-router", () => ({
   useNavigate: () => mocks.navigate,
+  useSearch: () => mocks.search,
   // `search` is an object, so serialise it onto a data attribute the assertions
   // can read (a raw object prop would render as "[object Object]").
   Link: ({
@@ -51,7 +53,10 @@ vi.mock("@/crypto", () => ({
 
 import { SigninPage } from "./index";
 
-afterEach(() => vi.clearAllMocks());
+afterEach(() => {
+  vi.clearAllMocks();
+  mocks.search = {};
+});
 
 describe("SigninPage", () => {
   it("renders the welcome-back copy and fields", () => {
@@ -113,6 +118,23 @@ describe("SigninPage", () => {
       id: "u1",
       email: "deniz@acme.io",
     });
+  });
+
+  it("returns to where a guard bounced the visitor from", async () => {
+    // The TUI opens /device; an anonymous visitor is sent to /signin carrying
+    // that destination, and signing in must put them back on it — otherwise
+    // the terminal waits for a code they never see.
+    mocks.search = { redirect: "/device?onboarding=false" };
+    const user = userEvent.setup();
+    renderWithProviders(<SigninPage />);
+
+    await user.type(screen.getByTestId("signin-email"), "deniz@acme.io");
+    await user.type(screen.getByTestId("signin-password"), "super-secret-pass");
+    await user.click(screen.getByTestId("signin-submit"));
+
+    await waitFor(() =>
+      expect(mocks.navigate).toHaveBeenCalledWith({ to: "/device?onboarding=false" }),
+    );
   });
 
   it("tells an unverified account to verify and links on with the typed email", async () => {

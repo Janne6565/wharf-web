@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -29,6 +29,7 @@ interface SetPasswordValues {
 export function useSetPasswordLogic() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { redirect: pendingRedirect } = useSearch({ strict: false }) as { redirect?: string };
   const queryClient = useQueryClient();
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -45,9 +46,12 @@ export function useSetPasswordLogic() {
   useEffect(() => {
     if (profile.data?.hasVault && !routedRef.current) {
       routedRef.current = true;
-      void navigate({ to: "/unlock" });
+      void navigate({
+        to: "/unlock",
+        search: pendingRedirect ? { redirect: pendingRedirect } : undefined,
+      });
     }
-  }, [profile.data, navigate]);
+  }, [profile.data, navigate, pendingRedirect]);
 
   const schema = useMemo(
     () =>
@@ -106,7 +110,7 @@ export function useSetPasswordLogic() {
           const me = await getCurrentUser();
           queryClient.setQueryData<UserProfile>(ME_QUERY_KEY, me);
           routedRef.current = true;
-          void navigate({ to: me.hasVault ? "/unlock" : "/device" });
+          void navigate({ to: me.hasVault ? "/unlock" : (pendingRedirect ?? "/device") });
           return;
         } catch {
           // Fall through to a generic error if the re-check fails.

@@ -17,6 +17,6 @@ export const Route = createFileRoute("/device")({
   validateSearch: (search: Record<string, unknown>): DeviceSearch => ({
     onboarding: search.onboarding === true || search.onboarding === "true",
   }),
-  beforeLoad: () => requireVault(),
+  beforeLoad: ({ location }) => requireVault(location.href),
   component: DevicePage,
 });

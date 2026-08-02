@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -22,6 +22,7 @@ interface UnlockValues {
 export function useUnlockLogic() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { redirect: pendingRedirect } = useSearch({ strict: false }) as { redirect?: string };
   const { email } = useAuthInformation();
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -41,15 +42,15 @@ export function useUnlockLogic() {
   // the master password again — go straight to their connections.
   useEffect(() => {
     if (getVaultSession()) {
-      void navigate({ to: "/connections" });
+      void navigate({ to: pendingRedirect ?? "/connections" });
     }
-  }, [navigate]);
+  }, [navigate, pendingRedirect]);
 
   const mutation = useMutation({
     mutationFn: (values: UnlockValues) => unlockVaultWithPassword(values.password),
     onSuccess: (primed) => {
       // No vault blob means onboarding was never finished — route there instead.
-      void navigate({ to: primed ? "/connections" : "/set-password" });
+      void navigate({ to: primed ? (pendingRedirect ?? "/connections") : "/set-password" });
     },
     onError: (error: unknown) => {
       if (error instanceof CryptoError && error.code === "wrong-secret") {

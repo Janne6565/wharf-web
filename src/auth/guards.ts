@@ -15,24 +15,32 @@ import { redirect } from "@tanstack/react-router";
 import { getCurrentUser } from "@/api/wharf";
 import { queryClient } from "@/queryClient";
 import { ME_QUERY_KEY } from "./profile";
+import { safeRedirect } from "./redirectTo";
 import { ensureSessionBootstrapped } from "./session";
 import { getAccessToken } from "./tokenStore";
 
 const isClient = typeof window !== "undefined";
 
-export async function requireAuth(): Promise<void> {
+// `from` is where the visitor was actually heading. It rides along to /signin
+// so the flow can put them back afterwards — without it, someone sent to the
+// pairing page by their terminal signs in and lands on /connections, while the
+// terminal waits for a code they now have to go and find.
+export async function requireAuth(from?: string): Promise<void> {
   if (!isClient) return;
   await ensureSessionBootstrapped();
   if (!getAccessToken()) {
-    throw redirect({ to: "/signin" });
+    const target = safeRedirect(from);
+    throw redirect({ to: "/signin", search: target ? { redirect: target } : undefined });
   }
 }
 
-export async function requireAnonymous(): Promise<void> {
+export async function requireAnonymous(from?: string): Promise<void> {
   if (!isClient) return;
   await ensureSessionBootstrapped();
   if (getAccessToken()) {
-    throw redirect({ to: "/connections" });
+    // Already signed in and asking for /signin: honour the pending destination
+    // rather than dropping them on the dashboard.
+    throw redirect({ to: safeRedirect(from) ?? "/connections" });
   }
 }
 
@@ -42,9 +50,9 @@ export async function requireAnonymous(): Promise<void> {
 // through the shared ME cache so repeated navigations don't refetch; a failed
 // profile read fails open (requireAuth has already passed and the screens
 // themselves don't hard-depend on the flags).
-export async function requireVault(): Promise<void> {
+export async function requireVault(from?: string): Promise<void> {
   if (!isClient) return;
-  await requireAuth();
+  await requireAuth(from);
   let hasVault: boolean | undefined;
   try {
     const me = await queryClient.ensureQueryData({
@@ -56,6 +64,7 @@ export async function requireVault(): Promise<void> {
     return;
   }
   if (hasVault === false) {
-    throw redirect({ to: "/set-password" });
+    const target = safeRedirect(from);
+    throw redirect({ to: "/set-password", search: target ? { redirect: target } : undefined });
   }
 }

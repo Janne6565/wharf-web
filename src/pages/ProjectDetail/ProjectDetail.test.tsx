@@ -18,6 +18,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, ...props }: { children: React.ReactNode }) => <a {...props}>{children}</a>,
   useNavigate: () => mocks.navigate,
+  useSearch: () => ({}),
 }));
 vi.mock("@/api/wharf", () => ({
   getProject: mocks.getProject,
