@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { getCurrentUser } from "@/api/wharf";
 import { ME_QUERY_KEY } from "@/auth/profile";
-import { takeStashedRedirect } from "@/auth/redirectTo";
+import { needsPrimedVault, takeStashedRedirect } from "@/auth/redirectTo";
 import { ensureSessionBootstrapped } from "@/auth/session";
 import { getAccessToken } from "@/auth/tokenStore";
 
@@ -67,10 +67,17 @@ export function useOAuthCompleteLogic(errorParam: string | undefined) {
 
   useEffect(() => {
     if (!profile) return;
-    // The destination rides on to the vault step rather than replacing it:
-    // most screens need a primed vault, so skipping /unlock to land on it
-    // directly would trade one broken landing for another.
     const pending = takeStashedRedirect();
+    // A destination that works with a sealed vault is gone to directly: making
+    // someone type their master password on the way to pair a terminal asks
+    // them to unlock something that page never reads.
+    if (pending && profile.hasVault && !needsPrimedVault(pending)) {
+      void navigate({ to: pending });
+      return;
+    }
+    // Otherwise the destination rides on to the vault step rather than
+    // replacing it — /connections and /projects render decrypted hosts, so
+    // short-circuiting would trade one wrong landing for another.
     void navigate({
       to: profile.hasVault ? "/unlock" : "/set-password",
       search: pending ? { redirect: pending } : undefined,

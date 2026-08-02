@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { getHttpStatus } from "@/api/httpError";
+import { needsPrimedVault } from "@/auth/redirectTo";
 import { useAuthInformation } from "@/auth/useAuthInformation";
 import { getVaultSession } from "@/auth/vaultSession";
 import { unlockVaultWithPassword } from "@/auth/vaultUnlock";
@@ -41,6 +42,13 @@ export function useUnlockLogic() {
   // this session and came back via the landing "profile" link), don't ask for
   // the master password again — go straight to their connections.
   useEffect(() => {
+    // Nothing to unlock *for*: the pending destination reads no vault
+    // plaintext, so asking for the master password here is a step for its own
+    // sake. Reached this way from OAuth, and from set-password's hand-off.
+    if (pendingRedirect && !needsPrimedVault(pendingRedirect)) {
+      void navigate({ to: pendingRedirect });
+      return;
+    }
     if (getVaultSession()) {
       void navigate({ to: pendingRedirect ?? "/connections" });
     }

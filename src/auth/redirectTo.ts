@@ -52,3 +52,21 @@ export function takeStashedRedirect(): string | undefined {
     return undefined;
   }
 }
+
+// Destinations that work with a sealed vault.
+//
+// Pairing a terminal only authorises the device; the vault plaintext is never
+// touched in the browser — the TUI downloads the account blob and opens it with
+// the master password typed there. So sending someone through /unlock on the
+// way to /device asks for a password to unlock something the page never reads.
+//
+// Everything else does need a primed vault (/connections and /projects render
+// decrypted hosts), so this is an allowlist, not a heuristic.
+const VAULT_FREE_PREFIXES = ["/device"];
+
+export function needsPrimedVault(target: string | undefined): boolean {
+  const safe = safeRedirect(target);
+  if (!safe) return true;
+  const path = safe.split(/[?#]/)[0];
+  return !VAULT_FREE_PREFIXES.includes(path);
+}

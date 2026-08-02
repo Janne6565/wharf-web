@@ -23,7 +23,10 @@ vi.mock("@/auth/tokenStore", () => ({ getAccessToken: mocks.getAccessToken }));
 
 import { OAuthCompletePage } from "./index";
 
-afterEach(() => vi.clearAllMocks());
+afterEach(() => {
+  vi.clearAllMocks();
+  globalThis.sessionStorage.clear();
+});
 
 describe("OAuthCompletePage", () => {
   it("renders a human message and back links for a known error code", () => {
@@ -85,5 +88,34 @@ describe("OAuthCompletePage", () => {
     expect(await screen.findByTestId("oauth-error")).toBeInTheDocument();
     expect(screen.getByText(/something went wrong completing sign-in/i)).toBeInTheDocument();
     expect(mocks.navigate).not.toHaveBeenCalled();
+  });
+
+  it("goes straight to the pairing page, skipping the master password", async () => {
+    // /device reads no vault plaintext, so unlocking on the way to it asks for
+    // a password the page never uses.
+    globalThis.sessionStorage.setItem("wharf-redirect-after-auth", "/device?onboarding=false");
+    mocks.ensureSessionBootstrapped.mockResolvedValue(undefined);
+    mocks.getAccessToken.mockReturnValue("access-token");
+    mocks.getCurrentUser.mockResolvedValue({ id: "u1", email: "a@b.io", hasVault: true });
+
+    renderWithProviders(<OAuthCompletePage />);
+    await waitFor(() =>
+      expect(mocks.navigate).toHaveBeenCalledWith({ to: "/device?onboarding=false" }),
+    );
+  });
+
+  it("still routes a vault-backed destination through unlock", async () => {
+    globalThis.sessionStorage.setItem("wharf-redirect-after-auth", "/connections");
+    mocks.ensureSessionBootstrapped.mockResolvedValue(undefined);
+    mocks.getAccessToken.mockReturnValue("access-token");
+    mocks.getCurrentUser.mockResolvedValue({ id: "u1", email: "a@b.io", hasVault: true });
+
+    renderWithProviders(<OAuthCompletePage />);
+    await waitFor(() =>
+      expect(mocks.navigate).toHaveBeenCalledWith({
+        to: "/unlock",
+        search: { redirect: "/connections" },
+      }),
+    );
   });
 });
