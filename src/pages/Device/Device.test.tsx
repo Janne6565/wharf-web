@@ -2,6 +2,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { INSTALL_COMMAND } from "@/lib/install";
 import { renderWithProviders } from "@/test/utils";
 
 const mocks = vi.hoisted(() => ({
@@ -83,10 +84,10 @@ describe("DevicePage", () => {
 
     await user.click(screen.getByTestId("device-install-open"));
     const modal = screen.getByTestId("device-install-modal");
-    expect(modal).toHaveTextContent("curl -fsSL wharf.sh/install | sh");
+    expect(modal).toHaveTextContent(INSTALL_COMMAND);
 
     await user.click(screen.getByTestId("device-install-copy"));
-    expect(mocks.copyToClipboard).toHaveBeenCalledWith("curl -fsSL wharf.sh/install | sh");
+    expect(mocks.copyToClipboard).toHaveBeenCalledWith(INSTALL_COMMAND);
 
     await user.click(screen.getByTestId("modal-close"));
     expect(screen.queryByTestId("device-install-modal")).not.toBeInTheDocument();

@@ -403,7 +403,8 @@ const enCommon = {
       body: "An SSH manager that lives in your terminal. Hosts, keys and projects — synced across devices, shared with your team, and readable by no one but you.",
       copy: "copy",
       copied: "copied",
-      footnote: "macOS · Linux · single binary, no root",
+      channels: "install methods",
+      footnote: "macOS · Linux · Windows · single binary, no root",
     },
     features: {
       vault: {
