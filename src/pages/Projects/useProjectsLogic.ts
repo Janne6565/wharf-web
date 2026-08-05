@@ -11,9 +11,9 @@ import {
   listProjects,
 } from "@/api/wharf";
 import { useVaultUnlock } from "@/auth/useVaultUnlock";
-import { fromBase64, type UnlockedVault } from "@/crypto";
+import type { UnlockedVault } from "@/crypto";
 import { runFinalizePass } from "@/vault/finalize";
-import { ensureIdentity } from "@/vault/identity";
+import { ensureIdentity, identityKeys } from "@/vault/identity";
 import { buildCreateProject } from "@/vault/projectCrypto";
 
 export type IdentityState = "loading" | "ready" | "needs-sync" | "key-mismatch" | "error";
@@ -78,7 +78,9 @@ export function useProjectsLogic() {
   const createMutation = useMutation({
     mutationFn: async (values: CreateValues) => {
       if (identityQuery.data?.kind !== "ready") throw new Error("identity-not-ready");
-      const ownerPub = fromBase64(identityQuery.data.identity.x25519Pub);
+      // The encoded identity key, not the bare x25519Pub field: sealing to that
+      // half alone would produce a classical wrap for a hybrid identity.
+      const ownerPub = identityKeys(identityQuery.data.identity).publicKey;
       const { vault, wrappedDek } = await buildCreateProject(ownerPub);
       return createProject({
         name: values.name.trim(),

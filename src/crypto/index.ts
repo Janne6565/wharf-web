@@ -16,6 +16,14 @@ export {
 export { CryptoError, type CryptoErrorCode } from "./errors";
 export { fingerprintPublicKey } from "./fingerprint";
 export {
+  encodeIdentity,
+  HYBRID_PUB_LEN,
+  HYBRID_WRAPPED_DEK_LEN,
+  isHybridPub,
+  isIdentityPub,
+  newMlkemSeed,
+} from "./hybrid";
+export {
   AUTH_INFO,
   deriveAuthKey,
   deriveMasterKey,
