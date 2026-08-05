@@ -1,4 +1,4 @@
-// Lazy X25519 identity bootstrap, run on first Projects use once the vault is
+// Lazy identity bootstrap, run on first Projects use once the vault is
 // unlocked. The identity keypair lives inside the personal vault payload (schema
 // 2) so it syncs across devices and never touches the server; only the public
 // half is published (PUT /users/me/public-key) so others can seal project DEKs
@@ -17,16 +17,25 @@
 //     the user to sync this vault first.
 //   * neither → generate a keypair, write it into the vault (schema 2), PUT the
 //     personal vault (optimistic version), then publish the public key.
+//
+// A fifth case rides on the first: an identity minted before the hybrid
+// post-quantum upgrade carries no ML-KEM seed. Once the published key is
+// confirmed to be ours, the seed is added and the hybrid key replaces it
+// (upgrade, not rotate — the X25519 half is unchanged, so every wrapped DEK
+// stays openable). The order matters: upgrading before the comparison would
+// overwrite a substituted key and hide the very attack the check exists for.
 
 import { getHttpStatus } from "@/api/httpError";
 import { getCurrentUser, getVault, updatePublicKey, updateVault } from "@/api/wharf";
 import { setVaultSession } from "@/auth/vaultSession";
 import type { UnlockedVault } from "@/crypto";
 import {
+  encodeIdentity,
   fingerprintPublicKey,
   fromBase64,
   generateKeypair,
   HEADER_LEN,
+  newMlkemSeed,
   sealPayload,
   toBase64,
 } from "@/crypto";
@@ -70,13 +79,34 @@ async function publishKey(publicKey: string): Promise<void> {
   }
 }
 
-// makeIdentity mints a fresh X25519 identity keypair, base64-encoded for storage
-// in the vault payload.
+// identityKeyBytes decodes a stored identity into the wire forms the server and
+// the DEK wrapping use: the bare X25519 keys for a pre-hybrid identity, the
+// versioned hybrid blobs once an ML-KEM seed is present.
+function identityKeyBytes(identity: VaultIdentity): {
+  publicKey: Uint8Array;
+  privateKey: Uint8Array;
+} {
+  return encodeIdentity(
+    fromBase64(identity.x25519Pub),
+    fromBase64(identity.x25519Priv),
+    identity.mlkemSeed ? fromBase64(identity.mlkemSeed) : undefined,
+  );
+}
+
+// publicKeyBase64 is what gets published for an identity — the encoded public
+// key, NOT the raw x25519Pub field, which is only half of a hybrid identity.
+function publicKeyBase64(identity: VaultIdentity): string {
+  return toBase64(identityKeyBytes(identity).publicKey);
+}
+
+// makeIdentity mints a fresh identity keypair, base64-encoded for storage in the
+// vault payload. New identities are always hybrid.
 async function makeIdentity(): Promise<VaultIdentity> {
   const kp = await generateKeypair();
   return {
     x25519Priv: toBase64(kp.privateKey),
     x25519Pub: toBase64(kp.publicKey),
+    mlkemSeed: toBase64(newMlkemSeed()),
     createdAt: new Date().toISOString(),
   };
 }
@@ -109,7 +139,7 @@ async function storeIdentity(vault: UnlockedVault, identity: VaultIdentity): Pro
 async function generateAndStore(vault: UnlockedVault): Promise<VaultIdentity> {
   const identity = await makeIdentity();
   await storeIdentity(vault, identity);
-  await publishKey(identity.x25519Pub);
+  await publishKey(publicKeyBase64(identity));
   return identity;
 }
 
@@ -138,7 +168,7 @@ async function compareToServer(
   identity: VaultIdentity,
   serverKey: string,
 ): Promise<IdentityStatus> {
-  const local = keyBytes(identity.x25519Pub);
+  const local = keyBytes(publicKeyBase64(identity));
   const remote = keyBytes(serverKey);
   if (sameKey(local, remote)) return { kind: "ready", identity };
   return {
@@ -158,10 +188,12 @@ export async function ensureIdentity(vault: UnlockedVault): Promise<IdentityStat
 
   if (doc.identity) {
     if (!serverKey) {
-      await publishKey(doc.identity.x25519Pub);
+      await publishKey(publicKeyBase64(doc.identity));
       return { kind: "ready", identity: doc.identity };
     }
-    return compareToServer(doc.identity, serverKey);
+    const status = await compareToServer(doc.identity, serverKey);
+    if (status.kind !== "ready") return status;
+    return upgradeToHybrid(vault, status.identity);
   }
   if (serverKey) {
     // Server has a key but this vault carries no identity: sync the vault from
@@ -183,7 +215,7 @@ export async function ensureIdentity(vault: UnlockedVault): Promise<IdentityStat
 export async function resetIdentity(vault: UnlockedVault): Promise<VaultIdentity> {
   const identity = await makeIdentity();
   await storeIdentity(vault, identity);
-  await updatePublicKey({ publicKey: identity.x25519Pub, rotate: true });
+  await updatePublicKey({ publicKey: publicKeyBase64(identity), rotate: true });
   return identity;
 }
 
@@ -200,18 +232,40 @@ export async function resetIdentity(vault: UnlockedVault): Promise<VaultIdentity
 export async function republishLocalKey(vault: UnlockedVault): Promise<VaultIdentity> {
   const doc = parseVaultDocument(vault.payload);
   if (!doc.identity) throw new Error("no local identity to republish");
-  await updatePublicKey({ publicKey: doc.identity.x25519Pub, rotate: true });
+  await updatePublicKey({ publicKey: publicKeyBase64(doc.identity), rotate: true });
   return doc.identity;
 }
 
-// identityKeys decodes a ready identity's base64 keypair into raw bytes for the
-// sealed-box unwrap of project DEKs.
+// identityKeys decodes a ready identity's keypair into the raw bytes used to
+// wrap and unwrap project DEKs.
 export function identityKeys(identity: VaultIdentity): {
   publicKey: Uint8Array;
   privateKey: Uint8Array;
 } {
-  return {
-    publicKey: fromBase64(identity.x25519Pub),
-    privateKey: fromBase64(identity.x25519Priv),
-  };
+  return identityKeyBytes(identity);
+}
+
+// upgradeToHybrid adds the ML-KEM half to a pre-hybrid identity and replaces the
+// published key with the hybrid form. It runs only after the published key has
+// been confirmed to be ours.
+//
+// `upgrade: true` (not `rotate`) is what keeps every wrapped DEK in place: the
+// new key embeds the same X25519 key, so the existing sealed boxes still open.
+//
+// A failure is deliberately swallowed: the account stays on the classical
+// identity, which still works, and blocking the user out of their projects over
+// a best-effort upgrade would be the worse outcome.
+async function upgradeToHybrid(
+  vault: UnlockedVault,
+  identity: VaultIdentity,
+): Promise<IdentityStatus> {
+  if (identity.mlkemSeed) return { kind: "ready", identity };
+  const upgraded: VaultIdentity = { ...identity, mlkemSeed: toBase64(newMlkemSeed()) };
+  try {
+    await storeIdentity(vault, upgraded);
+    await updatePublicKey({ publicKey: publicKeyBase64(upgraded), rotate: false, upgrade: true });
+  } catch {
+    return { kind: "ready", identity };
+  }
+  return { kind: "ready", identity: upgraded };
 }
