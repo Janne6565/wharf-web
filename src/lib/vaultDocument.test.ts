@@ -131,3 +131,43 @@ describe("hostTarget", () => {
     expect(hostTarget({ ...base, user: "ada", port: 22 })).toBe("ada@example.com:22");
   });
 });
+
+// A schema-5 document binds a host to one synced key. The web never connects,
+// but it must parse the field rather than drop it — and it must stay an id, not
+// a door onto key material.
+describe("schema 5: per-host keyId", () => {
+  it("parses the binding and still refuses the password", () => {
+    const doc = parseVaultDocument(
+      new TextEncoder().encode(
+        JSON.stringify({
+          schema: 5,
+          hosts: [
+            {
+              id: "a",
+              name: "prod",
+              user: "root",
+              addr: "10.0.0.1",
+              port: 22,
+              keyId: "key-1",
+              password: "s3cret",
+            },
+          ],
+          keys: [{ id: "key-1", name: "work", material: "bWF0" }],
+        }),
+      ),
+    );
+    expect(doc.schema).toBe(5);
+    expect(doc.hosts[0].keyId).toBe("key-1");
+    expect(doc.hosts[0]).not.toHaveProperty("password");
+    expect(doc.keyCount).toBe(1);
+  });
+
+  it("leaves an unbound host without the field", () => {
+    const doc = parseVaultDocument(
+      new TextEncoder().encode(
+        JSON.stringify({ schema: 5, hosts: [{ id: "a", name: "n", user: "u", addr: "x", port: 22 }] }),
+      ),
+    );
+    expect(doc.hosts[0]).not.toHaveProperty("keyId");
+  });
+});
